@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Log;
+use App\Services\MicrosoftOAuthMailer;
+use Throwable;
 
 class LearnerSpaceController extends Controller
 {
@@ -3023,7 +3026,7 @@ class LearnerSpaceController extends Controller
         array $answers,
         bool $autoSubmitted
     ): array {
-        return DB::transaction(function () use (
+        $result = DB::transaction(function () use (
             $exam,
             $answers,
             $autoSubmitted
@@ -3035,12 +3038,24 @@ class LearnerSpaceController extends Controller
                 ->lockForUpdate()
                 ->findOrFail($exam->id);
 
+            /*
+            |--------------------------------------------------------------------------
+            | Already finalized
+            |--------------------------------------------------------------------------
+            |
+            | Do not resend certificate emails if this method is called again for an
+            | exam that has already been submitted.
+            |
+            */
             if ($lockedExam->status !== 'in_progress') {
                 return [
                     'passed' => (bool) $lockedExam->passed,
                     'remaining_attempts' => (int) (
                         $lockedExam->enrollment->attempts_rest ?? 0
                     ),
+                    'exam_id' => (int) $lockedExam->id,
+                    'certificate_ids' => [],
+                    'was_finalized' => false,
                 ];
             }
 
@@ -3129,6 +3144,8 @@ class LearnerSpaceController extends Controller
 
             $lockedExam->enrollment->refresh();
 
+            $certificateIds = [];
+
             if ($passed) {
                 $expirationDate = $this->calculateEnrollmentExpirationDate(
                     $lockedExam->enrollment,
@@ -3145,9 +3162,15 @@ class LearnerSpaceController extends Controller
                     'progress_percent' => 100,
                 ]);
 
-                $this->createCertificatesForPassedExam(
+                $certificates = $this->createCertificatesForPassedExam(
                     $lockedExam
                 );
+
+                $certificateIds = $certificates
+                    ->pluck('id')
+                    ->map(fn ($id) => (int) $id)
+                    ->values()
+                    ->all();
             }
 
             $remainingAttempts = (int) (
@@ -3158,11 +3181,6 @@ class LearnerSpaceController extends Controller
             |--------------------------------------------------------------------------
             | Require a full course retake before the final exam attempt
             |--------------------------------------------------------------------------
-            |
-            | The attempt is consumed when the exam starts. Therefore, after a
-            | failed exam, remainingAttempts === 1 means that only the final
-            | attempt remains. Both normal and SCORM courses are reset.
-            |
             */
             if (
                 !$passed &&
@@ -3176,8 +3194,31 @@ class LearnerSpaceController extends Controller
             return [
                 'passed' => $passed,
                 'remaining_attempts' => $remainingAttempts,
+                'exam_id' => (int) $lockedExam->id,
+                'certificate_ids' => $certificateIds,
+                'was_finalized' => true,
             ];
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Certificate emails after database commit
+        |--------------------------------------------------------------------------
+        |
+        | SMTP failures must never roll back a passed exam or generated certificate.
+        |
+        */
+        if (
+            ($result['passed'] ?? false) &&
+            ($result['was_finalized'] ?? false)
+        ) {
+            $this->sendPassedExamCertificateEmails(
+                (int) $result['exam_id'],
+                $result['certificate_ids'] ?? []
+            );
+        }
+
+        return $result;
     }
 
 
@@ -3282,6 +3323,545 @@ class LearnerSpaceController extends Controller
             ->whereIn('accreditation_id', $linkedAccreditationIds)
             ->orderBy('accreditation_id')
             ->get();
+    }
+
+
+    /**
+     * Send the generated certificates to the learner and, when available,
+     * to the learner's company email address.
+     */
+    private function sendPassedExamCertificateEmails(
+        int $examId,
+        array $certificateIds
+    ): void {
+        /*
+         * Certificate PDF generation plus two SMTP deliveries can take longer
+         * than the default 60 seconds on local Windows/Laragon environments.
+         */
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
+        try {
+            /*
+            |--------------------------------------------------------------------------
+            | Load exam and identify the request type
+            |--------------------------------------------------------------------------
+            |
+            | Individual request:
+            | - send one generic completion certificate to the learner only.
+            |
+            | Company request:
+            | - send accreditation certificate(s) to the learner;
+            | - send the same certificate(s) to the company email when available.
+            |
+            */
+            $exam = Exam::with([
+                    'enrollment.user.company',
+                    'enrollment.course.category',
+                    'enrollment.companyRequest.company',
+                    'enrollment.companyRequest.accreditations',
+                    'enrollment.individualRequestCourse.individualRequest',
+                ])
+                ->findOrFail($examId);
+
+            $enrollment = $exam->enrollment;
+            $learner = $enrollment?->user;
+
+            if (!$enrollment || !$learner) {
+                Log::warning(
+                    'Passed exam certificate email skipped because learner or enrollment is missing.',
+                    [
+                        'exam_id' => $examId,
+                    ]
+                );
+
+                return;
+            }
+
+            $isCompanyRequest = (bool) $enrollment->companyRequest;
+            $isIndividualRequest = (
+                !$isCompanyRequest &&
+                (bool) $enrollment->individualRequestCourse
+            );
+
+            $mailer = app(MicrosoftOAuthMailer::class);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Individual request -> learner only
+            |--------------------------------------------------------------------------
+            |
+            | Individual requests do not use the Company Request accreditation list.
+            | A generic, non-regulatory Certificate of Completion is generated directly
+            | for the email attachment. No email is ever sent to a company here, even
+            | if the learner account happens to be linked to a company.
+            |
+            */
+            if ($isIndividualRequest) {
+                try {
+                    $attachment = $this->buildIndividualCertificateEmailAttachment(
+                        $exam
+                    );
+                } catch (Throwable $exception) {
+                    Log::error(
+                        'Unable to generate individual certificate PDF attachment.',
+                        [
+                            'exam_id' => $examId,
+                            'enrollment_id' => $enrollment->id,
+                            'learner_id' => $learner->id,
+                            'error' => $exception->getMessage(),
+                        ]
+                    );
+
+                    return;
+                }
+
+                if (!$learner->email) {
+                    Log::warning(
+                        'Individual passed exam certificate email skipped because learner email is missing.',
+                        [
+                            'exam_id' => $examId,
+                            'enrollment_id' => $enrollment->id,
+                            'learner_id' => $learner->id,
+                        ]
+                    );
+
+                    return;
+                }
+
+                try {
+                    $mailer->sendPassedExamCertificatesToLearner(
+                        $learner,
+                        $enrollment,
+                        $exam,
+                        [$attachment]
+                    );
+                } catch (Throwable $exception) {
+                    Log::error(
+                        'Unable to send individual passed exam certificate to learner.',
+                        [
+                            'exam_id' => $examId,
+                            'enrollment_id' => $enrollment->id,
+                            'learner_id' => $learner->id,
+                            'learner_email' => $learner->email,
+                            'error' => $exception->getMessage(),
+                        ]
+                    );
+                }
+
+                /*
+                | Important business rule:
+                | Individual Request => learner only. Stop here.
+                */
+                return;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Company request -> learner + company
+            |--------------------------------------------------------------------------
+            */
+            if ($isCompanyRequest) {
+                if (empty($certificateIds)) {
+                    Log::warning(
+                        'Company passed exam certificate email skipped because no accreditation certificate was generated.',
+                        [
+                            'exam_id' => $examId,
+                            'enrollment_id' => $enrollment->id,
+                            'company_request_id' => $enrollment->company_request_id,
+                        ]
+                    );
+
+                    return;
+                }
+
+                $certificates = Certificate::with('accreditation')
+                    ->where('enrollment_id', $enrollment->id)
+                    ->whereIn('id', $certificateIds)
+                    ->orderBy('accreditation_id')
+                    ->get();
+
+                if ($certificates->isEmpty()) {
+                    Log::warning(
+                        'Passed exam certificate email skipped because certificates could not be loaded.',
+                        [
+                            'exam_id' => $examId,
+                            'enrollment_id' => $enrollment->id,
+                        ]
+                    );
+
+                    return;
+                }
+
+                $attachments = $this->buildCertificateEmailAttachments(
+                    $exam,
+                    $certificates
+                );
+
+                if (empty($attachments)) {
+                    Log::warning(
+                        'Passed exam certificate email skipped because PDF attachments could not be generated.',
+                        [
+                            'exam_id' => $examId,
+                            'enrollment_id' => $enrollment->id,
+                        ]
+                    );
+
+                    return;
+                }
+
+                /*
+                | Learner email
+                */
+                if ($learner->email) {
+                    try {
+                        $mailer->sendPassedExamCertificatesToLearner(
+                            $learner,
+                            $enrollment,
+                            $exam,
+                            $attachments
+                        );
+                    } catch (Throwable $exception) {
+                        Log::error(
+                            'Unable to send passed exam certificates to learner.',
+                            [
+                                'exam_id' => $examId,
+                                'enrollment_id' => $enrollment->id,
+                                'learner_id' => $learner->id,
+                                'learner_email' => $learner->email,
+                                'error' => $exception->getMessage(),
+                            ]
+                        );
+                    }
+                }
+
+                /*
+                | Company email
+                |
+                | IMPORTANT: only the company linked to this exact Company Request is
+                | eligible. There is deliberately no fallback to $learner->company,
+                | because an Individual Request must never notify a company.
+                */
+                $company = $enrollment->companyRequest?->company;
+                $companyEmail = $company?->email;
+
+                if (
+                    $companyEmail &&
+                    strcasecmp(
+                        (string) $companyEmail,
+                        (string) $learner->email
+                    ) !== 0
+                ) {
+                    try {
+                        $mailer->sendPassedExamCertificatesToCompany(
+                            $learner,
+                            $enrollment,
+                            $exam,
+                            $companyEmail,
+                            $company?->name,
+                            $attachments
+                        );
+                    } catch (Throwable $exception) {
+                        Log::error(
+                            'Unable to send learner certificates to company.',
+                            [
+                                'exam_id' => $examId,
+                                'enrollment_id' => $enrollment->id,
+                                'company_request_id' => $enrollment->company_request_id,
+                                'company_id' => $company?->id,
+                                'company_email' => $companyEmail,
+                                'learner_id' => $learner->id,
+                                'error' => $exception->getMessage(),
+                            ]
+                        );
+                    }
+                }
+
+                return;
+            }
+
+            Log::warning(
+                'Passed exam certificate email skipped because the enrollment is not linked to a Company Request or Individual Request.',
+                [
+                    'exam_id' => $examId,
+                    'enrollment_id' => $enrollment->id,
+                    'company_request_id' => $enrollment->company_request_id,
+                    'individual_request_course_id' => $enrollment->individual_request_course_id,
+                ]
+            );
+        } catch (Throwable $exception) {
+            Log::error(
+                'Unable to prepare passed exam certificate emails.',
+                [
+                    'exam_id' => $examId,
+                    'certificate_ids' => $certificateIds,
+                    'error' => $exception->getMessage(),
+                ]
+            );
+        }
+    }
+
+    /**
+     * Generate a generic, non-regulatory Certificate of Completion for an
+     * Individual Request. It is generated directly as an email attachment and
+     * does not depend on Company Request accreditations.
+     */
+    private function buildIndividualCertificateEmailAttachment(
+        Exam $exam
+    ): array {
+        $exam->loadMissing([
+            'enrollment.user',
+            'enrollment.course.category',
+            'enrollment.individualRequestCourse.individualRequest',
+        ]);
+
+        $enrollment = $exam->enrollment;
+        $learner = $enrollment?->user;
+        $course = $enrollment?->course;
+        $individualItem = $enrollment?->individualRequestCourse;
+        $individualRequest = $individualItem?->individualRequest;
+
+        if (
+            !$enrollment ||
+            !$learner ||
+            !$course ||
+            !$individualItem
+        ) {
+            throw new \RuntimeException(
+                'Individual certificate PDF data is incomplete.'
+            );
+        }
+
+        $learnerDisplayName = $this->getUserDisplayName(
+            $learner
+        );
+
+        $completedAt = $exam->submitted_at
+            ?? $exam->completed_at
+            ?? $enrollment->completed_at
+            ?? now();
+
+        $completedAtCarbon = Carbon::parse(
+            $completedAt
+        );
+
+        $completedAtFormatted = $completedAtCarbon
+            ->format('d-m-Y');
+
+        $completedTimeFormatted = $completedAtCarbon
+            ->format('H:i');
+
+        $expiredAtFormatted = $enrollment->expired_at
+            ? Carbon::parse($enrollment->expired_at)->format('d-m-Y')
+            : null;
+
+        $certificateNumber = sprintf(
+            'IND-CERT-%s-%06d',
+            $completedAtCarbon->format('Y'),
+            $enrollment->id
+        );
+
+        $pdf = Pdf::loadView(
+                'learner.certificates.individual-certificate',
+                [
+                    'certificateNumber' => $certificateNumber,
+                    'individualRequest' => $individualRequest,
+                    'individualItem' => $individualItem,
+                    'enrollment' => $enrollment,
+                    'learner' => $learner,
+                    'learnerDisplayName' => $learnerDisplayName,
+                    'course' => $course,
+                    'exam' => $exam,
+                    'completedAt' => $completedAtFormatted,
+                    'completedTime' => $completedTimeFormatted,
+                    'expiredAt' => $expiredAtFormatted,
+                    'validUntil' => $expiredAtFormatted,
+                    'validityMonths' => $enrollment->duree_validite_formation !== null
+                        ? (int) $enrollment->duree_validite_formation
+                        : null,
+                    'hasExpiration' => $expiredAtFormatted !== null,
+                ]
+            )
+            ->setPaper('a4', 'landscape')
+            ->setOptions([
+                'enable_php' => true,
+                /*
+                 * The Individual certificate intentionally uses no remote image
+                 * asset, which also avoids local ImageMagick/Imagick DLL issues.
+                 */
+                'isRemoteEnabled' => false,
+            ]);
+
+        $learnerName = Str::slug(
+            $learnerDisplayName ?: 'learner'
+        );
+
+        $courseName = Str::slug(
+            $course->title ?? 'training-course'
+        );
+
+        return [
+            'name' => sprintf(
+                'certificate-individual-%s-%s.pdf',
+                $courseName,
+                $learnerName
+            ),
+            'content' => $pdf->output(),
+            'content_type' => 'application/pdf',
+        ];
+    }
+
+    /**
+     * Build one PDF attachment for each certificate generated for the exam.
+     */
+    private function buildCertificateEmailAttachments(
+        Exam $exam,
+        Collection $certificates
+    ): array {
+        $attachments = [];
+
+        foreach ($certificates as $certificate) {
+            try {
+                $attachments[] = $this->buildCertificateEmailAttachment(
+                    $exam,
+                    $certificate
+                );
+            } catch (Throwable $exception) {
+                Log::error(
+                    'Unable to generate certificate PDF attachment.',
+                    [
+                        'exam_id' => $exam->id,
+                        'certificate_id' => $certificate->id,
+                        'error' => $exception->getMessage(),
+                    ]
+                );
+            }
+        }
+
+        return $attachments;
+    }
+
+    /**
+     * Generate the exact certificate PDF used by the learner download page,
+     * but return it as binary content for an email attachment.
+     */
+    private function buildCertificateEmailAttachment(
+        Exam $exam,
+        Certificate $certificate
+    ): array {
+        $exam->loadMissing([
+            'enrollment.user',
+            'enrollment.course.category',
+            'enrollment.companyRequest.accreditations',
+        ]);
+
+        $certificate->loadMissing('accreditation');
+
+        $enrollment = $exam->enrollment;
+        $learner = $enrollment?->user;
+        $course = $enrollment?->course;
+        $accreditation = $certificate->accreditation;
+
+        if (!$enrollment || !$learner || !$course || !$accreditation) {
+            throw new \RuntimeException(
+                'Certificate PDF data is incomplete.'
+            );
+        }
+
+        $learnerDisplayName = $this->getUserDisplayName(
+            $learner
+        );
+
+        /* Backward compatibility for older certificate templates. */
+        $learner->setAttribute(
+            'name',
+            $learnerDisplayName
+        );
+
+        $completedAt = $certificate->issued_at
+            ?? $exam->submitted_at
+            ?? $exam->completed_at
+            ?? $enrollment->completed_at
+            ?? now();
+
+        $completedAtCarbon = Carbon::parse(
+            $completedAt
+        );
+
+        $completedAtFormatted = $completedAtCarbon
+            ->format('d-m-Y');
+
+        $completedTimeFormatted = $completedAtCarbon
+            ->format('H:i');
+
+        $expiredAtFormatted = $enrollment->expired_at
+            ? Carbon::parse($enrollment->expired_at)->format('d-m-Y')
+            : null;
+
+        $template = $this->resolveCertificateTemplate(
+            $accreditation
+        );
+
+        $assets = $this->resolveCertificateAssets(
+            $accreditation
+        );
+
+        $pdf = Pdf::loadView(
+                $template,
+                [
+                    'certificateLogo' => $assets['logo'],
+                    'imageBG' => $assets['background'],
+                    'SECONDEpage' => $assets['second_page'],
+                    'certificate' => $certificate,
+                    'certificateNumber' => $certificate->certificate_number,
+                    'accreditation' => $accreditation,
+                    'trainingRequest' => $enrollment->companyRequest,
+                    'enrollment' => $enrollment,
+                    'learner' => $learner,
+                    'learnerDisplayName' => $learnerDisplayName,
+                    'course' => $course,
+                    'exam' => $exam,
+                    'completedAt' => $completedAtFormatted,
+                    'completedTime' => $completedTimeFormatted,
+                    'expiredAt' => $expiredAtFormatted,
+                    'validUntil' => $expiredAtFormatted,
+                    'validityMonths' => $enrollment->duree_validite_formation !== null
+                        ? (int) $enrollment->duree_validite_formation
+                        : null,
+                    'hasExpiration' => $expiredAtFormatted !== null,
+                ]
+            )
+            ->setPaper('a4', 'landscape')
+            ->setOptions([
+                'enable_php' => true,
+                'isRemoteEnabled' => true,
+            ]);
+
+        $learnerName = Str::slug(
+            $learnerDisplayName ?: 'learner'
+        );
+
+        $courseName = Str::slug(
+            $course->title ?? 'training-course'
+        );
+
+        $accreditationCode = Str::slug(
+            $accreditation->code ?? 'certificate'
+        );
+
+        $fileName = sprintf(
+            'certificate-%s-%s-%s.pdf',
+            $accreditationCode,
+            $courseName,
+            $learnerName
+        );
+
+        return [
+            'name' => $fileName,
+            'content' => $pdf->output(),
+            'content_type' => 'application/pdf',
+        ];
     }
 
     private function normalizeExamAnswer(Question $question, ?string $answer): ?string

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\CompanyRequest;
+use App\Models\Enrollment;
+use App\Models\Exam;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -487,7 +489,8 @@ class MicrosoftOAuthMailer
         string $recipientEmail,
         string $subject,
         string $html,
-        string $text
+        string $text,
+        array $attachments = []
     ): void {
         if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
             throw new RuntimeException(
@@ -548,6 +551,33 @@ class MicrosoftOAuthMailer
             ->subject($subject)
             ->text($text)
             ->html($html);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Attachments
+        |--------------------------------------------------------------------------
+        |
+        | Each attachment must contain:
+        | - content: raw file content
+        | - name: attachment filename
+        | - content_type: MIME type (optional)
+        |
+        */
+        foreach ($attachments as $attachment) {
+            $content = $attachment['content'] ?? null;
+            $name = $attachment['name'] ?? null;
+            $contentType = $attachment['content_type'] ?? 'application/pdf';
+
+            if ($content === null || !$name) {
+                continue;
+            }
+
+            $email->attach(
+                $content,
+                $name,
+                $contentType
+            );
+        }
 
         $mailer = new Mailer($transport);
         $mailer->send($email);
@@ -903,5 +933,150 @@ class MicrosoftOAuthMailer
         );
     }
 
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Passed Exam - Certificates to Learner
+    |--------------------------------------------------------------------------
+    |
+    | Sends every generated certificate PDF to the learner after a successful
+    | final exam. The PDFs are supplied by LearnerSpaceController as raw bytes.
+    |
+    */
+    public function sendPassedExamCertificatesToLearner(
+        User $learner,
+        Enrollment $enrollment,
+        Exam $exam,
+        array $attachments
+    ): void {
+        if (empty($attachments)) {
+            throw new RuntimeException(
+                'No certificate attachment was provided for the learner email.'
+            );
+        }
+
+        $learner->loadMissing('company');
+        $enrollment->loadMissing('course.category');
+
+        $loginUrl = route('login');
+
+        $html = view(
+            'emails.certificates.exam-passed-learner',
+            [
+                'learner' => $learner,
+                'enrollment' => $enrollment,
+                'exam' => $exam,
+                'loginUrl' => $loginUrl,
+                'certificatesCount' => count($attachments),
+            ]
+        )->render();
+
+        $learnerName = $learner->full_name ?: collect([
+            $learner->first_name,
+            $learner->middle_name,
+            $learner->last_name,
+        ])->filter()->implode(' ');
+
+        if (!$learnerName) {
+            $learnerName = $learner->email;
+        }
+
+        $courseTitle = $enrollment->course?->title ?? 'Training Course';
+
+        $text = implode("\n", [
+            'SafeSky LMS',
+            '',
+            'Congratulations ' . $learnerName . '!',
+            '',
+            'You passed the final exam for: ' . $courseTitle,
+            'Score: ' . ((float) $exam->score) . '%',
+            '',
+            'Your certificate(s) are attached to this email.',
+            'Certificates: ' . count($attachments),
+            '',
+            'SafeSky LMS:',
+            $loginUrl,
+        ]);
+
+        $this->sendEmail(
+            $learner->email,
+            'Congratulations - Your Certificate(s) - ' . $courseTitle,
+            $html,
+            $text,
+            $attachments
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Passed Exam - Certificates to Company
+    |--------------------------------------------------------------------------
+    |
+    | If the learner belongs to a company and a company email is available,
+    | send the same generated certificate PDF files to that company.
+    |
+    */
+    public function sendPassedExamCertificatesToCompany(
+        User $learner,
+        Enrollment $enrollment,
+        Exam $exam,
+        string $companyEmail,
+        ?string $companyName,
+        array $attachments
+    ): void {
+        if (empty($attachments)) {
+            throw new RuntimeException(
+                'No certificate attachment was provided for the company email.'
+            );
+        }
+
+        $enrollment->loadMissing('course.category');
+
+        $learnerName = $learner->full_name ?: collect([
+            $learner->first_name,
+            $learner->middle_name,
+            $learner->last_name,
+        ])->filter()->implode(' ');
+
+        if (!$learnerName) {
+            $learnerName = $learner->email;
+        }
+
+        $courseTitle = $enrollment->course?->title ?? 'Training Course';
+
+        $html = view(
+            'emails.certificates.exam-passed-company',
+            [
+                'learner' => $learner,
+                'enrollment' => $enrollment,
+                'exam' => $exam,
+                'companyName' => $companyName,
+                'certificatesCount' => count($attachments),
+            ]
+        )->render();
+
+        $text = implode("\n", [
+            'SafeSky LMS',
+            '',
+            'Learner training completed successfully.',
+            '',
+            'Learner: ' . $learnerName,
+            'Email: ' . $learner->email,
+            'Course: ' . $courseTitle,
+            'Score: ' . ((float) $exam->score) . '%',
+            '',
+            'The learner certificate(s) are attached to this email.',
+            'Certificates: ' . count($attachments),
+        ]);
+
+        $this->sendEmail(
+            $companyEmail,
+            'Learner Certificate(s) - ' . $learnerName . ' - ' . $courseTitle,
+            $html,
+            $text,
+            $attachments
+        );
+    }
 
 }
