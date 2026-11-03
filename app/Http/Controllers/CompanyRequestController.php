@@ -60,6 +60,7 @@ class CompanyRequestController extends Controller
                     'duree_validite_formation' => $this->normalizeNullableInteger(
                         $companyRequest->duree_validite_formation
                     ),
+                    'certificate_visible_to_learner' => (bool) $companyRequest->certificate_visible_to_learner,
 
                     'company' => $companyRequest->company ? [
                         'id' => $companyRequest->company->id,
@@ -107,7 +108,7 @@ class CompanyRequestController extends Controller
         if (!$user->company_id) {
             return redirect()
                 ->route('company-requests.index')
-                ->with('error', 'Votre compte n’est lié à aucune entreprise.');
+                ->with('error', __('Your account is not linked to a company.'));
         }
 
         $categories = $this->getCategoriesWithCourses();
@@ -152,25 +153,26 @@ class CompanyRequestController extends Controller
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'duree_validite_formation' => ['nullable', 'integer', 'min:1', 'max:1200'],
+            'certificate_visible_to_learner' => ['required', 'boolean'],
             'learners' => ['required', 'array', 'min:1'],
             'learners.*' => ['required', 'integer', 'distinct', 'exists:users,id'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ], [
-            'accreditation_ids.required' => 'Veuillez sélectionner au moins un agrément.',
-            'accreditation_ids.min' => 'Veuillez sélectionner au moins un agrément.',
-            'accreditation_ids.max' => 'Vous pouvez sélectionner au maximum deux agréments.',
-            'start_date.required' => 'La date de début est obligatoire.',
-            'end_date.required' => 'La date de fin est obligatoire.',
-            'end_date.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
-            'duree_validite_formation.integer' => 'La durée de validité doit être un nombre entier de mois.',
-            'duree_validite_formation.min' => 'La durée de validité doit être au minimum de 1 mois.',
-            'duree_validite_formation.max' => 'La durée de validité ne peut pas dépasser 1200 mois.',
+            'accreditation_ids.required' => __('Please select at least one accreditation.'),
+            'accreditation_ids.min' => __('Please select at least one accreditation.'),
+            'accreditation_ids.max' => __('You can select a maximum of two accreditations.'),
+            'start_date.required' => __('The start date is required.'),
+            'end_date.required' => __('The end date is required.'),
+            'end_date.after_or_equal' => __('The end date must be on or after the start date.'),
+            'duree_validite_formation.integer' => __('The validity duration must be a whole number of months.'),
+            'duree_validite_formation.min' => __('The validity duration must be at least 1 month.'),
+            'duree_validite_formation.max' => __('The validity duration cannot exceed 1200 months.'),
         ]);
 
         $user = auth()->user();
 
         if (!$user->company_id) {
-            return back()->with('error', 'Votre compte n’est lié à aucune entreprise.');
+            return back()->with('error', __('Your account is not linked to a company.'));
         }
 
         $learnerIds = collect($validated['learners'])
@@ -186,7 +188,7 @@ class CompanyRequestController extends Controller
 
         if ($validLearnersCount !== count($learnerIds)) {
             return back()->withErrors([
-                'learners' => 'Certains learners ne sont pas liés à votre entreprise.',
+                'learners' => __('Some learners are not linked to your company.'),
             ]);
         }
 
@@ -201,6 +203,7 @@ class CompanyRequestController extends Controller
                 'duree_validite_formation' => $this->normalizeNullableInteger(
                     $validated['duree_validite_formation'] ?? null
                 ),
+                'certificate_visible_to_learner' => (bool) $validated['certificate_visible_to_learner'],
                 'requested_by_id' => $user->id,
                 'notes' => $validated['notes'] ?? null,
             ]);
@@ -230,7 +233,7 @@ class CompanyRequestController extends Controller
 
         return redirect()
             ->route('company-requests.index')
-            ->with('success', 'Demande envoyée avec succès.');
+            ->with('success', __('Request sent successfully.'));
     }
 
     public function show($hashid)
@@ -268,6 +271,7 @@ class CompanyRequestController extends Controller
                 'duree_validite_formation' => $this->normalizeNullableInteger(
                     $companyRequest->duree_validite_formation
                 ),
+                'certificate_visible_to_learner' => (bool) $companyRequest->certificate_visible_to_learner,
                 'created_at' => $companyRequest->created_at,
                 'validated_at' => $companyRequest->validated_at,
 
@@ -348,7 +352,7 @@ class CompanyRequestController extends Controller
                 ->route('company-requests.show', [
                     'hashid' => Hashids::encode($companyRequest->id),
                 ])
-                ->with('error', 'Vous ne pouvez plus modifier cette demande après validation.');
+                ->with('error', __('You can no longer edit this request after approval.'));
         }
 
         $categories = $this->getCategoriesWithCourses();
@@ -406,6 +410,7 @@ class CompanyRequestController extends Controller
                 'duree_validite_formation' => $this->normalizeNullableInteger(
                     $companyRequest->duree_validite_formation
                 ),
+                'certificate_visible_to_learner' => (bool) $companyRequest->certificate_visible_to_learner,
                 'accreditation_ids' => $companyRequest->accreditations
                     ->pluck('id')
                     ->map(fn ($accreditationId) => (int) $accreditationId)
@@ -481,7 +486,7 @@ class CompanyRequestController extends Controller
 
         if (!$isSuperAdmin && $companyRequest->status !== 'pending') {
             return back()->withErrors([
-                'message' => 'Vous ne pouvez plus modifier cette demande après validation.',
+                'message' => __('You can no longer edit this request after approval.'),
             ]);
         }
 
@@ -498,6 +503,7 @@ class CompanyRequestController extends Controller
             $rules['start_date'] = ['nullable', 'date'];
             $rules['end_date'] = ['nullable', 'date', 'after_or_equal:start_date'];
             $rules['duree_validite_formation'] = ['nullable', 'integer', 'min:1', 'max:1200'];
+            $rules['certificate_visible_to_learner'] = ['nullable', 'boolean'];
         } else {
             $rules['course_id'] = ['required', 'integer', 'exists:courses,id'];
             $rules['learners'] = ['required', 'array', 'min:1'];
@@ -513,16 +519,17 @@ class CompanyRequestController extends Controller
             $rules['start_date'] = ['required', 'date'];
             $rules['end_date'] = ['required', 'date', 'after_or_equal:start_date'];
             $rules['duree_validite_formation'] = ['nullable', 'integer', 'min:1', 'max:1200'];
+            $rules['certificate_visible_to_learner'] = ['required', 'boolean'];
         }
 
         $validated = $request->validate($rules, [
-            'accreditation_ids.required' => 'Veuillez sélectionner au moins un agrément.',
-            'start_date.required' => 'La date de début est obligatoire.',
-            'end_date.required' => 'La date de fin est obligatoire.',
-            'end_date.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
-            'duree_validite_formation.integer' => 'La durée de validité doit être un nombre entier de mois.',
-            'duree_validite_formation.min' => 'La durée de validité doit être au minimum de 1 mois.',
-            'duree_validite_formation.max' => 'La durée de validité ne peut pas dépasser 1200 mois.',
+            'accreditation_ids.required' => __('Please select at least one accreditation.'),
+            'start_date.required' => __('The start date is required.'),
+            'end_date.required' => __('The end date is required.'),
+            'end_date.after_or_equal' => __('The end date must be on or after the start date.'),
+            'duree_validite_formation.integer' => __('The validity duration must be a whole number of months.'),
+            'duree_validite_formation.min' => __('The validity duration must be at least 1 month.'),
+            'duree_validite_formation.max' => __('The validity duration cannot exceed 1200 months.'),
         ]);
 
         $oldLearnerIds = $companyRequest->users
@@ -578,6 +585,11 @@ class CompanyRequestController extends Controller
                 $companyRequest->duree_validite_formation
             );
 
+            $oldCertificateVisibility = (bool) $companyRequest->certificate_visible_to_learner;
+            $submittedCertificateVisibility = $request->has('certificate_visible_to_learner')
+                ? $request->boolean('certificate_visible_to_learner')
+                : $oldCertificateVisibility;
+
             $submittedValidityDuration = $this->normalizeNullableInteger(
                 $request->input(
                     'duree_validite_formation',
@@ -588,7 +600,7 @@ class CompanyRequestController extends Controller
             if ($submittedCourseId !== (int) $companyRequest->course_id) {
                 return back()
                     ->withErrors([
-                        'course_id' => 'Le cours ne peut pas être modifié après approbation.',
+                        'course_id' => __('The course cannot be changed after approval.'),
                     ])
                     ->withInput();
             }
@@ -596,7 +608,7 @@ class CompanyRequestController extends Controller
             if ($submittedLearnerIds !== $oldLearnerIds) {
                 return back()
                     ->withErrors([
-                        'learners' => 'Les learners ne peuvent pas être ajoutés ou retirés après approbation.',
+                        'learners' => __('Learners cannot be added or removed after approval.'),
                     ])
                     ->withInput();
             }
@@ -604,7 +616,7 @@ class CompanyRequestController extends Controller
             if ($submittedAccreditationIds !== $oldAccreditationIds) {
                 return back()
                     ->withErrors([
-                        'accreditation_ids' => 'Les agréments ne peuvent pas être modifiés après approbation.',
+                        'accreditation_ids' => __('Accreditations cannot be changed after approval.'),
                     ])
                     ->withInput();
             }
@@ -612,7 +624,7 @@ class CompanyRequestController extends Controller
             if ($submittedStartDate !== $oldStartDate || $submittedEndDate !== $oldEndDate) {
                 return back()
                     ->withErrors([
-                        'start_date' => 'La période de formation ne peut pas être modifiée après approbation.',
+                        'start_date' => __('The training period cannot be changed after approval.'),
                     ])
                     ->withInput();
             }
@@ -620,7 +632,15 @@ class CompanyRequestController extends Controller
             if ($submittedValidityDuration !== $oldValidityDuration) {
                 return back()
                     ->withErrors([
-                        'duree_validite_formation' => 'La durée de validité ne peut pas être modifiée après approbation.',
+                        'duree_validite_formation' => __('The validity duration cannot be changed after approval.'),
+                    ])
+                    ->withInput();
+            }
+
+            if ($submittedCertificateVisibility !== $oldCertificateVisibility) {
+                return back()
+                    ->withErrors([
+                        'certificate_visible_to_learner' => __('Certificate visibility cannot be changed after approval.'),
                     ])
                     ->withInput();
             }
@@ -636,7 +656,7 @@ class CompanyRequestController extends Controller
                 ->route('company-requests.show', [
                     'hashid' => Hashids::encode($companyRequest->id),
                 ])
-                ->with('success', 'Notes de la demande modifiées avec succès.');
+                ->with('success', __('Request notes updated successfully.'));
         }
 
         $newLearnerIds = collect($validated['learners'])
@@ -658,7 +678,7 @@ class CompanyRequestController extends Controller
 
         if ($validLearnersCount !== count($newLearnerIds)) {
             return back()->withErrors([
-                'learners' => 'Certains learners ne sont pas liés à cette entreprise.',
+                'learners' => __('Some learners are not linked to this company.'),
             ]);
         }
 
@@ -695,6 +715,7 @@ class CompanyRequestController extends Controller
                     'duree_validite_formation' => $this->normalizeNullableInteger(
                         $validated['duree_validite_formation'] ?? null
                     ),
+                    'certificate_visible_to_learner' => (bool) $validated['certificate_visible_to_learner'],
                     'notes' => $validated['notes'] ?? $companyRequest->notes,
                 ]);
 
@@ -731,7 +752,7 @@ class CompanyRequestController extends Controller
             ->route('company-requests.show', [
                 'hashid' => Hashids::encode($companyRequest->id),
             ])
-            ->with('success', 'Demande modifiée avec succès.');
+            ->with('success', __('Request updated successfully.'));
     }
 
     public function approve($hashid)
@@ -753,19 +774,19 @@ class CompanyRequestController extends Controller
 
         if ($companyRequest->status !== 'pending') {
             return back()->withErrors([
-                'message' => 'Cette demande est déjà traitée.',
+                'message' => __('This request has already been processed.'),
             ]);
         }
 
         if ($companyRequest->accreditations->isEmpty()) {
             return back()->withErrors([
-                'message' => 'La demande doit contenir au moins un agrément avant son approbation.',
+                'message' => __('The request must include at least one accreditation before approval.'),
             ]);
         }
 
         if (!$companyRequest->start_date || !$companyRequest->end_date) {
             return back()->withErrors([
-                'message' => 'La période de formation doit être renseignée avant l’approbation.',
+                'message' => __('The training period must be set before approval.'),
             ]);
         }
 
@@ -787,6 +808,7 @@ class CompanyRequestController extends Controller
                         'duree_validite_formation' => $this->normalizeNullableInteger(
                             $companyRequest->duree_validite_formation
                         ),
+                        'certificate_visible_to_learner' => (bool) $companyRequest->certificate_visible_to_learner,
                     ]
                 );
 
@@ -806,6 +828,7 @@ class CompanyRequestController extends Controller
                         'duree_validite_formation' => $this->normalizeNullableInteger(
                             $companyRequest->duree_validite_formation
                         ),
+                        'certificate_visible_to_learner' => (bool) $companyRequest->certificate_visible_to_learner,
                     ]);
                 }
 
@@ -878,7 +901,7 @@ class CompanyRequestController extends Controller
 
         if ($companyRequest->status !== 'pending') {
             return back()->withErrors([
-                'message' => 'Cette demande est déjà traitée.',
+                'message' => __('This request has already been processed.'),
             ]);
         }
 

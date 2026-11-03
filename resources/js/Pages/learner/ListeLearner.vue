@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -138,7 +142,7 @@ const formatDate = date => {
 
   if (Number.isNaN(parsedDate.getTime())) return '-'
 
-  return parsedDate.toLocaleDateString('en-GB', {
+  return parsedDate.toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -251,8 +255,8 @@ const handleDeleteData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Deleted',
-        text: 'Learner deleted successfully.',
+        title: t('ui-deleted'),
+        text: t('ui-learner-deleted-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -260,8 +264,8 @@ const handleDeleteData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'An error occurred while deleting the learner.',
+        title: t('t-error'),
+        text: t('ui-an-error-occurred-while-deleting-the-learner'),
       })
     },
     onFinish: closeDeleteModal,
@@ -327,9 +331,9 @@ const onSort = column => {
               </div>
 
               <div>
-                <h5 class="mb-1 fw-semibold">Learners</h5>
+                <h5 class="mb-1 fw-semibold">{{ $t('ui-learners') }}</h5>
                 <p class="text-muted mb-0">
-                  Manage learners, companies and account information.
+                  {{ $t('ui-manage-learners-companies-and-account-information') }}
                 </p>
               </div>
             </div>
@@ -344,7 +348,7 @@ const onSort = column => {
                   v-model="selectedCompany"
                   class="form-select company-filter"
                 >
-                  <option value="">All companies</option>
+                  <option value="">{{ $t('ui-all-companies') }}</option>
 
                   <option
                     v-for="company in companies"
@@ -361,7 +365,7 @@ const onSort = column => {
                   v-model="searchQuery"
                   type="text"
                   class="form-control"
-                  placeholder="Search learner..."
+                  :placeholder="$t('ui-search-learner')"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -375,7 +379,7 @@ const onSort = column => {
                 @click="toggleModal"
               >
                 <i class="ri-add-line align-bottom me-1"></i>
-                Add Learner
+                {{ $t('ui-add-learner') }}
               </BButton>
             </div>
           </BCol>
@@ -393,7 +397,7 @@ const onSort = column => {
                     class="sort learner-column"
                     @click="onSort('full_name')"
                   >
-                    Learner
+                    {{ $t('ui-learner') }}
                     <i :class="getSortIcon('full_name')" class="ms-1"></i>
                   </th>
 
@@ -401,7 +405,7 @@ const onSort = column => {
                     class="sort organization-column"
                     @click="onSort('company')"
                   >
-                    Organization
+                    {{ $t('ui-organization') }}
                     <i :class="getSortIcon('company')" class="ms-1"></i>
                   </th>
 
@@ -409,7 +413,7 @@ const onSort = column => {
                     class="sort personal-column"
                     @click="onSort('date_of_birth')"
                   >
-                    Personal information
+                    {{ $t('ui-personal-information') }}
                     <i :class="getSortIcon('date_of_birth')" class="ms-1"></i>
                   </th>
 
@@ -417,12 +421,12 @@ const onSort = column => {
                     class="sort account-column text-center"
                     @click="onSort('status')"
                   >
-                    Account
+                    {{ $t('ui-account') }}
                     <i :class="getSortIcon('status')" class="ms-1"></i>
                   </th>
 
                   <th class="actions-column text-center">
-                    Actions
+                    {{ $t('ui-actions') }}
                   </th>
                 </tr>
               </thead>
@@ -538,7 +542,7 @@ const onSort = column => {
                             : 'ri-time-line'"
                           class="me-1"
                         ></i>
-                        {{ data.email_verified_at ? 'Verified' : 'Pending' }}
+                        {{ data.email_verified_at ? $t('ui-verified') : $t('t-pending') }}
                       </span>
 
                      
@@ -556,7 +560,7 @@ const onSort = column => {
                         :href="getPassportUrl(data)"
                         target="_blank"
                         rel="noopener noreferrer"
-                        title="Open passport document"
+                        :title="$t('ui-open-passport-document')"
                       >
                         <i class="ri-file-pdf-2-line"></i>
                       </BButton>
@@ -567,7 +571,7 @@ const onSort = column => {
                         size="sm"
                         class="action-btn"
                         :href="route('learners.show', data.hashid || data.id)"
-                        title="View learner"
+                        :title="$t('ui-view-learner')"
                       >
                         <i class="ri-eye-line"></i>
                       </BButton>
@@ -577,7 +581,7 @@ const onSort = column => {
                         variant="soft-primary"
                         size="sm"
                         class="action-btn"
-                        title="Edit learner"
+                        :title="$t('ui-edit-learner')"
                         @click="triggerShowEdit(data)"
                       >
                         <i class="ri-pencil-fill"></i>
@@ -588,7 +592,7 @@ const onSort = column => {
                         variant="soft-danger"
                         size="sm"
                         class="action-btn"
-                        title="Delete learner"
+                        :title="$t('ui-delete-learner')"
                         @click="deleteData(data)"
                       >
                         <i class="ri-delete-bin-fill"></i>
@@ -640,7 +644,7 @@ const onSort = column => {
                   :href="getPassportUrl(data)"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="Open passport document"
+                  :title="$t('ui-open-passport-document')"
                 >
                   <i class="ri-file-pdf-2-line"></i>
                 </BButton>
@@ -651,7 +655,7 @@ const onSort = column => {
                   size="sm"
                   class="action-btn"
                   :href="route('learners.show', data.hashid || data.id)"
-                  title="View learner"
+                  :title="$t('ui-view-learner')"
                 >
                   <i class="ri-eye-line"></i>
                 </BButton>
@@ -661,7 +665,7 @@ const onSort = column => {
                   variant="soft-primary"
                   size="sm"
                   class="action-btn"
-                  title="Edit learner"
+                  :title="$t('ui-edit-learner')"
                   @click="triggerShowEdit(data)"
                 >
                   <i class="ri-pencil-fill"></i>
@@ -672,7 +676,7 @@ const onSort = column => {
                   variant="soft-danger"
                   size="sm"
                   class="action-btn"
-                  title="Delete learner"
+                  :title="$t('ui-delete-learner')"
                   @click="deleteData(data)"
                 >
                   <i class="ri-delete-bin-fill"></i>
@@ -698,7 +702,7 @@ const onSort = column => {
                     : 'ri-time-line'"
                   class="me-1"
                 ></i>
-                {{ data.email_verified_at ? 'Verified' : 'Pending' }}
+                {{ data.email_verified_at ? $t('ui-verified') : $t('t-pending') }}
               </span>
             </div>
 
@@ -706,11 +710,11 @@ const onSort = column => {
               <div class="mobile-information-group">
                 <div class="mobile-group-title">
                   <i class="ri-building-line"></i>
-                  Organization
+                  {{ $t('ui-organization') }}
                 </div>
 
                 <div class="user-mobile-item">
-                  <span class="user-mobile-label">Company</span>
+                  <span class="user-mobile-label">{{ $t('ui-company') }}</span>
                   <span class="user-mobile-value">
                     {{ getCompanyName(data) }}
                   </span>
@@ -722,32 +726,32 @@ const onSort = column => {
               <div class="mobile-information-group">
                 <div class="mobile-group-title">
                   <i class="ri-profile-line"></i>
-                  Personal information
+                  {{ $t('ui-personal-information') }}
                 </div>
 
                 <div class="user-mobile-item">
-                  <span class="user-mobile-label">Date of birth</span>
+                  <span class="user-mobile-label">{{ $t('ui-date-of-birth') }}</span>
                   <span class="user-mobile-value">
                     {{ formatDate(data.date_of_birth) }}
                   </span>
                 </div>
 
                 <div class="user-mobile-item">
-                  <span class="user-mobile-label">Place of birth</span>
+                  <span class="user-mobile-label">{{ $t('ui-place-of-birth') }}</span>
                   <span class="user-mobile-value">
                     {{ data.place_of_birth || '-' }}
                   </span>
                 </div>
 
                 <div class="user-mobile-item">
-                  <span class="user-mobile-label">Country</span>
+                  <span class="user-mobile-label">{{ $t('ui-country') }}</span>
                   <span class="user-mobile-value">
                     {{ data.country || '-' }}
                   </span>
                 </div>
 
                 <div class="user-mobile-item">
-                  <span class="user-mobile-label">Passport number</span>
+                  <span class="user-mobile-label">{{ $t('ui-passport-number') }}</span>
                   <span class="user-mobile-value">
                     {{ data.passport_number || '-' }}
                   </span>
@@ -771,9 +775,9 @@ const onSort = column => {
             :width="85"
           />
 
-          <h5 class="mt-3 mb-1">No learners found</h5>
+          <h5 class="mt-3 mb-1">{{ $t('ui-no-learners-found') }}</h5>
           <p class="text-muted mb-0">
-            Try changing your search or company filter.
+            {{ $t('ui-try-changing-your-search-or-company-filter') }}
           </p>
         </div>
 
@@ -783,11 +787,11 @@ const onSort = column => {
           class="user-pagination"
         >
           <div class="text-muted user-pagination-text">
-            Showing
+            {{ $t('ui-showing') }}
             <span class="fw-semibold">{{ paginatedData.length }}</span>
-            of
+            {{ $t('ui-of') }}
             <span class="fw-semibold">{{ filteredData.length }}</span>
-            result(s)
+            {{ $t('ui-result-s') }}
           </div>
 
           <ul class="pagination listjs-pagination mb-0">
@@ -862,9 +866,9 @@ const onSort = column => {
       />
 
       <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-        <h4>Are you sure?</h4>
+        <h4>{{ $t('ui-are-you-sure') }}</h4>
         <p class="text-muted mx-4 mb-0">
-          You will not be able to restore this learner.
+          {{ $t('ui-you-will-not-be-able-to-restore-this-learner') }}
         </p>
       </div>
     </div>
@@ -875,7 +879,7 @@ const onSort = column => {
         class="btn w-sm btn-light"
         @click="closeDeleteModal"
       >
-        Cancel
+        {{ $t('ui-cancel') }}
       </button>
 
       <button
@@ -884,7 +888,7 @@ const onSort = column => {
         class="btn w-sm btn-danger"
         @click="handleDeleteData"
       >
-        Yes, delete
+        {{ $t('ui-yes-delete') }}
       </button>
     </div>
   </BModal>

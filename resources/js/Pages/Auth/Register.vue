@@ -31,7 +31,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head :title="$t('ui-register')" />
 
     <div class="auth-page-wrapper pt-5">
         <div class="auth-page-content">
@@ -44,7 +44,7 @@ export default {
                                 <img src="@assets/images/logo_safesky blue.webp" alt="" height="20">
                                 </Link>
                             </div>
-                            <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
+                            <p class="mt-3 fs-15 fw-medium">{{ $t('ui-premium-admin-dashboard-template') }}</p>
                         </div>
                     </BCol>
                 </BRow>
@@ -55,35 +55,35 @@ export default {
 
                             <BCardBody class="p-4">
                                 <div class="text-center mt-2">
-                                    <h5 class="text-primary">Create New Account</h5>
-                                    <p class="text-muted">Get your free velzon account now</p>
+                                    <h5 class="text-primary">{{ $t('ui-create-new-account') }}</h5>
+                                    <p class="text-muted">{{ $t('ui-get-your-free-velzon-account-now') }}</p>
                                 </div>
                                 <div class="p-2 mt-4">
                                     <form @submit.prevent="submit" class="needs-validation" novalidate>
 
                                         <div class="mb-3">
-                                            <InputLabel for="name" value="Name" />
-                                            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" placeholder="Enter your name" :class="{ 'is-invalid': form.errors.name }" />
+                                            <InputLabel for="name" :value="$t('ui-name')" />
+                                            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" :placeholder="$t('ui-enter-your-name')" :class="{ 'is-invalid': form.errors.name }" />
                                             <InputError :message="form.errors.name" />
                                         </div>
                                         <div class="mb-3">
-                                            <InputLabel for="email" value="Email" />
-                                            <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required autocomplete="email" :class="{ 'is-invalid': form.errors.email }" placeholder="Enter your email" />
+                                            <InputLabel for="email" :value="$t('t-email')" />
+                                            <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required autocomplete="email" :class="{ 'is-invalid': form.errors.email }" :placeholder="$t('t-enter-your-email')" />
                                             <InputError :message="form.errors.email" />
                                         </div>
                                         <div class="mb-3">
-                                            <InputLabel for="password" value="Password" />
+                                            <InputLabel for="password" :value="$t('t-password')" />
                                             <div class="position-relative auth-pass-inputgroup">
-                                                <input :type="togglePassword ? 'text' : 'password'" class="form-control pe-5 password-input" placeholder="Enter password" id="password" required v-model="form.password" :class="{ 'is-invalid': form.errors.password }" autocomplete="new-password">
+                                                <input :type="togglePassword ? 'text' : 'password'" class="form-control pe-5 password-input" :placeholder="$t('ui-enter-password')" id="password" required v-model="form.password" :class="{ 'is-invalid': form.errors.password }" autocomplete="new-password">
                                                 <BButton variant="link" class="position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" @click="togglePassword = !togglePassword"><i class="ri-eye-fill align-middle"></i></BButton>
                                                 <InputError :message="form.errors.password" />
                                             </div>
                                         </div>
 
                                         <div class="mb-3">
-                                            <InputLabel for="password_confirmation" value="Confirm Password" />
+                                            <InputLabel for="password_confirmation" :value="$t('t-confirm-password')" />
                                             <div class="position-relative auth-pass-inputgroup">
-                                                <input :type="togglePassword_conf ? 'text' : 'password'" class="form-control pe-5 password-input" placeholder="Enter password" id="password_confirmation" required v-model="form.password_confirmation" :class="{ 'is-invalid': form.errors.password_confirmation }" autocomplete="new-password">
+                                                <input :type="togglePassword_conf ? 'text' : 'password'" class="form-control pe-5 password-input" :placeholder="$t('ui-enter-password')" id="password_confirmation" required v-model="form.password_confirmation" :class="{ 'is-invalid': form.errors.password_confirmation }" autocomplete="new-password">
                                                 <BButton variant="link" class="position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button"  @click="togglePassword_conf = !togglePassword_conf"><i class="ri-eye-fill align-middle"></i></BButton>
                                                 <InputError :message="form.errors.password_confirmation" />
                                             </div>
@@ -92,18 +92,17 @@ export default {
                                         <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="mb-3 form-check">
                                             <Checkbox id="terms" v-model:checked="form.terms" name="terms" required class="form-check-input me-1" :class="{ 'is-invalid': form.errors.terms }" />
                                             <label class="form-check-label mb-0 fs-12 text-muted fst-italic" for="auth-remember-check">
-                                                I agree to the <BLink target="_blank" :href="route('terms.show')" class="">Terms of Service</BLink> and <BLink target="_blank" :href="route('policy.show')" class="">Privacy Policy</BLink>
+                                                {{ $t('ui-i-agree-to-the') }} <BLink target="_blank" :href="route('terms.show')" class="">{{ $t('ui-terms-of-service') }}</BLink> {{ $t('t-and') }} <BLink target="_blank" :href="route('policy.show')" class="">{{ $t('ui-privacy-policy') }}</BLink>
                                             </label>
                                             <InputError :message="form.errors.terms" />
                                         </div>
                                         <div class="mt-4">
-                                            <BButton variant="success" class="w-100" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">Sign
-                                                Up</BButton>
+                                            <BButton variant="success" class="w-100" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">{{ $t('t-sign-up') }}</BButton>
                                         </div>
 
                                         <div class="mt-4 text-center">
                                             <div class="signin-other-title">
-                                                <h5 class="fs-13 mb-4 title text-muted">Create account with</h5>
+                                                <h5 class="fs-13 mb-4 title text-muted">{{ $t('ui-create-account-with') }}</h5>
                                             </div>
 
                                             <div>
@@ -120,8 +119,8 @@ export default {
                         </BCard>
 
                         <div class="mt-4 text-center">
-                            <p class="mb-0">Already have an account ?
-                                <Link :href="route('login')" class="fw-semibold text-primary text-decoration-underline"> Signin </Link>
+                            <p class="mb-0">{{ $t('ui-already-have-an-account') }}
+                                <Link :href="route('login')" class="fw-semibold text-primary text-decoration-underline"> {{ $t('ui-signin') }} </Link>
                             </p>
                         </div>
                     </BCol>
@@ -134,7 +133,7 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

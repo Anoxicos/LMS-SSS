@@ -87,7 +87,7 @@ export default {
 
                                 <BCol lg="6">
                                     <div class="p-lg-5 p-4">
-                                        <h5 class="text-primary">Forgot Password?</h5>
+                                        <h5 class="text-primary">{{ $t('t-forgot-password-question') }}</h5>
                                         <p class="text-muted">Reset password with velzon</p>
 
                                         <div class="mt-2 text-center">
@@ -100,12 +100,12 @@ export default {
                                         <div class="p-2">
                                             <form>
                                                 <div class="mb-4">
-                                                    <label class="form-label">Email</label>
+                                                    <label class="form-label">{{ $t('ui-email') }}</label>
                                                     <input type="email" class="form-control" id="email" placeholder="Enter email address">
                                                 </div>
 
                                                 <div class="text-center mt-4">
-                                                    <BButton variant="primary" class="w-100" type="submit">Send Reset Link</BButton>
+                                                    <BButton variant="primary" class="w-100" type="submit">{{ $t('t-send-reset-link') }}</BButton>
                                                 </div>
                                             </form>
                                         </div>
@@ -131,7 +131,7 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

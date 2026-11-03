@@ -1,7 +1,11 @@
 <script setup>
+import { formatCourseLabel } from '@/composables/course-labels'
 import { Head, Link } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 import defaultImage from '@assets/images/default-user.png'
 
@@ -107,7 +111,7 @@ const handleImageError = event => {
 const formatDate = date => {
   if (!date) return '-'
 
-  return new Date(date).toLocaleDateString('en-GB', {
+  return new Date(date).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -120,7 +124,7 @@ const formatPercent = value => {
 }
 
 const formatPrice = course => {
-  if (!course?.price) return 'Free'
+  if (!course?.price) return t('t-free')
 
   return `${course.price} ${course.currency || ''}`
 }
@@ -172,9 +176,9 @@ const getSlideStatusClass = slide => {
 }
 
 const getSlideStatusText = slide => {
-  if (slide.is_completed) return 'Completed'
-  if (slide.is_viewed) return 'Viewed'
-  return 'Not started'
+  if (slide.is_completed) return t('ui-completed')
+  if (slide.is_viewed) return t('ui-viewed')
+  return t('ui-not-started')
 }
 </script>
 
@@ -184,7 +188,7 @@ const getSlideStatusText = slide => {
 
     <PageHeader
       :title="learnerDisplayName"
-      pageTitle="Learners"
+      :page-title="$t('ui-learners')"
     />
 
     <BRow class="g-4">
@@ -216,7 +220,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-user-line me-1"></i>
-                First name
+                {{ $t('ui-first-name') }}
               </span>
               <strong>{{ learner.first_name || '-' }}</strong>
             </div>
@@ -224,7 +228,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-user-line me-1"></i>
-                Middle name
+                {{ $t('ui-middle-name') }}
               </span>
               <strong>{{ learner.middle_name || '-' }}</strong>
             </div>
@@ -232,7 +236,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-user-line me-1"></i>
-                Last name
+                {{ $t('ui-last-name') }}
               </span>
               <strong>{{ learner.last_name || '-' }}</strong>
             </div>
@@ -240,7 +244,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-building-line me-1"></i>
-                Company
+                {{ $t('ui-company') }}
               </span>
               <strong>{{ learner.company?.name || '-' }}</strong>
             </div>
@@ -248,7 +252,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-calendar-event-line me-1"></i>
-                Date of birth
+                {{ $t('ui-date-of-birth') }}
               </span>
               <strong>{{ formatDate(learner.date_of_birth) }}</strong>
             </div>
@@ -256,7 +260,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-map-pin-user-line me-1"></i>
-                Place of birth
+                {{ $t('ui-place-of-birth') }}
               </span>
               <strong>{{ learner.place_of_birth || '-' }}</strong>
             </div>
@@ -264,7 +268,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-earth-line me-1"></i>
-                Country
+                {{ $t('ui-country') }}
               </span>
               <strong>{{ learner.country || '-' }}</strong>
             </div>
@@ -272,7 +276,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-passport-line me-1"></i>
-                Passport number
+                {{ $t('ui-passport-number') }}
               </span>
               <strong>{{ learner.passport_number || '-' }}</strong>
             </div>
@@ -280,7 +284,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-file-text-line me-1"></i>
-                Passport file
+                {{ $t('ui-passport-file') }}
               </span>
               <strong>
                 <a
@@ -290,7 +294,7 @@ const getSlideStatusText = slide => {
                   rel="noopener noreferrer"
                   class="passport-document-link"
                 >
-                  View document
+                  {{ $t('ui-view-document') }}
                   <i class="ri-external-link-line ms-1"></i>
                 </a>
                 <template v-else>-</template>
@@ -300,7 +304,7 @@ const getSlideStatusText = slide => {
             <div class="info-row">
               <span>
                 <i class="ri-book-open-line me-1"></i>
-                Courses
+                {{ $t('t-courses') }}
               </span>
               <strong>{{ totalCourses }}</strong>
             </div>
@@ -312,7 +316,7 @@ const getSlideStatusText = slide => {
               class="btn btn-light w-100 learner-back-btn"
             >
               <i class="ri-arrow-left-line me-1"></i>
-              Back
+              {{ $t('t-back') }}
             </Link>
           </div>
         </BCard>
@@ -321,21 +325,21 @@ const getSlideStatusText = slide => {
           <BCardBody>
             <h6 class="mb-3 fw-semibold">
               <i class="ri-bar-chart-box-line me-1"></i>
-              Summary
+              {{ $t('t-summary') }}
             </h6>
 
             <div class="mini-stat">
-              <span>Total courses</span>
+              <span>{{ $t('t-total-courses') }}</span>
               <strong>{{ totalCourses }}</strong>
             </div>
 
             <div class="mini-stat">
-              <span>In progress</span>
+              <span>{{ $t('t-in-progress') }}</span>
               <strong>{{ inProgressCourses }}</strong>
             </div>
 
             <div class="mini-stat">
-              <span>Completed</span>
+              <span>{{ $t('t-completed') }}</span>
               <strong>{{ completedCourses }}</strong>
             </div>
           </BCardBody>
@@ -354,9 +358,9 @@ const getSlideStatusText = slide => {
                   </div>
 
                   <div>
-                    <h5 class="mb-1 fw-semibold">Learner courses</h5>
+                    <h5 class="mb-1 fw-semibold">{{ $t('ui-learner-courses') }}</h5>
                     <p class="text-muted mb-0">
-                      Select a category to display affected courses.
+                      {{ $t('ui-select-a-category-to-display-affected-courses') }}
                     </p>
                   </div>
                 </div>
@@ -371,7 +375,7 @@ const getSlideStatusText = slide => {
                     @click="selectedCategory = 'all'"
                   >
                     <i class="ri-apps-line me-1"></i>
-                    All
+                    {{ $t('ui-all') }}
                     <span>{{ totalCourses }}</span>
                   </button>
 
@@ -429,7 +433,7 @@ const getSlideStatusText = slide => {
                   <div class="course-meta">
                     <span>
                       <i class="ri-global-line me-1"></i>
-                      {{ enrollment.course?.language || '-' }}
+                      {{ formatCourseLabel(enrollment.course?.language) }}
                     </span>
 
                     <span>
@@ -450,7 +454,7 @@ const getSlideStatusText = slide => {
 
                   <div class="course-simple-stats">
                     <div>
-                      <span>Chapters</span>
+                      <span>{{ $t('t-chapters') }}</span>
                       <strong>
                         {{ enrollment.stats.completed_chapters }}
                         /
@@ -459,7 +463,7 @@ const getSlideStatusText = slide => {
                     </div>
 
                     <div>
-                      <span>Slides</span>
+                      <span>{{ $t('ui-slides') }}</span>
                       <strong>
                         {{ enrollment.stats.completed_slides }}
                         /
@@ -475,7 +479,7 @@ const getSlideStatusText = slide => {
                     @click="openDetails(enrollment)"
                   >
                     <i class="ri-eye-line me-1"></i>
-                    Details
+                    {{ $t('ui-details') }}
                   </BButton>
                 </div>
               </div>
@@ -486,9 +490,9 @@ const getSlideStatusText = slide => {
                 <i class="ri-book-open-line"></i>
               </div>
 
-              <h5 class="mt-3 mb-1">No courses found</h5>
+              <h5 class="mt-3 mb-1">{{ $t('t-no-courses-found') }}</h5>
               <p class="text-muted mb-0">
-                No affected courses for this selected category.
+                {{ $t('ui-no-affected-courses-for-this-selected-category') }}
               </p>
             </div>
           </BCardBody>
@@ -546,47 +550,47 @@ const getSlideStatusText = slide => {
 
                 <div class="modal-info-list">
                   <div>
-                    <span>Category</span>
+                    <span>{{ $t('t-category') }}</span>
                     <strong>{{ selectedEnrollment.course?.category?.name || '-' }}</strong>
                   </div>
 
                   <div>
-                    <span>Language</span>
-                    <strong>{{ selectedEnrollment.course?.language || '-' }}</strong>
+                    <span>{{ $t('t-language') }}</span>
+                    <strong>{{ formatCourseLabel(selectedEnrollment.course?.language) }}</strong>
                   </div>
 
                   <div>
-                    <span>Type</span>
-                    <strong>{{ selectedEnrollment.course?.type || '-' }}</strong>
+                    <span>{{ $t('ui-type') }}</span>
+                    <strong>{{ selectedEnrollment.course?.type === 'paid' ? $t('ui-paid') : selectedEnrollment.course?.type ? $t('t-free') : '-' }}</strong>
                   </div>
 
                   <div>
-                    <span>Training type</span>
-                    <strong>{{ selectedEnrollment.course?.training_type || '-' }}</strong>
+                    <span>{{ $t('ui-training-type-label') }}</span>
+                    <strong>{{ formatCourseLabel(selectedEnrollment.course?.training_type) }}</strong>
                   </div>
 
                   <div>
-                    <span>Course Type</span>
-                    <strong>{{ selectedEnrollment.course?.skill_level || '-' }}</strong>
+                    <span>{{ $t('ui-course-type') }}</span>
+                    <strong>{{ formatCourseLabel(selectedEnrollment.course?.skill_level) }}</strong>
                   </div>
 
                   <div>
-                    <span>Price</span>
+                    <span>{{ $t('t-price') }}</span>
                     <strong>{{ formatPrice(selectedEnrollment.course) }}</strong>
                   </div>
 
                   <div>
-                    <span>Started at</span>
+                    <span>{{ $t('ui-started-at') }}</span>
                     <strong>{{ formatDate(selectedEnrollment.started_at) }}</strong>
                   </div>
 
                   <div>
-                    <span>Completed at</span>
+                    <span>{{ $t('ui-completed-at') }}</span>
                     <strong>{{ formatDate(selectedEnrollment.completed_at) }}</strong>
                   </div>
 
                   <div>
-                    <span>Current chapter</span>
+                    <span>{{ $t('ui-current-chapter') }}</span>
                     <strong>{{ selectedEnrollment.current_chapter?.title || '-' }}</strong>
                   </div>
                 </div>
@@ -598,7 +602,7 @@ const getSlideStatusText = slide => {
             <div class="modal-section">
               <h5 class="mb-3 fw-semibold">
                 <i class="ri-list-check-2 me-1"></i>
-                Chapters progress
+                {{ $t('ui-chapters-progress') }}
               </h5>
 
               <div
@@ -617,7 +621,7 @@ const getSlideStatusText = slide => {
                       </h6>
 
                       <small class="text-muted">
-                        {{ chapter.slides_count }} slide(s)
+                        {{ chapter.slides_count }} {{ $t('ui-slide-s') }}
                       </small>
                     </div>
 
@@ -657,10 +661,10 @@ const getSlideStatusText = slide => {
                           <small class="text-muted d-block">
                             {{ slide.lesson_type || '-' }}
                             <template v-if="slide.is_mandatory">
-                              · Mandatory
+                              {{ $t('ui-mandatory-label') }}
                             </template>
                             <template v-if="slide.is_preview">
-                              · Preview
+                              {{ $t('ui-preview-label') }}
                             </template>
                           </small>
                         </div>
@@ -679,7 +683,7 @@ const getSlideStatusText = slide => {
                   <i class="ri-list-check-2"></i>
                 </div>
 
-                <h6 class="mt-3 mb-1">No chapters found</h6>
+                <h6 class="mt-3 mb-1">{{ $t('ui-no-chapters-found') }}</h6>
               </div>
             </div>
           </BCol>

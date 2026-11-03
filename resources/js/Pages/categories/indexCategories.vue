@@ -22,8 +22,8 @@ defineProps({
 
 <template>
   <Layout>
-    <Head title="Categories" />
-    <PageHeader title="Categories" pageTitle="Admin" />
+    <Head :title="$t('ui-categories')" />
+    <PageHeader :title="$t('ui-categories')" :page-title="$t('ui-admin')" />
     <BRow>
       <BCol xxl="8">
           <ListeCategories :categories="categories" />  

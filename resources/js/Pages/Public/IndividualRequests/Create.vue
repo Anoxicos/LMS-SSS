@@ -70,21 +70,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <Head title="Submit individual training request" />
+  <Head :title="$t('ui-submit-individual-training-request')" />
 
   <main class="checkout-page">
     <section class="checkout-hero">
       <div class="hero-inner">
         <span class="hero-badge">
           <i class="ri-shopping-cart-check-line"></i>
-          Authenticated learner request
+          {{ $t('ui-authenticated-learner-request') }}
         </span>
 
-        <h1>Review and submit your courses</h1>
+        <h1>{{ $t('ui-review-and-submit-your-courses') }}</h1>
 
         <p>
-          The request will be linked to your learner account. The Super Admin
-          can approve all courses, approve some courses, or reject them.
+          {{ $t('ui-the-request-will-be-linked-to-your-learner-account-the') }}
         </p>
       </div>
     </section>
@@ -98,44 +97,44 @@ onMounted(() => {
             </span>
 
             <div>
-              <h2>Learner account</h2>
-              <p>The request will use the information saved in this account.</p>
+              <h2>{{ $t('t-learner-account') }}</h2>
+              <p>{{ $t('ui-the-request-will-use-the-information-saved-in-this-acc') }}</p>
             </div>
 
             <a :href="profileUrl" class="edit-profile-link">
               <i class="ri-edit-line"></i>
-              Edit profile
+              {{ $t('t-edit-profile') }}
             </a>
           </header>
 
           <div class="account-grid">
             <div>
-              <span>Full name</span>
+              <span>{{ $t('ui-full-name') }}</span>
               <strong>{{ learner.full_name }}</strong>
             </div>
 
             <div>
-              <span>Email</span>
+              <span>{{ $t('ui-email') }}</span>
               <strong>{{ learner.email }}</strong>
             </div>
 
             <div>
-              <span>Country</span>
+              <span>{{ $t('ui-country') }}</span>
               <strong>{{ learner.country }}</strong>
             </div>
 
             <div>
-              <span>Date of birth</span>
+              <span>{{ $t('ui-date-of-birth') }}</span>
               <strong>{{ learner.date_of_birth }}</strong>
             </div>
 
             <div>
-              <span>Place of birth</span>
+              <span>{{ $t('ui-place-of-birth') }}</span>
               <strong>{{ learner.place_of_birth }}</strong>
             </div>
 
             <div>
-              <span>Passport number</span>
+              <span>{{ $t('ui-passport-number') }}</span>
               <strong>{{ learner.passport_number }}</strong>
             </div>
           </div>
@@ -143,8 +142,7 @@ onMounted(() => {
           <div v-if="!learner.email_verified" class="verification-notice">
             <i class="ri-mail-warning-line"></i>
             <span>
-              Your email is not verified yet. You may submit the request, but
-              email verification will still be required to access learner courses.
+              {{ $t('ui-your-email-is-not-verified-yet-you-may-submit-the-requ') }}
             </span>
           </div>
         </article>
@@ -156,17 +154,17 @@ onMounted(() => {
             </span>
 
             <div>
-              <h2>Request information</h2>
-              <p>Add an optional note for the Super Admin.</p>
+              <h2>{{ $t('ui-request-information') }}</h2>
+              <p>{{ $t('ui-add-an-optional-note-for-the-super-admin') }}</p>
             </div>
           </header>
 
           <label class="note-field">
-            <span>Additional note</span>
+            <span>{{ $t('ui-additional-note') }}</span>
             <textarea
               v-model="form.learner_note"
               rows="6"
-              placeholder="Add any useful information about your training request..."
+              :placeholder="$t('ui-add-any-useful-information-about-your-training-request')"
             ></textarea>
             <small v-if="form.errors.learner_note">
               {{ form.errors.learner_note }}
@@ -192,13 +190,13 @@ onMounted(() => {
       <aside class="cart-card">
         <header class="cart-header">
           <div>
-            <h2>Selected courses</h2>
-            <p>{{ cartCount }} course(s) in your cart</p>
+            <h2>{{ $t('ui-selected-courses') }}</h2>
+            <p class="cart-count"><strong>{{ cartCount }}</strong>{{ $t('ui-course-s-in-your-cart') }}</p>
           </div>
 
           <Link :href="coursesUrl" class="add-more-link">
             <i class="ri-add-line"></i>
-            Add courses
+            {{ $t('ui-add-courses') }}
           </Link>
         </header>
 
@@ -227,13 +225,12 @@ onMounted(() => {
         </div>
 
         <div class="cart-total">
-          <span>Estimated total</span>
+          <span>{{ $t('ui-estimated-total') }}</span>
           <strong>{{ formattedTotal }}</strong>
         </div>
 
         <p class="cart-note">
-          Prices and course availability are verified again by the server when
-          the request is submitted.
+          {{ $t('ui-prices-and-course-availability-are-verified-again-by-t') }}
         </p>
       </aside>
     </section>
@@ -242,57 +239,68 @@ onMounted(() => {
 
 <style scoped>
 .checkout-page {
-  min-height: 100vh;
-  padding-bottom: 72px;
-  color: #071126;
-  background: linear-gradient(180deg, #f4fbff 0%, #ffffff 52%, #f8fafc 100%);
+  min-height: 100dvh;
+  padding-bottom: 88px;
+  color: var(--ink);
+  background: var(--paper);
+  background-color: var(--paper, #f2efe8);
 }
 
 .checkout-hero {
-  padding: 68px 20px 115px;
-  color: #ffffff;
-  background: linear-gradient(90deg, #37cced 0%, #0d8fe9 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 100px 24px 100px;
+  color: var(--chalk);
+  background:
+    radial-gradient(ellipse at 84% 12%, rgba(56, 225, 255, 0.13), transparent 30%),
+    var(--ink);
 }
 
 .hero-inner {
-  width: min(900px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
-  text-align: center;
 }
 
 .hero-badge {
-  padding: 9px 14px;
-  border-radius: 999px;
-  color: #071126;
-  background: #ffffff;
-  font-size: 12px;
-  font-weight: 900;
+  color: var(--jet);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
+}
+
+.hero-badge i {
+  font-size: 15px;
 }
 
 .hero-inner h1 {
-  margin: 18px 0 13px;
-  color: #ffffff;
-  font-size: clamp(36px, 5vw, 56px);
-  font-weight: 900;
+  max-width: 780px;
+  margin: 18px 0 12px;
+  color: var(--chalk);
+  font-size: clamp(34px, 4.4vw, 56px);
+  line-height: 1.04;
+  font-weight: 850;
+  letter-spacing: -0.045em;
 }
 
 .hero-inner p {
-  max-width: 720px;
-  margin: 0 auto;
-  color: rgba(255, 255, 255, 0.92);
-  line-height: 1.7;
+  max-width: 650px;
+  margin: 0;
+  color: var(--mist);
+  font-size: 15px;
+  line-height: 1.65;
 }
 
 .checkout-shell {
   position: relative;
-  width: min(1360px, calc(100% - 32px));
-  margin: -58px auto 0;
+  width: min(1240px, calc(100% - 48px));
+  margin: -72px auto 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 400px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.8fr);
+  gap: 22px;
   align-items: start;
 }
 
@@ -304,15 +312,15 @@ onMounted(() => {
 .account-card,
 .request-card,
 .cart-card {
-  border: 1px solid #e4edf4;
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
+  border: 1px solid rgba(58, 66, 86, 0.12);
+  border-radius: 8px;
+  background: var(--chalk);
+  box-shadow: 0 8px 28px rgba(7, 11, 20, 0.06);
 }
 
 .account-card,
 .request-card {
-  padding: 26px;
+  padding: clamp(20px, 2.4vw, 30px);
 }
 
 .cart-card {
@@ -323,12 +331,12 @@ onMounted(() => {
 
 .card-header,
 .cart-header {
-  margin-bottom: 21px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid #e4edf4;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(58, 66, 86, 0.12);
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 12px;
 }
 
 .cart-header {
@@ -336,13 +344,13 @@ onMounted(() => {
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
-  border-radius: 14px;
-  color: #0d8fe9;
-  background: #eaf7ff;
-  font-size: 22px;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--jet);
+  font-size: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -351,21 +359,23 @@ onMounted(() => {
 .card-header h2,
 .cart-header h2 {
   margin: 0 0 4px;
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 900;
+  letter-spacing: -0.025em;
 }
 
 .card-header p,
 .cart-header p {
   margin: 0;
-  color: #64748b;
+  color: var(--slate);
   font-size: 12px;
 }
 
 .edit-profile-link,
 .add-more-link {
   margin-left: auto;
-  color: #0d8fe9;
+  min-height: 44px;
+  color: var(--signal-deep);
   text-decoration: none;
   font-size: 12px;
   font-weight: 900;
@@ -377,36 +387,38 @@ onMounted(() => {
 .account-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 13px;
+  column-gap: 22px;
+  row-gap: 0;
 }
 
 .account-grid > div {
-  padding: 13px;
-  border: 1px solid #e4edf4;
-  border-radius: 13px;
-  background: #f8fafc;
+  min-width: 0;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(58, 66, 86, 0.1);
 }
 
 .account-grid span {
   margin-bottom: 5px;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 850;
-  text-transform: uppercase;
+  color: var(--slate);
+  font-size: 11px;
+  font-weight: 700;
   display: block;
 }
 
 .account-grid strong {
+  overflow-wrap: anywhere;
   font-size: 13px;
+  line-height: 1.45;
+  font-weight: 800;
 }
 
 .verification-notice {
   margin-top: 16px;
   padding: 13px;
   border: 1px solid rgba(247, 184, 75, 0.32);
-  border-radius: 12px;
-  color: #7a4b00;
-  background: #fff8e8;
+  border-radius: 6px;
+  color: var(--warning-deep);
+  background: rgba(255, 182, 56, 0.12);
   font-size: 12px;
   line-height: 1.55;
   display: flex;
@@ -416,29 +428,38 @@ onMounted(() => {
 
 .note-field > span {
   margin-bottom: 8px;
-  color: #475569;
-  font-size: 12px;
+  color: var(--slate);
+  font-size: 13px;
   font-weight: 850;
   display: block;
 }
 
 .note-field textarea {
   width: 100%;
-  padding: 13px;
-  border: 1px solid #dce5ef;
-  border-radius: 13px;
+  min-height: 132px;
+  padding: 14px 15px;
+  border: 1px solid var(--sand);
+  border-radius: 6px;
   outline: none;
   resize: vertical;
+  color: var(--ink);
+  background: var(--chalk);
+  line-height: 1.55;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .note-field textarea:focus {
-  border-color: #0d8fe9;
-  box-shadow: 0 0 0 3px rgba(13, 143, 233, 0.12);
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px rgba(31, 92, 255, 0.14);
+}
+
+.note-field textarea::placeholder {
+  color: var(--slate);
 }
 
 .note-field small {
   margin-top: 6px;
-  color: #f06548;
+  color: var(--danger);
   font-size: 11px;
   display: block;
 }
@@ -447,27 +468,28 @@ onMounted(() => {
   margin-top: 14px;
   padding: 12px;
   border-radius: 12px;
-  color: #b42318;
-  background: #fff1ef;
+  color: var(--danger-deep);
+  background: rgba(255, 77, 77, 0.08);
   font-size: 12px;
   font-weight: 750;
 }
 
 .submit-request-button {
   width: 100%;
-  min-height: 52px;
+  min-height: 50px;
   margin-top: 18px;
   border: 0;
-  border-radius: 14px;
-  color: #ffffff;
-  background: #071126;
-  box-shadow: 0 16px 34px rgba(7, 17, 38, 0.22);
+  border-radius: 6px;
+  color: var(--chalk);
+  background: var(--signal);
   font-weight: 900;
   cursor: pointer;
+  transition: background-color 160ms ease, transform 160ms ease;
 }
 
 .submit-request-button:hover:not(:disabled) {
-  background: #132b4a;
+  background: var(--signal-deep);
+  transform: translateY(-1px);
 }
 
 .submit-request-button:disabled {
@@ -479,23 +501,35 @@ onMounted(() => {
   max-height: 520px;
   overflow-y: auto;
   display: grid;
-  gap: 11px;
+  gap: 9px;
+}
+
+.cart-count {
+  color: var(--slate);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.cart-count strong {
+  margin-right: 4px;
+  color: var(--ink);
+  font-size: 14px;
 }
 
 .cart-item {
-  padding: 9px;
-  border: 1px solid #e4edf4;
-  border-radius: 14px;
+  min-width: 0;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(58, 66, 86, 0.1);
   display: grid;
-  grid-template-columns: 66px minmax(0, 1fr) 34px;
-  gap: 10px;
+  grid-template-columns: 58px minmax(0, 1fr) 44px;
+  gap: 11px;
   align-items: center;
 }
 
 .cart-item img {
-  width: 66px;
-  height: 59px;
-  border-radius: 10px;
+  width: 58px;
+  height: 54px;
+  border-radius: 4px;
   object-fit: cover;
 }
 
@@ -505,38 +539,39 @@ onMounted(() => {
 
 .cart-item-copy strong {
   margin-bottom: 5px;
+  overflow-wrap: anywhere;
   font-size: 12px;
   line-height: 1.35;
   display: block;
 }
 
 .cart-item-copy span {
-  color: #087bc9;
+  color: var(--signal-deep);
   font-size: 11px;
   font-weight: 900;
 }
 
 .remove-button {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border: 0;
-  border-radius: 10px;
-  color: #f06548;
-  background: #fff1ef;
+  border-radius: 6px;
+  color: var(--danger);
+  background: rgba(255, 77, 77, 0.08);
   cursor: pointer;
 }
 
 .cart-total {
-  margin-top: 18px;
-  padding-top: 17px;
-  border-top: 1px solid #e4edf4;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--sand);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .cart-total span {
-  color: #64748b;
+  color: var(--slate);
   font-size: 12px;
   font-weight: 800;
 }
@@ -549,9 +584,9 @@ onMounted(() => {
 .cart-note {
   margin: 13px 0 0;
   padding: 11px;
-  border-radius: 11px;
-  color: #475569;
-  background: #eaf7ff;
+  border-radius: 6px;
+  color: var(--slate);
+  background: var(--paper);
   font-size: 11px;
   line-height: 1.55;
 }
@@ -560,11 +595,19 @@ onMounted(() => {
   animation: spin 0.8s linear infinite;
 }
 
+.edit-profile-link:focus-visible,
+.add-more-link:focus-visible,
+.remove-button:focus-visible,
+.submit-request-button:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1020px) {
   .checkout-shell {
     grid-template-columns: 1fr;
   }
@@ -577,33 +620,93 @@ onMounted(() => {
 
 @media (max-width: 767.98px) {
   .checkout-hero {
-    padding: 45px 16px 90px;
+    padding: 48px 20px 92px;
   }
 
   .checkout-shell {
-    width: calc(100% - 20px);
-    margin-top: -44px;
+    width: calc(100% - 28px);
+    margin-top: -48px;
+    gap: 14px;
   }
 
   .account-card,
   .request-card,
   .cart-card {
-    padding: 17px;
-    border-radius: 19px;
+    padding: 18px;
   }
 
   .card-header {
     align-items: flex-start;
+  }
+
+  .header-icon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    font-size: 18px;
+  }
+
+  .card-header h2,
+  .cart-header h2 {
+    font-size: 17px;
+  }
+
+  .account-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-hero {
+    padding: 38px 16px 82px;
+  }
+
+  .checkout-hero h1 {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+
+  .checkout-hero p {
+    font-size: 14px;
+  }
+
+  .checkout-shell {
+    width: calc(100% - 20px);
+    margin-top: -40px;
+  }
+
+  .account-card,
+  .request-card,
+  .cart-card {
+    padding: 16px;
+  }
+
+  .card-header,
+  .cart-header {
     flex-wrap: wrap;
   }
 
   .edit-profile-link {
+    margin-left: 50px;
+  }
+
+  .cart-header .add-more-link {
     width: 100%;
-    margin-left: 61px;
+    margin-left: 50px;
   }
 
   .account-grid {
     grid-template-columns: 1fr;
+  }
+
+  .cart-item {
+    grid-template-columns: 50px minmax(0, 1fr) 44px;
+    gap: 9px;
+  }
+
+  .cart-item img {
+    width: 50px;
+    height: 48px;
   }
 }
 </style>

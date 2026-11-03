@@ -22,8 +22,8 @@ defineProps({
 
 <template>
   <Layout>
-    <Head title="Company Requests" />
-    <PageHeader title="Company Requests" pageTitle="LMS" />
+    <Head :title="$t('ui-company-requests')" />
+    <PageHeader :title="$t('ui-company-requests')" :page-title="$t('ui-lms')" />
 
     <ListesCompanyRequests
       :company-requests="companyRequests"

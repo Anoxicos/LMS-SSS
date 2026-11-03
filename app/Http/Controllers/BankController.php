@@ -138,12 +138,12 @@ class BankController extends Controller
 
             return redirect()
                 ->route('banks.index')
-                ->with('success', 'Bank has been created successfully.');
+                ->with('success', __('Bank has been created successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while creating the bank.',
+                    'error' => __('An error occurred while creating the bank.'),
                 ])
                 ->withInput();
         }
@@ -175,12 +175,12 @@ class BankController extends Controller
 
             return redirect()
                 ->route('banks.index')
-                ->with('success', 'Bank has been updated successfully.');
+                ->with('success', __('Bank has been updated successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while updating the bank.',
+                    'error' => __('An error occurred while updating the bank.'),
                 ])
                 ->withInput();
         }
@@ -198,14 +198,14 @@ class BankController extends Controller
 
             return redirect()
                 ->route('banks.index')
-                ->with('success', 'Bank has been deleted successfully.');
+                ->with('success', __('Bank has been deleted successfully.'));
         } catch (\Throwable $e) {
             DB::rollBack();
 
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while deleting the bank.',
+                    'error' => __('An error occurred while deleting the bank.'),
                 ]);
         }
     }
@@ -259,12 +259,12 @@ class BankController extends Controller
 
             return redirect()
                 ->route('banks.questions', $bank->id)
-                ->with('success', 'Question has been created successfully.');
+                ->with('success', __('Question has been created successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while creating the question.',
+                    'error' => __('An error occurred while creating the question.'),
                 ])
                 ->withInput();
         }
@@ -296,12 +296,12 @@ class BankController extends Controller
 
             return redirect()
                 ->route('banks.questions', $bank->id)
-                ->with('success', 'Question has been updated successfully.');
+                ->with('success', __('Question has been updated successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while updating the question.',
+                    'error' => __('An error occurred while updating the question.'),
                 ])
                 ->withInput();
         }
@@ -316,12 +316,12 @@ class BankController extends Controller
 
             return redirect()
                 ->route('banks.questions', $bank->id)
-                ->with('success', 'Question has been deleted successfully.');
+                ->with('success', __('Question has been deleted successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while deleting the question.',
+                    'error' => __('An error occurred while deleting the question.'),
                 ]);
         }
     }
@@ -344,12 +344,12 @@ class BankController extends Controller
 
             return redirect()
                 ->route('banks.questions', $bank->id)
-                ->with('success', 'Questions imported successfully.');
+                ->with('success', __('Questions imported successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'file' => 'Unable to import questions. Please check the file format.',
+                    'file' => __('Unable to import questions. Please check the file format.'),
                 ]);
         }
     }

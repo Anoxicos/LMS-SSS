@@ -1,7 +1,7 @@
 <template>
   <div @dragenter.prevent="toggleActive" @dragleave.prevent="toggleActive" @dragover.prevent
     @drop.prevent="toggleActive" :class="{ 'active-dropzone': active }" class="dropzone position-relative">
-    <label for="dropzoneFile" class="stretched-link">Drag and Drop your files or Browse</label>
+    <label for="dropzoneFile" class="stretched-link">{{ $t('ui-drag-and-drop-your-files-or-browse') }}</label>
     <input type="file" id="dropzoneFile" class="dropzoneFile btn btn-primary" />
   </div>
 </template>

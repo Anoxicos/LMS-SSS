@@ -2,10 +2,13 @@
 import { Head, Link } from '@inertiajs/vue3'
 import { ref, computed, watch } from 'vue'
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
+import i18n from '@/i18n'
 
 defineOptions({
   layout: LayoutAnonyme,
 })
+
+const t = (...args) => i18n.global.t(...args)
 
 const props = defineProps({
   enrollments: {
@@ -32,10 +35,10 @@ const normalizeLanguage = value => {
 const getLanguageLabel = value => {
   const language = normalizeLanguage(value)
 
-  if (language === 'english') return 'English'
-  if (language === 'french') return 'French'
-  if (language === 'arabic') return 'Arabic'
-  if (language === 'not_specified') return 'Not specified'
+  if (language === 'english') return t('t-language-english')
+  if (language === 'french') return t('t-language-french')
+  if (language === 'arabic') return t('t-language-arabic')
+  if (language === 'not_specified') return t('t-not-specified')
 
   return String(value || language)
     .replace(/[_-]+/g, ' ')
@@ -44,8 +47,8 @@ const getLanguageLabel = value => {
 
 const languageOptions = computed(() => {
   const options = new Map([
-    ['english', 'English'],
-    ['french', 'French'],
+    ['english', getLanguageLabel('English')],
+    ['french', getLanguageLabel('French')],
   ])
 
   props.enrollments.forEach(item => {
@@ -245,13 +248,13 @@ const getStatusClass = status => {
 const getStatusLabel = status => {
   switch (status) {
     case 'completed':
-      return 'Completed'
+      return t('t-completed')
     case 'in_progress':
-      return 'In progress'
+      return t('t-in-progress')
     case 'not_started':
-      return 'Not started'
+      return t('t-not-started')
     case 'expired':
-      return 'Expired'
+      return t('t-expired')
     default:
       return status || '-'
   }
@@ -296,7 +299,8 @@ const isTrainingUnavailable = enrollment => {
 const formatTrainingDate = value => {
   if (!value) return '-'
 
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', {
+  const locale = i18n.global.locale?.value || i18n.global.locale || 'en'
+  return new Date(`${value}T00:00:00`).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -314,10 +318,10 @@ const getTrainingPeriodLabel = enrollment => {
 const getTrainingStateLabel = enrollment => {
   const state = getTrainingAccessState(enrollment)
 
-  if (state === 'expired') return 'Training validity expired'
-  if (state === 'upcoming') return 'Upcoming training'
-  if (state === 'ended') return 'Training period ended'
-  if (state === 'active') return 'Training active'
+  if (state === 'expired') return t('t-training-validity-expired')
+  if (state === 'upcoming') return t('t-upcoming-training')
+  if (state === 'ended') return t('t-training-period-ended')
+  if (state === 'active') return t('t-training-active')
 
   return null
 }
@@ -356,38 +360,38 @@ const getCourseDestination = enrollment => {
 
 const getButtonLabel = enrollment => {
   if (isEnrollmentExpired(enrollment)) {
-    return 'View expired training'
+    return t('t-view-expired-training')
   }
 
   if (hasPassedExam(enrollment)) {
-    return 'View exam result'
+    return t('t-view-exam-result')
   }
 
   if (getTrainingAccessState(enrollment) === 'upcoming') {
-    return 'View training details'
+    return t('t-view-training-details')
   }
 
   if (getTrainingAccessState(enrollment) === 'ended') {
-    return 'View course summary'
+    return t('t-view-course-summary')
   }
 
   if (hasNoExamAttempts(enrollment)) {
-    return 'View course summary'
+    return t('t-view-course-summary')
   }
 
   if (isScormCourse(enrollment)) {
-    return 'Open course'
+    return t('t-open-course')
   }
 
   if (enrollment?.status === 'completed') {
-    return 'Review course'
+    return t('t-review-course')
   }
 
   if (enrollment?.status === 'not_started') {
-    return 'Start course'
+    return t('t-start-course')
   }
 
-  return 'Continue course'
+  return t('t-continue-course')
 }
 
 const getButtonIcon = enrollment => {
@@ -420,16 +424,16 @@ const getButtonIcon = enrollment => {
 
 const getAttemptsLabel = enrollment => {
   if (hasPassedExam(enrollment)) {
-    return 'Final exam passed'
+    return t('t-final-exam-passed')
   }
 
   if (hasNoExamAttempts(enrollment)) {
-    return 'No attempts remaining'
+    return t('t-no-attempts-remaining')
   }
 
   const attempts = Number(enrollment?.attempts_rest ?? 0)
 
-  return `Attempts left: ${attempts}`
+  return t('t-attempts-left', attempts)
 }
 
 const formatPercent = value => {
@@ -526,8 +530,8 @@ const getCourseProgress = enrollment => {
 
 const getCourseProgressLabel = enrollment => {
   return isScormCourse(enrollment)
-    ? 'SCORM progress'
-    : 'Course progress'
+    ? t('t-scorm-completion')
+    : t('t-course-progress')
 }
 
 const formatDuration = value => {
@@ -541,7 +545,7 @@ const formatDuration = value => {
     ? hours.toFixed(0)
     : hours.toFixed(2).replace(/\.?0+$/, '')
 
-  return `${formatted} hour${hours === 1 ? '' : 's'}`
+  return t(hours === 1 ? 't-hour-singular' : 't-hour-plural', { count: formatted })
 }
 
 const formatPassingScore = value => {
@@ -564,7 +568,7 @@ const getSyllabusUrl = course => {
 </script>
 
 <template>
-  <Head title="My Courses" />
+  <Head :title="$t('t-my-courses')" />
 
   <section class="learner-courses-page">
     <!-- Hero -->
@@ -572,14 +576,13 @@ const getSyllabusUrl = course => {
       <div class="learner-hero-content">
         <div class="hero-badge">
           <i class="ri-graduation-cap-line"></i>
-          Learner Space
+          {{ $t('t-learner-space') }}
         </div>
 
-        <h1>My Courses</h1>
+        <h1>{{ $t('t-my-courses') }}</h1>
 
         <p>
-          Access your assigned aviation training courses, follow your progress,
-          and continue learning anytime, anywhere.
+          {{ $t('t-my-courses-description') }}
         </p>
       </div>
 
@@ -590,7 +593,7 @@ const getSyllabusUrl = course => {
           </div>
 
           <div>
-            <span>Total courses</span>
+            <span>{{ $t('t-total-courses') }}</span>
             <strong>{{ stats.total }}</strong>
           </div>
         </div>
@@ -601,7 +604,7 @@ const getSyllabusUrl = course => {
           </div>
 
           <div>
-            <span>Not started</span>
+            <span>{{ $t('t-not-started') }}</span>
             <strong>{{ stats.not_started }}</strong>
           </div>
         </div>
@@ -612,7 +615,7 @@ const getSyllabusUrl = course => {
           </div>
 
           <div>
-            <span>In progress</span>
+            <span>{{ $t('t-in-progress') }}</span>
             <strong>{{ stats.in_progress }}</strong>
           </div>
         </div>
@@ -623,7 +626,7 @@ const getSyllabusUrl = course => {
           </div>
 
           <div>
-            <span>Completed</span>
+            <span>{{ $t('t-completed') }}</span>
             <strong>{{ stats.completed }}</strong>
           </div>
         </div>
@@ -634,7 +637,7 @@ const getSyllabusUrl = course => {
           </div>
 
           <div>
-            <span>Expired</span>
+            <span>{{ $t('t-expired') }}</span>
             <strong>{{ stats.expired }}</strong>
           </div>
         </div>
@@ -650,11 +653,10 @@ const getSyllabusUrl = course => {
           </div>
 
           <div>
-            <h2>Assigned courses</h2>
+            <h2>{{ $t('t-assigned-courses') }}</h2>
 
             <p>
-              Showing {{ displayedFrom }} - {{ displayedTo }}
-              of {{ filteredCourses.length }} course(s)
+              {{ $t('t-showing-courses-range', { from: displayedFrom, to: displayedTo, total: filteredCourses.length }) }}
             </p>
           </div>
         </div>
@@ -664,11 +666,11 @@ const getSyllabusUrl = course => {
             <i class="ri-filter-3-line"></i>
 
             <select v-model="selectedStatus">
-              <option value="all">All status</option>
-              <option value="not_started">Not started</option>
-              <option value="in_progress">In progress</option>
-              <option value="completed">Completed</option>
-              <option value="expired">Expired</option>
+              <option value="all">{{ $t('t-all-statuses') }}</option>
+              <option value="not_started">{{ $t('t-not-started') }}</option>
+              <option value="in_progress">{{ $t('t-in-progress') }}</option>
+              <option value="completed">{{ $t('t-completed') }}</option>
+              <option value="expired">{{ $t('t-expired') }}</option>
             </select>
           </div>
 
@@ -678,7 +680,7 @@ const getSyllabusUrl = course => {
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search course..."
+              :placeholder="$t('t-search-course-placeholder')"
             />
           </div>
         </div>
@@ -687,8 +689,8 @@ const getSyllabusUrl = course => {
           <div class="language-filter-title">
             <i class="ri-translate-2"></i>
             <div>
-              <strong>Filter by language</strong>
-              <span>Select one or several languages.</span>
+              <strong>{{ $t('t-filter-by-language') }}</strong>
+              <span>{{ $t('t-select-languages-hint') }}</span>
             </div>
 
             <button
@@ -697,7 +699,7 @@ const getSyllabusUrl = course => {
               @click="selectedLanguages = []"
             >
               <i class="ri-close-circle-line"></i>
-              Clear
+              {{ $t('t-clear') }}
             </button>
           </div>
 
@@ -726,10 +728,11 @@ const getSyllabusUrl = course => {
 
       <div v-if="paginatedCourses.length" class="courses-grid">
         <div
-          v-for="item in paginatedCourses"
+          v-for="(item, index) in paginatedCourses"
           :key="item.id"
           class="learner-course-card"
           :class="{
+            'featured-course-card': index === 0,
             'attempts-exhausted': hasNoExamAttempts(item),
             'exam-passed': hasPassedExam(item),
             'training-upcoming': getTrainingAccessState(item) === 'upcoming',
@@ -741,7 +744,7 @@ const getSyllabusUrl = course => {
             <img
               v-if="getCourseImage(item.course)"
               :src="getCourseImage(item.course)"
-              :alt="item.course?.title || 'Course image'"
+              :alt="item.course?.title || $t('t-course-image')"
               class="course-img"
             />
 
@@ -767,12 +770,12 @@ const getSyllabusUrl = course => {
               ></i>
               {{
                 isEnrollmentExpired(item)
-                  ? 'Training validity expired'
+                  ? $t('t-training-validity-expired')
                   : hasPassedExam(item)
-                    ? 'Final exam passed'
+                    ? $t('t-final-exam-passed')
                     : isTrainingUnavailable(item)
                     ? getTrainingStateLabel(item)
-                    : 'Exam attempts finished'
+                    : $t('t-exam-attempts-finished')
               }}
             </span>
           </div>
@@ -782,7 +785,7 @@ const getSyllabusUrl = course => {
               <div class="course-heading-meta">
                 <div class="course-category">
                   <i class="ri-folder-line"></i>
-                  {{ item.course?.category?.name || 'Course' }}
+                  {{ item.course?.category?.name || $t('t-course') }}
                 </div>
 
               
@@ -793,7 +796,7 @@ const getSyllabusUrl = course => {
               </h3>
 
               <p>
-                {{ item.course?.description || 'No description available.' }}
+                {{ item.course?.description || $t('t-no-description-available') }}
               </p>
 
               <div class="course-meta">
@@ -824,7 +827,7 @@ const getSyllabusUrl = course => {
 
                 <span v-if="formatPassingScore(item.course?.passing_score)">
                   <i class="ri-medal-line"></i>
-                  Passing score: {{ formatPassingScore(item.course.passing_score) }}
+                  {{ $t('t-passing-score') }}: {{ formatPassingScore(item.course.passing_score) }}
                 </span>
               </div>
 
@@ -837,7 +840,7 @@ const getSyllabusUrl = course => {
                   <i :class="getTrainingStateIcon(item)"></i>
 
                   <div>
-                    <span>Training period</span>
+                    <span>{{ $t('t-training-period') }}</span>
                     <strong>{{ getTrainingPeriodLabel(item) }}</strong>
                   </div>
                 </div>
@@ -910,7 +913,7 @@ const getSyllabusUrl = course => {
                   <i :class="isEnrollmentExpired(item) ? 'ri-calendar-close-line' : 'ri-calendar-check-line'"></i>
                   {{ item.expired_at
                     ? `${isEnrollmentExpired(item) ? 'Expired' : 'Valid until'}: ${formatTrainingDate(String(item.expired_at).slice(0, 10))}`
-                    : `${item.duree_validite_formation} month(s) validity` }}
+                    : $t('t-validity-months', item.duree_validite_formation) }}
                 </span>
 
                 <a
@@ -921,7 +924,7 @@ const getSyllabusUrl = course => {
                   class="syllabus-link"
                 >
                   <i class="ri-file-pdf-2-line"></i>
-                  View syllabus
+                  {{ $t('t-view-syllabus') }}
                 </a>
               </div>
 
@@ -945,7 +948,7 @@ const getSyllabusUrl = course => {
                 disabled
               >
                 <i class="ri-error-warning-line"></i>
-                Enrollment unavailable
+                {{ $t('t-enrollment-unavailable') }}
               </button>
             </div>
           </div>
@@ -957,10 +960,10 @@ const getSyllabusUrl = course => {
           <i class="ri-book-open-line"></i>
         </div>
 
-        <h3>No courses found</h3>
+        <h3>{{ $t('t-no-courses-found') }}</h3>
 
         <p>
-          No assigned course matches your search or selected status.
+          {{ $t('t-no-course-filters-match') }}
         </p>
       </div>
 
@@ -969,13 +972,7 @@ const getSyllabusUrl = course => {
         class="courses-pagination-wrapper"
       >
         <div class="pagination-summary">
-          Showing
-          <strong>{{ displayedFrom }}</strong>
-          to
-          <strong>{{ displayedTo }}</strong>
-          of
-          <strong>{{ filteredCourses.length }}</strong>
-          courses
+          {{ $t('t-showing-courses-range', { from: displayedFrom, to: displayedTo, total: filteredCourses.length }) }}
         </div>
 
         <div class="courses-pagination">
@@ -2548,6 +2545,240 @@ const getSyllabusUrl = course => {
   .learner-course-card:hover,
   .course-action-btn:hover {
     transform: none !important;
+  }
+}
+
+/* Keep the hero content clear of the fixed public navigation. */
+.learner-hero {
+  align-items: flex-start;
+  padding-top: 112px;
+}
+
+@media (max-width: 1199.98px) {
+  .learner-hero {
+    padding-top: 112px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .learner-hero {
+    padding: 104px 22px 60px;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .hero-stat-card {
+    min-height: 78px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .hero-stat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+}
+
+/* Course bento layout using the homepage design tokens. */
+.learner-courses-page {
+  background: var(--paper);
+}
+
+.learner-hero {
+  min-height: 0;
+  align-items: flex-start;
+  padding: 112px 6% 76px;
+  background:
+    radial-gradient(ellipse at 75% 38%, rgba(56, 225, 255, 0.14), transparent 34%),
+    var(--ink);
+}
+
+.learner-hero h1 {
+  font-weight: 750;
+  letter-spacing: -0.045em;
+}
+
+.learner-hero p {
+  color: #dce3ee;
+}
+
+.hero-badge {
+  border-color: rgba(255, 255, 255, 0.42);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: none;
+}
+
+.hero-stats {
+  width: min(480px, 44vw);
+  min-width: 380px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hero-stat-card {
+  min-height: 82px;
+  border: 1px solid var(--sand);
+  border-radius: 18px;
+  background: var(--paper);
+  box-shadow: 0 8px 22px rgba(7, 11, 20, 0.12);
+}
+
+.hero-stat-card:first-child {
+  grid-column: 1 / -1;
+  border-color: var(--jet);
+  background: var(--jet);
+}
+
+.hero-stat-icon {
+  border-radius: 12px;
+  background: #eafaff;
+  color: var(--signal-deep);
+}
+
+.hero-stat-card:first-child .hero-stat-icon {
+  background: rgba(7, 11, 20, 0.08);
+  color: var(--ink);
+}
+
+.hero-stat-card span {
+  color: var(--slate);
+}
+
+.hero-stat-card strong {
+  color: var(--ink);
+}
+
+.courses-container {
+  margin-top: -34px;
+}
+
+.courses-header-card {
+  border-color: var(--sand);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(7, 11, 20, 0.07);
+}
+
+.courses-header-card::before {
+  right: 22px;
+  left: 22px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--jet), var(--signal));
+}
+
+.courses-header-icon {
+  border-radius: 14px;
+  background: var(--ink);
+  box-shadow: none;
+}
+
+.courses-grid {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.learner-course-card {
+  grid-column: span 4;
+  border-color: var(--sand);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(7, 11, 20, 0.06);
+}
+
+.learner-course-card.featured-course-card {
+  grid-column: span 8;
+  border-color: rgba(31, 92, 255, 0.28);
+}
+
+.learner-course-card::before {
+  display: none;
+}
+
+.learner-course-card:hover {
+  border-color: rgba(31, 92, 255, 0.5);
+  box-shadow: 0 14px 30px rgba(7, 11, 20, 0.1);
+}
+
+.course-cover {
+  background: #e6f7fb;
+}
+
+.course-fallback {
+  background: linear-gradient(145deg, var(--signal), var(--ink));
+}
+
+.course-action-btn {
+  border-radius: 10px;
+  background: var(--ink);
+  box-shadow: none;
+}
+
+.course-action-btn:hover {
+  background: var(--midnight);
+  box-shadow: none;
+}
+
+.course-action-btn.finish-destination {
+  background: var(--signal);
+}
+
+.course-action-btn.finish-destination:hover {
+  background: var(--signal-deep);
+}
+
+.courses-filter-box select:focus,
+.courses-search-box input:focus,
+.language-filter-option:focus-within {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px rgba(31, 92, 255, 0.14);
+}
+
+@media (max-width: 1199.98px) {
+  .learner-hero {
+    padding-top: 112px;
+  }
+
+  .hero-stats {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .courses-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .learner-course-card,
+  .learner-course-card.featured-course-card {
+    grid-column: span 6;
+  }
+
+  .learner-course-card.featured-course-card {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .learner-hero {
+    padding: 104px 22px 60px;
+  }
+
+  .hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .learner-course-card,
+  .learner-course-card.featured-course-card {
+    grid-column: 1 / -1;
   }
 }
 

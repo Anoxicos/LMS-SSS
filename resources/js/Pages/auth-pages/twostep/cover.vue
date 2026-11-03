@@ -109,7 +109,7 @@ export default {
                                             </div>
                                         </div>
                                         <div class="text-muted text-center mx-lg-3">
-                                            <h4 class="">Verify Your Email</h4>
+                                            <h4 class="">{{ $t('t-verify-your-email') }}</h4>
                                             <p>Please enter the 4 digit code sent to <span class="fw-semibold">example@abc.com</span></p>
                                         </div>
 
@@ -150,7 +150,7 @@ export default {
                                                 </BRow>
 
                                                 <div class="mt-3">
-                                                    <BButton type="button" variant="primary" class="w-100">Confirm</BButton>
+                                                    <BButton type="button" variant="primary" class="w-100">{{ $t('ui-confirm') }}</BButton>
                                                 </div>
 
                                             </form>
@@ -176,7 +176,7 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

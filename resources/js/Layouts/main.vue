@@ -5,36 +5,109 @@ import Vertical from "./vertical.vue";
 import Horizontal from "./horizontal.vue";
 import TwoColumns from "./twocolumn.vue";
 
+import SuperAdminPendingReminder from "@/Components/SuperAdminPendingReminder.vue";
+import HomeArrival from "@/Components/HomeArrival.vue";
+
 export default {
     components: {
         Vertical,
         Horizontal,
-        TwoColumns
+        TwoColumns,
+        SuperAdminPendingReminder,
+        HomeArrival,
     },
+
     data() {
         return {};
     },
+
     computed: {
         ...layoutComputed,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Super Admin
+        |--------------------------------------------------------------------------
+        |
+        | HandleInertiaRequests partage déjà :
+        |
+        | auth.user.roles
+        |
+        | Exemple :
+        | ['Super-admin']
+        |
+        */
+
+        isSuperAdmin() {
+            const roles =
+                this.$page?.props?.auth?.user?.roles || [];
+
+            return roles.includes("Super-admin");
+        },
     },
+
     mounted() {
-        // document.querySelector("html").setAttribute('dir', 'rtl');
-    }
+        // document
+        //     .querySelector("html")
+        //     .setAttribute("dir", "rtl");
+    },
 };
 </script>
 
 <template>
     <div>
-        <Vertical v-if="layoutType === 'vertical' || layoutType === 'semibox'" :layout="layoutType">
+        <!-- ========================================================= -->
+        <!-- VERTICAL LAYOUT                                           -->
+        <!-- ========================================================= -->
+
+        <Vertical
+            v-if="
+                layoutType === 'vertical' ||
+                layoutType === 'semibox'
+            "
+            :layout="layoutType"
+        >
             <slot />
         </Vertical>
 
-        <Horizontal v-if="layoutType === 'horizontal'" :layout="layoutType">
+        <!-- ========================================================= -->
+        <!-- HORIZONTAL LAYOUT                                         -->
+        <!-- ========================================================= -->
+
+        <Horizontal
+            v-if="layoutType === 'horizontal'"
+            :layout="layoutType"
+        >
             <slot />
         </Horizontal>
 
-        <TwoColumns v-if="layoutType === 'twocolumn'" :layout="layoutType">
+        <!-- ========================================================= -->
+        <!-- TWO COLUMNS LAYOUT                                        -->
+        <!-- ========================================================= -->
+
+        <TwoColumns
+            v-if="layoutType === 'twocolumn'"
+            :layout="layoutType"
+        >
             <slot />
         </TwoColumns>
+
+        <!-- ========================================================= -->
+        <!-- SUPER ADMIN PENDING REMINDER                              -->
+        <!-- ========================================================= -->
+        <!--
+            Le composant n'est chargé que pour le rôle Super-admin.
+
+            Il fonctionne quel que soit le layout :
+            - vertical
+            - semibox
+            - horizontal
+            - twocolumn
+        -->
+
+        <SuperAdminPendingReminder
+            v-if="isSuperAdmin"
+        />
+        <HomeArrival />
     </div>
 </template>

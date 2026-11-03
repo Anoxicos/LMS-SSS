@@ -47,7 +47,7 @@ class IndividualRequestCheckoutController extends Controller
             return redirect()
                 ->route('learner-account.edit')
                 ->withErrors([
-                    'profile' => 'Complete your learner profile before submitting the request.',
+                    'profile' => __('Complete your learner profile before submitting the request.'),
                 ]);
         }
 
@@ -63,10 +63,10 @@ class IndividualRequestCheckoutController extends Controller
                 'learner_note' => ['nullable', 'string', 'max:2000'],
             ],
             [
-                'course_ids.required' => 'Please select at least one course.',
-                'course_ids.min' => 'Please select at least one course.',
-                'course_ids.max' => 'You cannot request more than 20 courses.',
-                'course_ids.*.distinct' => 'The same course cannot be selected more than once.',
+                'course_ids.required' => __('Please select at least one course.'),
+                'course_ids.min' => __('Please select at least one course.'),
+                'course_ids.max' => __('You cannot request more than 20 courses.'),
+                'course_ids.*.distinct' => __('The same course cannot be selected more than once.'),
             ]
         );
 
@@ -87,7 +87,7 @@ class IndividualRequestCheckoutController extends Controller
         if ($courses->count() !== $courseIds->count()) {
             return back()
                 ->withErrors([
-                    'course_ids' => 'One or more selected courses are unavailable.',
+                    'course_ids' => __('One or more selected courses are unavailable.'),
                 ]);
         }
 

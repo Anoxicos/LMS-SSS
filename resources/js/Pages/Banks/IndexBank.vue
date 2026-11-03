@@ -18,8 +18,8 @@ defineProps({
 
 <template>
   <Layout>
-    <Head title="Question Banks" />
-    <PageHeader title="Question Banks" pageTitle="LMS" />
+    <Head :title="$t('ui-question-banks')" />
+    <PageHeader :title="$t('ui-question-banks')" :page-title="$t('ui-lms')" />
 
     <BRow>
       <BCol xxl="12">

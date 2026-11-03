@@ -121,7 +121,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Create Password" />
+    <Head :title="$t('t-password-create')" />
     <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-overlay"></div>
         <div class="auth-page-content overflow-hidden pt-lg-5">
@@ -174,16 +174,16 @@ export default {
 
                                 <BCol lg="6">
                                     <div class="p-lg-5 p-4">
-                                        <h5 class="text-primary">Create new password</h5>
+                                        <h5 class="text-primary">{{ $t('t-create-new-password') }}</h5>
                                         <p class="text-muted">Your new password must be different from previous used
                                             password.</p>
 
                                         <div class="p-2">
                                             <form>
                                                 <div class="mb-3">
-                                                    <label class="form-label" for="password-input">Password</label>
+                                                    <label class="form-label" for="password-input">{{ $t('ui-password') }}</label>
                                                     <div class="position-relative auth-pass-inputgroup">
-                                                        <input type="password" class="form-control pe-5 password-input" onpaste="return false" placeholder="Enter password" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
+                                                        <input type="password" class="form-control pe-5 password-input" onpaste="return false" :placeholder="$t('ui-enter-password')" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
                                                         <BButton variant="link" class="position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></BButton>
                                                     </div>
                                                     <div id="passwordInput" class="form-text">Must be at least 8
@@ -191,10 +191,9 @@ export default {
                                                 </div>
 
                                                 <div class="mb-3">
-                                                    <label class="form-label" for="confirm-password-input">Confirm
-                                                        Password</label>
+                                                    <label class="form-label" for="confirm-password-input">{{ $t('t-confirm-password') }}</label>
                                                     <div class="position-relative auth-pass-inputgroup mb-3">
-                                                        <input type="password" class="form-control pe-5 password-input" onpaste="return false" placeholder="Confirm password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="confirm-password-input" required>
+                                                        <input type="password" class="form-control pe-5 password-input" onpaste="return false" :placeholder="$t('t-confirm-password')" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="confirm-password-input" required>
                                                         <BButton variant="link" class="position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button"><i class="ri-eye-fill align-middle"></i></BButton>
                                                     </div>
                                                 </div>
@@ -214,12 +213,11 @@ export default {
 
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" value="" id="auth-remember-check">
-                                                    <label class="form-check-label" for="auth-remember-check">Remember
-                                                        me</label>
+                                                    <label class="form-check-label" for="auth-remember-check">{{ $t('t-remember-me') }}</label>
                                                 </div>
 
                                                 <div class="mt-4">
-                                                    <BButton variant="primary" class="w-100" @click="validatepassword" type="submit">Reset Password</BButton>
+                                                    <BButton variant="primary" class="w-100" @click="validatepassword" type="submit">{{ $t('t-password-reset') }}</BButton>
                                                 </div>
 
                                             </form>
@@ -247,7 +245,7 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

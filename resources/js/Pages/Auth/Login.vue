@@ -1,11 +1,12 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { ref } from 'vue'
-import haliAirLogoLight from '@assets/images/logo-blanche-.png'
-import haliAirLogoDark from '@assets/images/logo_safesky blue.webp'
+import { onUnmounted, ref } from 'vue'
+import authLogo from '@assets/images/brand/safesky-auth.svg'
 
+import AuthParticles from '@/Components/AuthParticles.vue'
 import Checkbox from '@/Components/Checkbox.vue'
 import InputError from '@/Components/InputError.vue'
+import LearnerRegister from '@/Pages/Public/Auth/LearnerRegister.vue'
 
 defineProps({
   canResetPassword: Boolean,
@@ -13,6 +14,42 @@ defineProps({
 })
 
 const togglePassword = ref(false)
+const startsInRegister = typeof window !== 'undefined'
+  && new URLSearchParams(window.location.search).get('mode') === 'register'
+const showRegister = ref(startsInRegister)
+const activeMode = ref(startsInRegister ? 'register' : 'login')
+const curtainStage = ref('')
+const authPanelRef = ref(null)
+const curtainTimers = []
+
+const scheduleCurtain = (callback, delay) => {
+  curtainTimers.push(window.setTimeout(callback, delay))
+}
+
+const switchMode = mode => {
+  const nextMode = mode === 'register'
+  if (curtainStage.value || showRegister.value === nextMode) return
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  activeMode.value = mode
+  if (reduceMotion) {
+    showRegister.value = nextMode
+  } else {
+    curtainStage.value = 'closing'
+    scheduleCurtain(() => {
+      showRegister.value = nextMode
+      scheduleCurtain(() => {
+        curtainStage.value = 'opening'
+        scheduleCurtain(() => { curtainStage.value = '' }, 360)
+      }, 340)
+    }, 360)
+  }
+
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+  if (authPanelRef.value) authPanelRef.value.scrollTop = 0
+}
+
+onUnmounted(() => curtainTimers.forEach(window.clearTimeout))
 
 const form = useForm({
   email: '',
@@ -33,9 +70,9 @@ const submit = () => {
 </script>
 
 <template>
-  <Head title="Login" />
-
-  <div class="lms-auth-page">
+  <div class="lms-auth-page" :class="{ 'is-register': showRegister }">
+    <Head :title="showRegister ? $t('t-create-learner-account') : $t('t-login')" />
+    <AuthParticles layer="backdrop" color="31, 92, 255" :quantity="110" :opacity="0.32" :size="2.4" />
     <BContainer fluid class="auth-container">
       <BRow class="auth-row align-items-center justify-content-center">
         <BCol xxl="10" xl="11" lg="12" class="auth-column">
@@ -44,17 +81,18 @@ const submit = () => {
               <!-- Left Side -->
               <BCol lg="6" class="auth-left">
                 <div class="auth-left-pattern"></div>
+                <AuthParticles />
 
                 <div class="auth-left-content">
                   <Link
                     href="/"
                     class="brand-box"
-                    aria-label="SAFESKY SOLUTION."
+                    :aria-label="$t('t-safesky-home')"
                   >
                     <span class="brand-logo-shell">
                       <img
-                        :src="haliAirLogoLight"
-                        alt="Hali Air"
+                        :src="authLogo"
+                        :alt="$t('t-safesky-home')"
                         class="brand-logo"
                       />
                     </span>
@@ -63,15 +101,15 @@ const submit = () => {
                   <div class="left-hero">
                     <span class="secure-pill">
                       <i class="ri-shield-check-line"></i>
-                      Secure aviation learning platform
+                      {{ $t('t-secure-aviation-platform') }}
                     </span>
 
                     <h1>
-                      Advance aviation knowledge with structured online training.
+                      {{ $t('t-auth-advance') }} <span class="auth-title-accent">{{ $t('t-aviation') }}</span> {{ $t('t-auth-knowledge') }}
                     </h1>
 
                     <p>
-                      Access professional aviation courses, complete assessments, follow your progress and receive verified training certificates.
+                      {{ $t('t-auth-platform-description') }}
                     </p>
                   </div>
 
@@ -82,8 +120,8 @@ const submit = () => {
                       </div>
 
                       <div>
-                        <strong>Aviation Courses</strong>
-                        <span>Structured learning content</span>
+                        <strong>{{ $t('t-aviation-courses') }}</strong>
+                        <span>{{ $t('t-structured-learning-content') }}</span>
                       </div>
                     </div>
 
@@ -93,8 +131,8 @@ const submit = () => {
                       </div>
 
                       <div>
-                        <strong>Voice Guidance</strong>
-                        <span>Assisted course narration</span>
+                        <strong>{{ $t('t-voice-guidance') }}</strong>
+                        <span>{{ $t('t-assisted-course-narration') }}</span>
                       </div>
                     </div>
 
@@ -104,8 +142,8 @@ const submit = () => {
                       </div>
 
                       <div>
-                        <strong>Certificates</strong>
-                        <span>Verified completion records</span>
+                        <strong>{{ $t('t-certificates') }}</strong>
+                        <span>{{ $t('t-verified-completion-records') }}</span>
                       </div>
                     </div>
 
@@ -115,46 +153,48 @@ const submit = () => {
                       </div>
 
                       <div>
-                        <strong>Company Training</strong>
-                        <span>Managed corporate learning</span>
+                        <strong>{{ $t('t-company-training') }}</strong>
+                        <span>{{ $t('t-managed-corporate-learning') }}</span>
                       </div>
                     </div>
                   </div>
 
                   <div class="left-footer-text">
                     <i class="ri-user-star-line"></i>
-                    <span>Trusted learning space for aviation professionals.</span>
+                    <span>{{ $t('t-trusted-aviation-learning-space') }}</span>
                   </div>
                 </div>
               </BCol>
 
               <!-- Right Side -->
               <BCol lg="6" class="auth-right">
-                <div class="auth-form-wrapper">
+                <div ref="authPanelRef" class="auth-form-wrapper">
+                  <Transition :name="showRegister ? 'auth-mode-forward' : 'auth-mode-back'" mode="out-in">
+                  <div v-if="!showRegister" key="login" class="auth-login-view">
                   <Link
                     href="/"
                     class="mobile-brand"
-                    aria-label="Hali Air home"
+                    :aria-label="$t('t-safesky-home')"
                   >
                     <span class="mobile-brand-logo-shell">
                       <img
-                        :src="haliAirLogoDark"
-                        alt="Hali Air"
+                        :src="authLogo"
+                        :alt="$t('t-safesky-home')"
                         class="mobile-brand-logo"
                       />
                     </span>
                   </Link>
 
                   <div class="login-head">
-                    <span class="login-pill">
-                      <i class="ri-login-circle-line"></i>
-                     login
-                    </span>
+                    <div class="auth-mode-toggle" role="group" :aria-label="$t('t-choose-signin-mode')">
+                      <button type="button" :aria-pressed="activeMode === 'login'" :class="{ 'is-active': activeMode === 'login' }" @click="switchMode('login')">{{ $t('t-sign-in') }}</button>
+                      <button type="button" :aria-pressed="activeMode === 'register'" :class="{ 'is-active': activeMode === 'register' }" @click="switchMode('register')">{{ $t('t-sign-up') }}</button>
+                    </div>
 
-                    <h2>Welcome back</h2>
+                    <h2>{{ $t('t-welcome-back') }}</h2>
 
                     <p>
-                      Sign in to continue your aviation learning journey.
+                      {{ $t('t-signin-to-continue-learning') }}
                     </p>
                   </div>
 
@@ -169,7 +209,7 @@ const submit = () => {
                   <form class="auth-form" @submit.prevent="submit">
                     <div class="mb-3">
                       <label for="email" class="form-label">
-                        Email address
+                        {{ $t('t-email-address') }}
                       </label>
 
                       <div class="input-shell">
@@ -180,7 +220,7 @@ const submit = () => {
                           v-model="form.email"
                           type="email"
                           class="form-control"
-                          placeholder="Enter your email"
+                          :placeholder="$t('t-enter-your-email')"
                           autocomplete="email"
                           required
                           autofocus
@@ -194,7 +234,7 @@ const submit = () => {
                     <div class="mb-3">
                       <div class="d-flex align-items-center justify-content-between gap-2">
                         <label class="form-label mb-0" for="password-input">
-                          Password
+                          {{ $t('t-password') }}
                         </label>
 
                         <Link
@@ -202,7 +242,7 @@ const submit = () => {
                           :href="route('password.request')"
                           class="forgot-link"
                         >
-                          Forgot password?
+                          {{ $t('t-forgot-password-question') }}
                         </Link>
                       </div>
 
@@ -214,7 +254,7 @@ const submit = () => {
                           v-model="form.password"
                           :type="togglePassword ? 'text' : 'password'"
                           class="form-control"
-                          placeholder="Enter your password"
+                          :placeholder="$t('t-enter-your-password')"
                           autocomplete="current-password"
                           required
                           :class="{ 'is-invalid': form.errors.password }"
@@ -248,7 +288,7 @@ const submit = () => {
                           class="form-check-label"
                           for="auth-remember-check"
                         >
-                          Remember me
+                          {{ $t('t-remember-me') }}
                         </label>
                       </div>
                     </div>
@@ -265,12 +305,34 @@ const submit = () => {
                       ></span>
 
                       <i v-else class="ri-login-box-line me-1"></i>
-                      Sign In
+                      {{ $t('t-sign-in') }}
                     </BButton>
                   </form>
+                  <Link href="/courses?arrival=1" class="continue-guest-link">
+                    {{ $t('t-continue-as-guest') }} <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                  </Link>
+                  </div>
+                  <LearnerRegister
+                    v-else
+                    key="register"
+                    :login-url="route('login')"
+                    :courses-url="route('courses')"
+                    :embedded="true"
+                    :active-mode="activeMode"
+                    @switch="switchMode"
+                  />
+                  </Transition>
                 </div>
               </BCol>
             </BRow>
+            <div
+              class="auth-curtain"
+              :class="curtainStage && `is-${curtainStage}`"
+              aria-hidden="true"
+            >
+              <span class="auth-curtain-panel auth-curtain-panel-left"></span>
+              <span class="auth-curtain-panel auth-curtain-panel-right"></span>
+            </div>
           </BCard>
 
           <div class="auth-copyright">
@@ -287,26 +349,14 @@ const submit = () => {
 
 <style scoped>
 .lms-auth-page {
-  --auth-cyan: #37cced;
-  --auth-blue: #0d8fe9;
-  --auth-blue-dark: #087bc9;
-  --auth-night: #071126;
-  --auth-night-hover: #10233f;
-  --auth-text: #172033;
-  --auth-muted: #64748b;
-  --auth-border: #dfe8f1;
-  --auth-soft: #f5faff;
-  --auth-success: #0ab39c;
-
   width: 100%;
   min-height: 100dvh;
   position: relative;
+  isolation: isolate;
   overflow-x: hidden;
-  /* Structured background: no decorative circles or floating bubbles. */
   background:
-    linear-gradient(135deg, rgba(55, 204, 237, 0.08) 0%, transparent 34%),
-    linear-gradient(315deg, rgba(13, 143, 233, 0.06) 0%, transparent 32%),
-    linear-gradient(180deg, #f8fcff 0%, #ffffff 52%, #f3f8fc 100%);
+    radial-gradient(ellipse at 52% 42%, rgba(56, 225, 255, 0.1), transparent 54%),
+    var(--paper);
 }
 
 .auth-container {
@@ -315,13 +365,12 @@ const submit = () => {
 }
 
 .auth-card {
+  position: relative;
   overflow: hidden;
-  border: 1px solid rgba(223, 232, 241, 0.96) !important;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow:
-    0 30px 80px rgba(7, 17, 38, 0.12),
-    0 2px 8px rgba(7, 17, 38, 0.035);
+  border: 1px solid var(--sand) !important;
+  border-radius: 4px;
+  background: var(--chalk);
+  box-shadow: 0 30px 80px rgba(7, 11, 20, 0.35);
 }
 
 /* =========================================================
@@ -330,10 +379,10 @@ const submit = () => {
 .auth-left {
   position: relative;
   overflow: hidden;
-  color: #ffffff;
+  color: var(--chalk);
   background:
-    linear-gradient(150deg, rgba(255, 255, 255, 0.09), transparent 34%),
-    linear-gradient(145deg, var(--auth-cyan) 0%, var(--auth-blue) 62%, var(--auth-blue-dark) 100%);
+    radial-gradient(ellipse at 78% 20%, rgba(56, 225, 255, 0.18), transparent 42%),
+    var(--ink);
 }
 
 .auth-left::before {
@@ -358,7 +407,7 @@ const submit = () => {
   left: 0;
   height: 4px;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+  background: linear-gradient(90deg, var(--jet), transparent);
 }
 
 .auth-left-pattern {
@@ -370,8 +419,9 @@ const submit = () => {
   z-index: 2;
   height: 100%;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto minmax(min-content, 1fr) auto auto;
   align-items: start;
+  gap: clamp(12px, 1.8vh, 20px);
 }
 
 .brand-box,
@@ -390,11 +440,11 @@ const submit = () => {
   justify-content: center;
 }
 
-/* White wordmark used only on the blue desktop panel. */
+/* White wordmark on the Ink panel. */
 .brand-logo-shell {
   width: 180px;
   height: 66px;
-  border-radius: 14px;
+  border-radius: 4px;
   background: transparent;
 }
 
@@ -411,15 +461,14 @@ const submit = () => {
   filter: drop-shadow(0 4px 10px rgba(7, 17, 38, 0.12));
 }
 
-/* Dark logo variant used on the white tablet/mobile card. */
+/* Dark logo variant used on Paper. */
 .mobile-brand-logo-shell {
   width: 176px;
   height: 66px;
   padding: 8px 16px;
-  border: 1px solid var(--auth-border);
-  border-radius: 17px;
-  background: #ffffff;
-  box-shadow: 0 12px 26px rgba(7, 17, 38, 0.09);
+  border: 1px solid var(--sand);
+  border-radius: 4px;
+  background: var(--chalk);
 }
 
 .mobile-brand-logo {
@@ -443,12 +492,11 @@ const submit = () => {
   min-height: 32px;
   margin-bottom: 17px;
   padding: 6px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--midnight);
   border-radius: 999px;
-  color: rgba(255, 255, 255, 0.96);
-  background: rgba(255, 255, 255, 0.13);
-  backdrop-filter: blur(10px);
-  font-size: 10.5px;
+  color: var(--mist);
+  background: var(--night);
+  font-size: 11.5px;
   font-weight: 850;
   letter-spacing: 0.01em;
   display: inline-flex;
@@ -457,17 +505,22 @@ const submit = () => {
 }
 
 .secure-pill i {
+  color: var(--jet);
   font-size: 14px;
 }
 
 .left-hero h1 {
   max-width: 620px;
   margin: 0 0 16px;
-  color: #ffffff;
-  font-size: clamp(35px, 3.25vw, 52px);
-  line-height: 1.06;
+  color: var(--chalk);
+  font-size: clamp(34px, 3.6vw, 50px);
+  line-height: 1.02;
   font-weight: 950;
   letter-spacing: -0.045em;
+}
+
+.auth-title-accent {
+  color: var(--jet);
 }
 
 .left-hero p {
@@ -489,10 +542,9 @@ const submit = () => {
   min-width: 0;
   min-height: 64px;
   padding: 11px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.105);
-  backdrop-filter: blur(10px);
+  border: 1px solid var(--midnight);
+  border-radius: 4px;
+  background: var(--night);
   display: flex;
   align-items: center;
   gap: 11px;
@@ -500,8 +552,8 @@ const submit = () => {
 }
 
 .feature-item:hover {
-  border-color: rgba(255, 255, 255, 0.36);
-  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--jet);
+  background: var(--midnight);
 }
 
 .feature-icon {
@@ -509,8 +561,8 @@ const submit = () => {
   height: 38px;
   min-width: 38px;
   border-radius: 11px;
-  color: var(--auth-blue-dark);
-  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  background: var(--jet);
   font-size: 18px;
   display: inline-flex;
   align-items: center;
@@ -520,8 +572,8 @@ const submit = () => {
 .feature-item strong {
   display: block;
   margin-bottom: 3px;
-  color: #ffffff;
-  font-size: 11.5px;
+  color: var(--chalk);
+  font-size: 12.5px;
   line-height: 1.25;
   font-weight: 900;
 }
@@ -529,7 +581,7 @@ const submit = () => {
 .feature-item span {
   display: block;
   color: rgba(255, 255, 255, 0.76);
-  font-size: 9.5px;
+  font-size: 10.5px;
   line-height: 1.35;
   font-weight: 700;
 }
@@ -537,7 +589,7 @@ const submit = () => {
 .left-footer-text {
   margin-top: 16px;
   color: rgba(255, 255, 255, 0.86);
-  font-size: 10.5px;
+  font-size: 11.5px;
   line-height: 1.4;
   font-weight: 800;
   display: inline-flex;
@@ -550,8 +602,8 @@ const submit = () => {
   height: 30px;
   min-width: 30px;
   border-radius: 9px;
-  color: var(--auth-blue-dark);
-  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  background: var(--jet);
   font-size: 16px;
   display: inline-flex;
   align-items: center;
@@ -563,9 +615,56 @@ const submit = () => {
    ========================================================= */
 .auth-right {
   position: relative;
-  background:
-    linear-gradient(145deg, #ffffff 0%, #ffffff 70%, rgba(13, 143, 233, 0.025) 100%);
+  background: var(--paper);
 }
+
+.lms-auth-page.is-register .auth-left { order: 2; }
+.lms-auth-page.is-register .auth-right { order: 1; }
+.lms-auth-page.is-register .auth-right::before { right: 0; left: auto; }
+
+.auth-login-view { width: 100%; }
+
+.lms-auth-page.is-register .auth-form-wrapper {
+  max-width: none;
+  height: 100%;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.auth-curtain {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.auth-curtain.is-closing,
+.auth-curtain.is-opening { pointer-events: auto; }
+
+.auth-curtain-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 51%;
+  background: var(--ink);
+  transition: transform 360ms cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.auth-curtain-panel-left {
+  left: 0;
+  border-right: 1px solid rgba(56, 225, 255, 0.48);
+  transform: translateX(-100%);
+}
+
+.auth-curtain-panel-right {
+  right: 0;
+  border-left: 1px solid rgba(56, 225, 255, 0.48);
+  transform: translateX(100%);
+}
+
+.auth-curtain.is-closing .auth-curtain-panel { transform: translateX(0); }
 
 .auth-right::before {
   content: '';
@@ -574,7 +673,7 @@ const submit = () => {
   bottom: 8%;
   left: 0;
   width: 1px;
-  background: linear-gradient(180deg, transparent, #e6edf4 18%, #e6edf4 82%, transparent);
+  background: linear-gradient(180deg, transparent, var(--sand) 18%, var(--sand) 82%, transparent);
 }
 
 .auth-form-wrapper {
@@ -587,6 +686,28 @@ const submit = () => {
   justify-content: center;
 }
 
+.continue-guest-link {
+  width: fit-content;
+  margin: 18px auto 0;
+  color: var(--slate);
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s ease;
+}
+
+.continue-guest-link:hover {
+  color: var(--signal);
+}
+
+.continue-guest-link:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+}
+
 .mobile-brand {
   display: none;
   margin-bottom: 25px;
@@ -597,31 +718,9 @@ const submit = () => {
   margin-bottom: 27px;
 }
 
-.login-pill {
-  width: fit-content;
-  min-height: 31px;
-  margin-bottom: 13px;
-  padding: 6px 11px;
-  border: 1px solid rgba(13, 143, 233, 0.1);
-  border-radius: 999px;
-  color: var(--auth-blue-dark);
-  background: #edf8ff;
-  font-size: 10.5px;
-  font-weight: 900;
-  text-transform: capitalize;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.login-pill i {
-  color: var(--auth-blue);
-  font-size: 14px;
-}
-
 .login-head h2 {
   margin: 0 0 8px;
-  color: var(--auth-night);
+  color: var(--ink);
   font-size: clamp(32px, 3vw, 39px);
   line-height: 1.05;
   font-weight: 950;
@@ -630,18 +729,18 @@ const submit = () => {
 
 .login-head p {
   margin: 0;
-  color: var(--auth-muted);
-  font-size: 13.5px;
+  color: var(--slate);
+  font-size: 15px;
   line-height: 1.65;
 }
 
 .auth-status-alert {
   padding: 11px 13px;
-  border: 1px solid rgba(10, 179, 156, 0.18);
-  border-radius: 13px;
-  color: #087f6f;
-  background: rgba(10, 179, 156, 0.07);
-  font-size: 11.5px;
+  border: 1px solid rgba(25, 195, 154, 0.3);
+  border-radius: 4px;
+  color: var(--success-deep);
+  background: rgba(25, 195, 154, 0.08);
+  font-size: 12px;
   font-weight: 850;
   display: flex;
   align-items: center;
@@ -650,9 +749,12 @@ const submit = () => {
 
 .auth-form .form-label {
   margin-bottom: 7px;
-  color: #263348;
-  font-size: 12px;
+  color: var(--slate);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
   font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .input-shell {
@@ -665,7 +767,7 @@ const submit = () => {
   left: 15px;
   z-index: 2;
   transform: translateY(-50%);
-  color: #7c8ba0;
+  color: var(--slate);
   font-size: 17px;
   pointer-events: none;
 }
@@ -673,32 +775,33 @@ const submit = () => {
 .input-shell .form-control {
   min-height: 52px;
   padding: 0 46px;
-  border: 1px solid var(--auth-border);
-  border-radius: 13px;
-  color: var(--auth-text);
-  background: #f9fbfd;
-  font-size: 12.5px;
+  border: 0;
+  border-bottom: 1px solid var(--sand);
+  border-radius: 0;
+  color: var(--ink);
+  background: transparent;
+  font-size: 14px;
   font-weight: 750;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .input-shell .form-control::placeholder {
-  color: #9aa8b8;
+  color: var(--slate);
 }
 
 .input-shell .form-control:hover {
-  border-color: rgba(13, 143, 233, 0.3);
-  background: #ffffff;
+  border-color: var(--signal);
+  background: var(--chalk);
 }
 
 .input-shell .form-control:focus {
-  border-color: var(--auth-blue);
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(13, 143, 233, 0.11);
+  border-color: var(--signal);
+  background: var(--chalk);
+  box-shadow: 0 2px 0 var(--signal);
 }
 
 .input-shell .form-control.is-invalid {
-  border-color: #f06548;
+  border-color: var(--danger);
 }
 
 .password-toggle {
@@ -708,23 +811,23 @@ const submit = () => {
   z-index: 3;
   transform: translateY(-50%);
   padding: 8px 10px !important;
-  color: #64748b !important;
+  color: var(--slate) !important;
   text-decoration: none !important;
 }
 
 .password-toggle:hover {
-  color: var(--auth-blue-dark) !important;
+  color: var(--signal-deep) !important;
 }
 
 .forgot-link {
-  color: var(--auth-blue-dark);
-  font-size: 11.5px;
+  color: var(--signal-deep);
+  font-size: 12px;
   font-weight: 900;
   text-decoration: none;
 }
 
 .forgot-link:hover {
-  color: var(--auth-night);
+  color: var(--ink);
 }
 
 .auth-options {
@@ -732,8 +835,8 @@ const submit = () => {
 }
 
 .form-check-label {
-  color: #475569;
-  font-size: 12px;
+  color: var(--slate);
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -744,10 +847,10 @@ const submit = () => {
 .login-btn {
   min-height: 52px;
   border: 0;
-  border-radius: 13px;
-  color: #ffffff;
-  background: var(--auth-night);
-  box-shadow: 0 14px 30px rgba(7, 17, 38, 0.2);
+  border-radius: 999px;
+  color: var(--chalk);
+  background: var(--signal);
+  box-shadow: none;
   font-size: 13.5px;
   font-weight: 900;
   letter-spacing: 0.005em;
@@ -755,10 +858,10 @@ const submit = () => {
 }
 
 .login-btn:hover {
-  color: #ffffff;
+  color: var(--chalk);
   transform: translateY(-1px);
-  background: var(--auth-night-hover);
-  box-shadow: 0 18px 36px rgba(7, 17, 38, 0.24);
+  background: var(--signal-deep);
+  box-shadow: none;
 }
 
 .login-btn:disabled {
@@ -774,7 +877,7 @@ const submit = () => {
 
 .auth-copyright p {
   margin: 0;
-  color: #8291a3;
+  color: var(--slate);
   font-size: 10.5px;
   line-height: 16px;
   font-weight: 750;
@@ -819,7 +922,7 @@ const submit = () => {
 
   .auth-card {
     width: min(1240px, 100%);
-    height: min(744px, calc(100dvh - 58px));
+    height: min(820px, calc(100dvh - 58px));
     min-height: 0;
     margin-inline: auto;
     flex: 0 1 auto;
@@ -835,6 +938,8 @@ const submit = () => {
     height: 100%;
     min-height: 0;
   }
+
+  .lms-auth-page.is-register .auth-form-wrapper { padding: 0; }
 
   .auth-left {
     flex: 0 0 47%;
@@ -904,7 +1009,7 @@ const submit = () => {
   .feature-item {
     min-height: 54px;
     padding: 9px 10px;
-    border-radius: 13px;
+    border-radius: 4px;
   }
 
   .feature-icon {
@@ -942,11 +1047,6 @@ const submit = () => {
 
   .login-head {
     margin-bottom: 21px;
-  }
-
-  .login-pill {
-    min-height: 28px;
-    margin-bottom: 10px;
   }
 
   .login-head h2 {
@@ -1007,10 +1107,12 @@ const submit = () => {
     display: none;
   }
 
+  .lms-auth-page.is-register .auth-right { order: 1; }
+
   .auth-card {
     width: min(560px, 100%);
     margin: 0 auto;
-    border-radius: 24px;
+    border-radius: 4px;
   }
 
   .auth-right::before {
@@ -1021,6 +1123,53 @@ const submit = () => {
     min-height: auto;
     padding: 42px 34px;
   }
+
+  .lms-auth-page.is-register .auth-form-wrapper {
+    height: 100%;
+    min-height: 0;
+    padding: 8px 18px;
+    overflow: hidden;
+  }
+
+  .lms-auth-page.is-register {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .lms-auth-page.is-register .auth-container {
+    height: 100%;
+    min-height: 0;
+    padding: 12px;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .lms-auth-page.is-register .auth-row,
+  .lms-auth-page.is-register .auth-column,
+  .lms-auth-page.is-register .auth-card,
+  .lms-auth-page.is-register .auth-card > .row,
+  .lms-auth-page.is-register .auth-right {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .lms-auth-page.is-register .auth-row { width: 100%; }
+
+  .lms-auth-page.is-register .auth-column {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lms-auth-page.is-register .auth-card {
+    width: 100%;
+    max-height: 100%;
+    margin: 0;
+  }
+
+  .lms-auth-page.is-register .auth-copyright { display: none; }
 
   .mobile-brand {
     display: inline-flex;
@@ -1033,7 +1182,7 @@ const submit = () => {
   }
 
   .auth-card {
-    border-radius: 19px;
+    border-radius: 4px;
   }
 
   .auth-form-wrapper {
@@ -1048,7 +1197,7 @@ const submit = () => {
     width: 158px;
     height: 60px;
     padding: 7px 14px;
-    border-radius: 15px;
+    border-radius: 4px;
   }
 
   .mobile-brand-logo {
@@ -1085,5 +1234,123 @@ const submit = () => {
   .login-btn:hover {
     transform: none !important;
   }
+}
+
+:global(.auth-mode-toggle) {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 0 22px;
+  padding: 4px;
+  border: 1px solid var(--sand);
+  border-radius: 999px;
+  background: var(--chalk);
+}
+
+:global(.auth-mode-toggle button),
+:global(.auth-mode-toggle a) {
+  min-width: 104px;
+  min-height: 40px;
+  padding: 8px 17px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--slate);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+:global(.auth-mode-toggle button:hover),
+:global(.auth-mode-toggle a:hover) {
+  color: var(--ink);
+}
+
+:global(.auth-mode-toggle button:active),
+:global(.auth-mode-toggle a:active) {
+  transform: scale(0.98);
+}
+
+:global(.auth-mode-toggle button.is-active),
+:global(.auth-mode-toggle button[aria-pressed="true"]) {
+  color: var(--chalk);
+  background: var(--ink);
+  animation: auth-mode-selected 280ms cubic-bezier(.2,.75,.25,1) both;
+}
+
+@keyframes auth-mode-selected {
+  0% { transform: scale(.94); }
+  72% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+:global(.auth-mode-toggle button:focus-visible),
+:global(.auth-mode-toggle a:focus-visible) {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+.auth-left .brand-box:focus-visible {
+  outline: 2px solid var(--jet);
+  outline-offset: 3px;
+}
+
+.auth-right a:focus-visible,
+.auth-right button:focus-visible,
+.auth-right input:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+:global(.auth-mode-forward-enter-active),
+:global(.auth-mode-forward-leave-active),
+:global(.auth-mode-back-enter-active),
+:global(.auth-mode-back-leave-active) {
+  transition: opacity 220ms ease, transform 320ms var(--ease-out);
+}
+
+:global(.auth-mode-forward-enter-from) {
+  opacity: 0;
+  transform: translateX(32px);
+}
+
+:global(.auth-mode-forward-leave-to) {
+  opacity: 0;
+  transform: translateX(-32px);
+}
+
+:global(.auth-mode-back-enter-from) {
+  opacity: 0;
+  transform: translateX(-32px);
+}
+
+:global(.auth-mode-back-leave-to) {
+  opacity: 0;
+  transform: translateX(32px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.auth-mode-forward-enter-active),
+  :global(.auth-mode-forward-leave-active),
+  :global(.auth-mode-back-enter-active),
+  :global(.auth-mode-back-leave-active) {
+    transition-duration: 1ms;
+  }
+
+  :global(.auth-mode-toggle button),
+  :global(.auth-mode-toggle a) {
+    transition-duration: 1ms;
+  }
+
+  :global(.auth-mode-toggle button.is-active),
+  :global(.auth-mode-toggle button[aria-pressed="true"]) {
+    animation-duration: 1ms;
+  }
+
+  .auth-curtain { display: none; }
+  .auth-curtain-panel { transition-duration: 1ms; }
 }
 </style>

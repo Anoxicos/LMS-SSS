@@ -12,8 +12,8 @@
         <i class="display-4 text-muted ri-upload-cloud-2-fill"></i>
     </div>
 
-    <h5>Drop files here or click to upload.</h5>
-    <label for="dropzoneFile" class="stretched-link">Upload</label>
+    <h5>{{ $t('ui-drop-files-here-or-click-to-upload') }}</h5>
+    <label for="dropzoneFile" class="stretched-link">{{ $t('ui-upload') }}</label>
    <input type="file" id="dropzoneFile" class="dropzoneFile btn btn-primary" />
   </div>
 </template>

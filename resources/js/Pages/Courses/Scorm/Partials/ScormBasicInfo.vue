@@ -1,5 +1,10 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref, watch } from 'vue'
+import { formatCourseLabel } from '@/composables/course-labels'
 
 const props = defineProps({
   form: {
@@ -23,13 +28,13 @@ const props = defineProps({
 const imagePreview = ref(null)
 const syllabusInput = ref(null)
 
-const methodOptions = [
-  { value: 'Online e-learning (LMS)', label: 'Online e-learning (LMS)' },
-  { value: 'Virtual classroom', label: 'Virtual classroom' },
-  { value: 'On-site classroom training', label: 'On-site classroom training' },
-  { value: 'Blended learning', label: 'Blended learning' },
-  { value: 'Self-study', label: 'Self-study' },
-]
+const methodOptions = computed(() => [
+  { value: 'Online e-learning (LMS)', label: t('ui-online-e-learning-lms') },
+  { value: 'Virtual classroom', label: t('ui-virtual-classroom') },
+  { value: 'On-site classroom training', label: t('ui-on-site-classroom-training') },
+  { value: 'Blended learning', label: t('ui-blended-learning') },
+  { value: 'Self-study', label: t('ui-self-study') },
+])
 
 watch(
   () => props.form.image_url,
@@ -139,8 +144,8 @@ const handleScormFileChange = (event) => {
 <template>
   <div class="builder-section">
     <div class="section-heading">
-      <h5>SCORM Course Information</h5>
-      <p>Fill in the course details and upload a valid SCORM package.</p>
+      <h5>{{ $t('ui-scorm-course-information') }}</h5>
+      <p>{{ $t('ui-fill-in-the-course-details-and-upload-a-valid-scorm-package') }}</p>
     </div>
 
     <BRow class="g-3">
@@ -148,7 +153,7 @@ const handleScormFileChange = (event) => {
         <BRow class="g-3">
           <BCol lg="3">
             <label class="form-label">
-              Reference <span class="text-danger">*</span>
+              {{ $t('ui-reference') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -159,7 +164,7 @@ const handleScormFileChange = (event) => {
                 type="text"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.ref }"
-                placeholder="Example: EWIS-001"
+                :placeholder="$t('ui-example-ewis-001')"
               />
             </div>
 
@@ -170,7 +175,7 @@ const handleScormFileChange = (event) => {
 
           <BCol lg="6">
             <label class="form-label">
-              Title <span class="text-danger">*</span>
+              {{ $t('ui-title') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -192,7 +197,7 @@ const handleScormFileChange = (event) => {
 
           <BCol lg="3">
             <label class="form-label">
-              Category <span class="text-danger">*</span>
+              {{ $t('ui-category') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -200,7 +205,7 @@ const handleScormFileChange = (event) => {
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.category_id }"
             >
-              <option value="">Select category</option>
+              <option value="">{{ $t('ui-select-category') }}</option>
 
               <option
                 v-for="category in categories"
@@ -217,7 +222,7 @@ const handleScormFileChange = (event) => {
           </BCol>
 
           <BCol cols="12">
-            <label class="form-label">Description</label>
+            <label class="form-label">{{ $t('ui-description') }}</label>
 
             <textarea
               v-model="form.description"
@@ -234,7 +239,7 @@ const handleScormFileChange = (event) => {
 
           <BCol md="4">
             <label class="form-label">
-              Type <span class="text-danger">*</span>
+              {{ $t('ui-type') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -242,10 +247,10 @@ const handleScormFileChange = (event) => {
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.type }"
             >
-              <option value="">Select type</option>
-              <option value="free">Free</option>
-              <option value="paid">Paid</option>
-              <option value="private">Private</option>
+              <option value="">{{ $t('ui-select-type') }}</option>
+              <option value="free">{{ $t('ui-free') }}</option>
+              <option value="paid">{{ $t('ui-paid') }}</option>
+              <option value="private">{{ $t('ui-private') }}</option>
             </select>
 
             <div v-if="form.errors.type" class="invalid-feedback d-block">
@@ -255,7 +260,7 @@ const handleScormFileChange = (event) => {
 
           <BCol md="4">
             <label class="form-label">
-              Training Type <span class="text-danger">*</span>
+              {{ $t('ui-training-type') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -263,10 +268,10 @@ const handleScormFileChange = (event) => {
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.training_type }"
             >
-              <option value="">Select training type</option>
-              <option value="online">Online</option>
-              <option value="onsite">Onsite</option>
-              <option value="hybrid">Hybrid</option>
+              <option value="">{{ $t('ui-select-training-type') }}</option>
+              <option value="online">{{ $t('ui-online') }}</option>
+              <option value="onsite">{{ $t('ui-onsite') }}</option>
+              <option value="hybrid">{{ $t('ui-hybrid') }}</option>
             </select>
 
             <div v-if="form.errors.training_type" class="invalid-feedback d-block">
@@ -276,7 +281,7 @@ const handleScormFileChange = (event) => {
 
           <BCol md="4">
             <label class="form-label">
-              Method <span class="text-danger">*</span>
+              {{ $t('ui-method') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -284,7 +289,7 @@ const handleScormFileChange = (event) => {
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.method }"
             >
-              <option value="" disabled>Select training method</option>
+              <option value="" disabled>{{ $t('ui-select-training-method') }}</option>
 
               <option
                 v-for="methodOption in methodOptions"
@@ -302,7 +307,7 @@ const handleScormFileChange = (event) => {
 
           <BCol md="4">
             <label class="form-label">
-              Duration (hours) <span class="text-danger">*</span>
+              {{ $t('ui-duration-hours') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -315,7 +320,7 @@ const handleScormFileChange = (event) => {
                 step="0.01"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.duration_hours }"
-                placeholder="Example: 12"
+                :placeholder="$t('ui-example-12')"
               />
             </div>
 
@@ -326,7 +331,7 @@ const handleScormFileChange = (event) => {
 
           <BCol md="4">
             <label class="form-label">
-              Passing Score (%) <span class="text-danger">*</span>
+              {{ $t('ui-passing-score') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -340,7 +345,7 @@ const handleScormFileChange = (event) => {
                 step="0.01"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.passing_score }"
-                placeholder="Example: 80"
+                :placeholder="$t('ui-example-80')"
               />
             </div>
 
@@ -350,16 +355,16 @@ const handleScormFileChange = (event) => {
           </BCol>
 
           <BCol md="4">
-            <label class="form-label">Course Type</label>
+            <label class="form-label">{{ $t('ui-course-type') }}</label>
 
             <select
               v-model="form.skill_level"
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.skill_level }"
             >
-              <option value="" disabled>Select a training type</option>
-              <option value="initial">Initial</option>
-              <option value="recurrent">Recurrent</option>
+              <option value="" disabled>{{ $t('ui-select-a-training-type') }}</option>
+              <option value="initial">{{ $t('ui-initial') }}</option>
+              <option value="recurrent">{{ $t('ui-recurrent') }}</option>
             </select>
 
             <div v-if="form.errors.skill_level" class="invalid-feedback d-block">
@@ -368,7 +373,7 @@ const handleScormFileChange = (event) => {
           </BCol>
 
           <BCol md="4">
-            <label class="form-label">Course Focus</label>
+            <label class="form-label">{{ $t('ui-course-focus') }}</label>
 
             <div class="input-icon-box">
               <i class="ri-focus-3-line input-icon"></i>
@@ -378,7 +383,7 @@ const handleScormFileChange = (event) => {
                 type="text"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.course_focus }"
-                placeholder="Example: Safety training"
+                :placeholder="$t('ui-example-safety-training')"
               />
             </div>
 
@@ -388,17 +393,17 @@ const handleScormFileChange = (event) => {
           </BCol>
 
           <BCol md="4">
-            <label class="form-label">Language</label>
+            <label class="form-label">{{ $t('ui-language') }}</label>
 
             <select
               v-model="form.language"
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.language }"
             >
-              <option value="">Select language</option>
-              <option value="English">English</option>
-              <option value="French">French</option>
-              <option value="Arabic">Arabic</option>
+              <option value="">{{ $t('ui-select-language') }}</option>
+              <option value="English">{{ $t('ui-english') }}</option>
+              <option value="French">{{ $t('ui-french') }}</option>
+              <option value="Arabic">{{ $t('ui-arabic') }}</option>
             </select>
 
             <div v-if="form.errors.language" class="invalid-feedback d-block">
@@ -407,7 +412,7 @@ const handleScormFileChange = (event) => {
           </BCol>
 
           <BCol md="2" v-if="form.type === 'paid'">
-            <label class="form-label">Price</label>
+            <label class="form-label">{{ $t('ui-price') }}</label>
 
             <input
               v-model="form.price"
@@ -425,7 +430,7 @@ const handleScormFileChange = (event) => {
           </BCol>
 
           <BCol md="2" v-if="form.type === 'paid'">
-            <label class="form-label">Currency</label>
+            <label class="form-label">{{ $t('ui-currency') }}</label>
 
             <select
               v-model="form.currency"
@@ -443,7 +448,7 @@ const handleScormFileChange = (event) => {
           </BCol>
 
           <BCol cols="12" v-if="tags.length">
-            <label class="form-label">Tags</label>
+            <label class="form-label">{{ $t('ui-tags') }}</label>
 
             <div class="tags-box">
               <button
@@ -467,7 +472,7 @@ const handleScormFileChange = (event) => {
           <BCol cols="12">
             <div class="publish-card">
               <div>
-                <h6 class="mb-1">Publication Status</h6>
+                <h6 class="mb-1">{{ $t('ui-publication-status') }}</h6>
                 <p class="text-muted mb-0">
                   {{
                     form.is_published
@@ -486,7 +491,7 @@ const handleScormFileChange = (event) => {
                 />
 
                 <label class="form-check-label" for="isPublished">
-                  {{ form.is_published ? 'Published' : 'Draft' }}
+                  {{ form.is_published ? $t('ui-published') : $t('ui-draft') }}
                 </label>
               </div>
             </div>
@@ -502,7 +507,7 @@ const handleScormFileChange = (event) => {
                 <div>
                   <h6 class="mb-1">
                     <i class="ri-code-box-line me-1"></i>
-                    SCORM Package
+                    {{ $t('ui-scorm-package') }}
                   </h6>
 
                   <p class="text-muted mb-0">
@@ -526,7 +531,7 @@ const handleScormFileChange = (event) => {
                   </label>
 
                   <p class="text-muted mb-0">
-                    Accepted format: .zip
+                    {{ $t('ui-accepted-format-zip') }}
                   </p>
                 </div>
 
@@ -534,7 +539,7 @@ const handleScormFileChange = (event) => {
                   for="scormFileInput"
                   class="btn btn-soft-primary btn-sm file-upload-btn mb-0"
                 >
-                  Browse
+                  {{ $t('ui-browse') }}
                 </label>
 
                 <input
@@ -580,10 +585,10 @@ const handleScormFileChange = (event) => {
         <div class="builder-side-form h-100">
           <div class="course-image-card mb-3">
             <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-              <label class="form-label mb-0">Course Syllabus</label>
+              <label class="form-label mb-0">{{ $t('ui-course-syllabus') }}</label>
 
               <span class="badge bg-danger-subtle text-danger syllabus-type-badge">
-                PDF
+                {{ $t('ui-pdf') }}
               </span>
             </div>
 
@@ -613,7 +618,7 @@ const handleScormFileChange = (event) => {
 
             <div v-else class="course-image-empty syllabus-empty mb-3">
               <i class="ri-file-pdf-2-line"></i>
-              <span>No syllabus selected</span>
+              <span>{{ $t('ui-no-syllabus-selected') }}</span>
             </div>
 
             <div class="d-flex flex-wrap gap-2">
@@ -634,7 +639,7 @@ const handleScormFileChange = (event) => {
                 class="btn btn-soft-info btn-sm"
               >
                 <i class="ri-eye-line me-1"></i>
-                View
+                {{ $t('ui-view') }}
               </a>
 
               <button
@@ -644,12 +649,12 @@ const handleScormFileChange = (event) => {
                 @click="removeSyllabus"
               >
                 <i class="ri-delete-bin-line me-1"></i>
-                Remove
+                {{ $t('ui-remove') }}
               </button>
             </div>
 
             <p class="text-muted small mb-0 mt-3">
-              PDF only, maximum size 10 MB.
+              {{ $t('ui-pdf-only-maximum-size-10-mb') }}
             </p>
 
             <div v-if="form.errors.syllabus" class="invalid-feedback d-block">
@@ -658,15 +663,15 @@ const handleScormFileChange = (event) => {
           </div>
 
           <div class="course-image-card mb-3">
-            <label class="form-label">Course Image</label>
+            <label class="form-label">{{ $t('ui-course-image') }}</label>
 
             <div v-if="imagePreview" class="course-image-preview mb-3">
-              <img :src="imagePreview" alt="Course image" />
+              <img :src="imagePreview" :alt="$t('t-course-image')" />
             </div>
 
             <div v-else class="course-image-empty mb-3">
               <i class="ri-image-add-line"></i>
-              <span>No image selected</span>
+              <span>{{ $t('ui-no-image-selected') }}</span>
             </div>
 
             <input
@@ -680,7 +685,7 @@ const handleScormFileChange = (event) => {
             <div class="d-flex gap-2 flex-wrap">
               <label for="courseImageInput" class="btn btn-soft-primary btn-sm mb-0">
                 <i class="ri-upload-cloud-2-line me-1"></i>
-                Choose Image
+                {{ $t('ui-choose-image') }}
               </label>
 
               <button
@@ -690,7 +695,7 @@ const handleScormFileChange = (event) => {
                 @click="removeImage"
               >
                 <i class="ri-delete-bin-line me-1"></i>
-                Remove
+                {{ $t('ui-remove') }}
               </button>
             </div>
 
@@ -701,26 +706,26 @@ const handleScormFileChange = (event) => {
 
           <h6 class="mb-3">
             <i class="ri-information-line me-1"></i>
-            SCORM Summary
+            {{ $t('ui-scorm-summary') }}
           </h6>
 
           <div class="publish-card mb-3">
             <div>
-              <h6 class="mb-1">Course Type</h6>
+              <h6 class="mb-1">{{ $t('ui-course-type') }}</h6>
 
               <p class="text-muted mb-0">
-                This course uses a SCORM package.
+                {{ $t('ui-this-course-uses-a-scorm-package') }}
               </p>
             </div>
 
             <span class="mini-badge warning">
-              SCORM
+              {{ $t('ui-scorm') }}
             </span>
           </div>
 
           <div class="publish-card mb-3">
             <div>
-              <h6 class="mb-1">Status</h6>
+              <h6 class="mb-1">{{ $t('ui-status') }}</h6>
 
               <p class="text-muted mb-0">
                 {{ form.is_published ? 'Visible to learners' : 'Draft mode' }}
@@ -731,41 +736,41 @@ const handleScormFileChange = (event) => {
               class="mini-badge"
               :class="form.is_published ? 'success' : 'warning'"
             >
-              {{ form.is_published ? 'Published' : 'Draft' }}
+              {{ form.is_published ? $t('ui-published') : $t('ui-draft') }}
             </span>
           </div>
 
           <div class="small text-muted">
             <div class="d-flex justify-content-between mb-2">
-              <span>Type</span>
+              <span>{{ $t('ui-type') }}</span>
               <strong class="text-dark text-capitalize">
-                {{ form.type || '-' }}
+                {{ form.type === 'paid' ? $t('ui-paid') : form.type ? $t('t-free') : '-' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Training</span>
+              <span>{{ $t('ui-training') }}</span>
               <strong class="text-dark text-capitalize">
-                {{ form.training_type || '-' }}
+                {{ formatCourseLabel(form.training_type) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Method</span>
+              <span>{{ $t('ui-method') }}</span>
               <strong class="text-dark text-end">
-                {{ form.method || '-' }}
+                {{ formatCourseLabel(form.method) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Duration</span>
+              <span>{{ $t('ui-duration') }}</span>
               <strong class="text-dark">
                 {{ form.duration_hours ? `${form.duration_hours} h` : '-' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Passing Score</span>
+              <span>{{ $t('ui-passing-score') }}</span>
               <strong class="text-dark">
                 {{ form.passing_score !== '' && form.passing_score !== null
                   ? `${form.passing_score}%`
@@ -774,42 +779,42 @@ const handleScormFileChange = (event) => {
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Level</span>
+              <span>{{ $t('ui-level') }}</span>
               <strong class="text-dark text-capitalize">
-                {{ form.skill_level || '-' }}
+                {{ formatCourseLabel(form.skill_level) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Language</span>
+              <span>{{ $t('ui-language') }}</span>
               <strong class="text-dark">
-                {{ form.language || '-' }}
+                {{ formatCourseLabel(form.language) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Tags</span>
+              <span>{{ $t('ui-tags') }}</span>
               <strong class="text-dark">
                 {{ selectedTags.length }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>SCORM Version</span>
+              <span>{{ $t('ui-scorm-version') }}</span>
               <strong class="text-dark">
                 {{ form.scorm_version || '-' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Package</span>
+              <span>{{ $t('ui-package') }}</span>
               <strong class="text-dark">
                 {{ form.scorm_file || form.scorm_zip_path ? 'Selected' : 'Not uploaded' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between" v-if="form.type === 'paid'">
-              <span>Price</span>
+              <span>{{ $t('ui-price') }}</span>
               <strong class="text-dark">
                 {{ form.price || 0 }} {{ form.currency || 'MAD' }}
               </strong>

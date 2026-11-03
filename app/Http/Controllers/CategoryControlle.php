@@ -52,13 +52,13 @@ class CategoryControlle extends Controller
 
                     return redirect()
                         ->back()
-                        ->with('success', 'Category has been restored successfully.');
+                        ->with('success', __('Category has been restored successfully.'));
                 }
 
                 return redirect()
                     ->back()
                     ->withErrors([
-                        'name' => 'This category already exists.',
+                        'name' => __('This category already exists.'),
                     ]);
             }
 
@@ -69,13 +69,13 @@ class CategoryControlle extends Controller
 
             return redirect()
                 ->back()
-                ->with('success', 'Category has been created successfully.');
+                ->with('success', __('Category has been created successfully.'));
 
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while creating the category.',
+                    'error' => __('An error occurred while creating the category.'),
                 ]);
         }
     }
@@ -88,7 +88,7 @@ class CategoryControlle extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'Invalid category ID.',
+                    'error' => __('Invalid category ID.'),
                 ]);
         }
 
@@ -107,12 +107,12 @@ class CategoryControlle extends Controller
 
             return redirect()
                 ->back()
-                ->with('success', 'Category has been updated successfully.');
+                ->with('success', __('Category has been updated successfully.'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while updating the category.',
+                    'error' => __('An error occurred while updating the category.'),
                 ]);
         }
     }
@@ -125,7 +125,7 @@ class CategoryControlle extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'Invalid category ID.',
+                    'error' => __('Invalid category ID.'),
                 ]);
         }
 
@@ -136,12 +136,12 @@ class CategoryControlle extends Controller
 
             return redirect()
                 ->back()
-                ->with('success', 'Category has been deleted successfully.');
+                ->with('success', __('Category has been deleted successfully.'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while deleting the category.',
+                    'error' => __('An error occurred while deleting the category.'),
                 ]);
         }
     }

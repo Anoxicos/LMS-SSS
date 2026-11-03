@@ -87,7 +87,7 @@ const handleCodeInput = (event) => {
 </script>
 
 <template>
-    <Head title="Email Verification" />
+    <Head :title="$t('t-email-verification')" />
 
     <div class="auth-page-wrapper pt-5">
 
@@ -108,7 +108,7 @@ const handleCodeInput = (event) => {
                             >
                                 <img
                                     src="@assets/images/logo_safesky blue.webp"
-                                    alt="SafeSky LMS"
+                                    :alt="$t('t-safesky-lms')"
                                     height="45"
                                 >
                             </Link>
@@ -116,7 +116,7 @@ const handleCodeInput = (event) => {
                             <p
                                 class="mt-3 fs-15 text-muted"
                             >
-                                SafeSky Learning Management System
+                                {{ $t('t-safesky-learning-management-system') }}
                             </p>
                         </div>
 
@@ -171,17 +171,17 @@ const handleCodeInput = (event) => {
                                     <h4
                                         class="fw-semibold mb-2"
                                     >
-                                        Verify Your Email
+                                        {{ $t('t-verify-your-email') }}
                                     </h4>
 
                                     <p
                                         class="text-muted mb-2"
                                     >
-                                        We sent a
+                                        {{ $t('t-verification-code-sent-intro') }}
                                         <strong>
-                                            6-digit verification code
+                                            {{ $t('t-six-digit-verification-code') }}
                                         </strong>
-                                        to
+                                        {{ $t('t-sent-to') }}
                                     </p>
 
                                     <p
@@ -212,8 +212,7 @@ const handleCodeInput = (event) => {
                                         "
                                     ></i>
 
-                                    A new verification code
-                                    has been sent to your email.
+                                    {{ $t('t-new-verification-code-sent') }}
                                 </div>
 
                                 <!-- Verify form -->
@@ -230,7 +229,7 @@ const handleCodeInput = (event) => {
                                                 d-block
                                             "
                                         >
-                                            Verification Code
+                                            {{ $t('t-verification-code') }}
                                         </label>
 
                                         <input
@@ -271,8 +270,7 @@ const handleCodeInput = (event) => {
                                                 mt-2
                                             "
                                         >
-                                            The code expires
-                                            after 10 minutes.
+                                            {{ $t('t-verification-code-expiry') }}
                                         </div>
 
                                     </div>
@@ -298,7 +296,7 @@ const handleCodeInput = (event) => {
                                                     class="me-1"
                                                 />
 
-                                                Verifying...
+                                                {{ $t('t-verifying') }}
                                             </span>
 
                                             <span v-else>
@@ -309,7 +307,7 @@ const handleCodeInput = (event) => {
                                                     "
                                                 ></i>
 
-                                                Verify Email
+                                                {{ $t('t-verify-email') }}
                                             </span>
                                         </BButton>
 
@@ -327,7 +325,7 @@ const handleCodeInput = (event) => {
                                             mb-2
                                         "
                                     >
-                                        Didn't receive the code?
+                                        {{ $t('t-did-not-receive-code') }}
                                     </p>
 
                                     <BButton
@@ -359,7 +357,7 @@ const handleCodeInput = (event) => {
                                             "
                                         ></i>
 
-                                        Resend Verification Code
+                                        {{ $t('t-resend-verification-code') }}
                                     </BButton>
                                 </div>
 
@@ -391,7 +389,7 @@ const handleCodeInput = (event) => {
                                             "
                                         ></i>
 
-                                        Edit Profile
+                                        {{ $t('t-edit-profile') }}
                                     </Link>
 
                                     <Link
@@ -414,7 +412,7 @@ const handleCodeInput = (event) => {
                                             "
                                         ></i>
 
-                                        Log Out
+                                        {{ $t('t-logout') }}
                                     </Link>
 
                                 </div>
@@ -442,7 +440,7 @@ const handleCodeInput = (event) => {
                                 &copy;
                                 {{ new Date().getFullYear() }}
                                 SafeSky Solution.
-                                All rights reserved.
+                                {{ $t('t-all-rights-reserved') }}
                             </p>
 
                         </div>

@@ -70,19 +70,19 @@ const deleteApiToken = () => {
 <template>
     <div>
         <!-- Generate API Token -->
-        <FormSection @submitted="createApiToken" title="Create API Token" description="API tokens allow third-party services to authenticate with our application on your behalf.">
+        <FormSection @submitted="createApiToken" :title="$t('ui-create-api-token')" :description="$t('ui-api-tokens-allow-third-party-services-to-authenticate-')">
 
             <template #form>
                 <!-- Token Name -->
                 <div class="mb-3">
-                    <InputLabel for="name" value="Name" />
+                    <InputLabel for="name" :value="$t('ui-name')" />
                     <TextInput id="name" v-model="createApiTokenForm.name" type="text" autofocus :class="{ 'is-invalid': createApiTokenForm.errors.name }" />
                     <InputError :message="createApiTokenForm.errors.name" class="mt-2" />
                 </div>
 
                 <!-- Token Permissions -->
                 <div v-if="availablePermissions.length > 0" class="">
-                    <InputLabel for="permissions" value="Permissions" />
+                    <InputLabel for="permissions" :value="$t('ui-permissions')" />
 
                     <div v-for="permission in availablePermissions" :key="permission">
                         <label class="d-flex align-items-center">
@@ -94,8 +94,8 @@ const deleteApiToken = () => {
             </template>
 
             <template #actions>
-                <BButton variant="primary w-100" type="submit" :class="{ 'opacity-25': createApiTokenForm.processing }" :disabled="createApiTokenForm.processing">Create</BButton>
-                <p v-if="createApiTokenForm.recentlySuccessful" class="alert alert-success mt-3">Created.</p>
+                <BButton variant="primary w-100" type="submit" :class="{ 'opacity-25': createApiTokenForm.processing }" :disabled="createApiTokenForm.processing">{{ $t('ui-create') }}</BButton>
+                <p v-if="createApiTokenForm.recentlySuccessful" class="alert alert-success mt-3">{{ $t('ui-created-label') }}</p>
             </template>
         </FormSection>
 
@@ -103,8 +103,8 @@ const deleteApiToken = () => {
             <!-- Manage API Tokens -->
             <BCard no-body>
                 <BCardHeader>
-                    <BCardTitle>Manage API Tokens</BCardTitle>
-                    <p class="text-muted mb-0">You may delete any of your existing tokens if they are no longer needed.</p>
+                    <BCardTitle>{{ $t('ui-manage-api-tokens') }}</BCardTitle>
+                    <p class="text-muted mb-0">{{ $t('ui-you-may-delete-any-of-your-existing-tokens-if-they-are') }}</p>
                 </BCardHeader>
 
                 <!-- API Token List -->
@@ -116,15 +116,15 @@ const deleteApiToken = () => {
 
                         <div class="d-flex align-items-center ms-2">
                             <div v-if="token.last_used_ago" class="text-sm text-muted">
-                                Last used {{ token.last_used_ago }}
+                                {{ $t('ui-last-used') }} {{ token.last_used_ago }}
                             </div>
 
                             <BButton variant="primary" v-if="availablePermissions.length > 0" class="btn-sm me-1" @click="manageApiTokenPermissions(token)">
-                                Permissions
+                                {{ $t('ui-permissions') }}
                             </BButton>
 
                             <BButton variant="danger" class="btn-sm" @click="confirmApiTokenDeletion(token)">
-                                Delete
+                                {{ $t('ui-delete') }}
                             </BButton>
                         </div>
                     </div>
@@ -133,18 +133,18 @@ const deleteApiToken = () => {
         </div>
 
         <!-- Token Value Modal -->
-        <BModal v-model="displayingToken" title="API Token" hide-footer header-class="bg-success-subtle p-3">
-            <p class="fs-14 text-muted">Please copy your new API token. For your security, it won't be shown again.</p>
+        <BModal v-model="displayingToken" :title="$t('ui-api-token')" hide-footer header-class="bg-success-subtle p-3">
+            <p class="fs-14 text-muted">{{ $t('ui-please-copy-your-new-api-token-for-your-security-it-wo-label') }}</p>
             <div v-if="$page.props.jetstream.flash.token" class="mt-4 rounded mb-4">
                 <pre class="language-markup"><code>{{ $page.props.jetstream.flash.token }}</code></pre>
             </div>
             <div class="text-end">
-                <BButton variant="danger" @click="displayingToken = false">Cancel</BButton>
+                <BButton variant="danger" @click="displayingToken = false">{{ $t('ui-cancel') }}</BButton>
             </div>
         </BModal>
 
         <!-- API Token Permissions Modal -->
-        <BModal v-model="permissionModal" title="API Token Permissions" hide-footer>
+        <BModal v-model="permissionModal" :title="$t('ui-api-token-permissions')" hide-footer>
             <div v-for="permission in availablePermissions" :key="permission">
                 <label class="d-flex align-items-center">
                     <Checkbox v-model:checked="updateApiTokenForm.permissions" :value="permission" />
@@ -152,17 +152,17 @@ const deleteApiToken = () => {
                 </label>
             </div>
             <div class="text-end">
-                <BButton variant="danger" @click="permissionModal = !permissionModal">Cancel</BButton>
-                <BButton variant="primary" class="ms-1" :class="{ 'opacity-25': updateApiTokenForm.processing }" :disabled="updateApiTokenForm.processing" @click="updateApiToken">Save</BButton>
+                <BButton variant="danger" @click="permissionModal = !permissionModal">{{ $t('ui-cancel') }}</BButton>
+                <BButton variant="primary" class="ms-1" :class="{ 'opacity-25': updateApiTokenForm.processing }" :disabled="updateApiTokenForm.processing" @click="updateApiToken">{{ $t('ui-save') }}</BButton>
             </div>
         </BModal>
 
         <!-- Delete Token Confirmation Modal -->
-        <BModal v-model="apiTokenDeleteModal" title="Delete API Token" header-class="bg-danger-subtle p-2"  hide-footer>
-            <p class="fs-14">Are you sure you would like to delete this API token?</p>
+        <BModal v-model="apiTokenDeleteModal" :title="$t('ui-delete-api-token')" header-class="bg-danger-subtle p-2"  hide-footer>
+            <p class="fs-14">{{ $t('ui-are-you-sure-you-would-like-to-delete-this-api-token') }}</p>
             <div class="text-end">
-                <BButton variant="danger" class="btn-sm" @click="apiTokenDeleteModal = !apiTokenDeleteModal">Cancel</BButton>
-                <BButton variant="primary" class="ms-1 btn-sm" :class="{ 'opacity-25': deleteApiTokenForm.processing }" :disabled="deleteApiTokenForm.processing" @click="deleteApiToken">Delete</BButton>
+                <BButton variant="danger" class="btn-sm" @click="apiTokenDeleteModal = !apiTokenDeleteModal">{{ $t('ui-cancel') }}</BButton>
+                <BButton variant="primary" class="ms-1 btn-sm" :class="{ 'opacity-25': deleteApiTokenForm.processing }" :disabled="deleteApiTokenForm.processing" @click="deleteApiToken">{{ $t('ui-delete') }}</BButton>
             </div>
         </BModal>
     </div>

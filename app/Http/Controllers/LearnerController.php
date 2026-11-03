@@ -309,7 +309,7 @@ class LearnerController extends Controller
             report($exception);
 
             return back()->withErrors([
-                'error' => 'An error occurred while adding the learner.',
+                'error' => __('An error occurred while adding the learner.'),
             ]);
         }
 
@@ -340,7 +340,7 @@ class LearnerController extends Controller
             );
 
             return back()
-                ->with('success', 'Learner added successfully.')
+                ->with('success', __('Learner added successfully.'))
                 ->with(
                     'warning',
                     'The learner account was created, but the welcome email could not be sent.'
@@ -476,7 +476,7 @@ class LearnerController extends Controller
             report($exception);
 
             return back()->withErrors([
-                'error' => 'An error occurred while updating the learner.',
+                'error' => __('An error occurred while updating the learner.'),
             ]);
         }
 
@@ -509,7 +509,7 @@ class LearnerController extends Controller
                 );
 
                 return back()
-                    ->with('success', 'Learner updated successfully.')
+                    ->with('success', __('Learner updated successfully.'))
                     ->with(
                         'warning',
                         'The password was updated, but the learner notification email could not be sent.'
@@ -522,7 +522,7 @@ class LearnerController extends Controller
             );
         }
 
-        return back()->with('success', 'Learner updated successfully.');
+        return back()->with('success', __('Learner updated successfully.'));
     }
 
     public function destroy(string $hashid)
@@ -547,12 +547,12 @@ class LearnerController extends Controller
             $this->deletePublicFile($photoPath);
             $this->deletePublicFile($passportPath);
 
-            return back()->with('success', 'Learner deleted successfully.');
+            return back()->with('success', __('Learner deleted successfully.'));
         } catch (Throwable $exception) {
             report($exception);
 
             return back()->withErrors([
-                'error' => 'An error occurred while deleting the learner.',
+                'error' => __('An error occurred while deleting the learner.'),
             ]);
         }
     }

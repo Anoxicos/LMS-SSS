@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -97,8 +101,8 @@ const saveDetail = () => {
   if (!detailForm.value.name) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required field',
-      text: 'Plan detail name is required.',
+      title: t('ui-required-field'),
+      text: t('ui-plan-detail-name-is-required'),
       timer: 2200,
       showConfirmButton: false,
     })
@@ -150,11 +154,11 @@ const saveDetail = () => {
 const deleteDetail = (detail) => {
   Swal.fire({
     icon: 'warning',
-    title: 'Delete detail?',
-    text: 'All children inside this detail will be deleted.',
+    title: t('ui-delete-detail'),
+    text: t('ui-all-children-inside-this-detail-will-be-deleted'),
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: t('ui-yes-delete'),
+    cancelButtonText: t('ui-cancel'),
   }).then((result) => {
     if (!result.isConfirmed) return
 
@@ -178,29 +182,29 @@ const deleteDetail = (detail) => {
 <template>
   <div class="builder-section">
     <div class="section-heading">
-      <h5>Plan</h5>
-      <p>Create a recursive course plan with saved question totals.</p>
+      <h5>{{ $t('ui-plan') }}</h5>
+      <p>{{ $t('ui-create-a-recursive-course-plan-with-saved-question-totals') }}</p>
     </div>
 
     <BRow class="g-3">
       <BCol lg="5">
         <div class="builder-side-form">
-          <h6 class="mb-3">Plan Information</h6>
+          <h6 class="mb-3">{{ $t('ui-plan-information') }}</h6>
 
           <div class="mb-3">
-            <label class="form-label">Plan Name</label>
+            <label class="form-label">{{ $t('ui-plan-name') }}</label>
 
             <input
               v-model="form.plan.name"
               type="text"
               class="form-control modern-input"
-              placeholder="Example: Default Plan"
+              :placeholder="$t('ui-example-default-plan')"
             />
           </div>
 
           <div class="publish-card mb-3">
             <div>
-              <h6 class="mb-1">Plan Status</h6>
+              <h6 class="mb-1">{{ $t('ui-plan-status') }}</h6>
               <p class="text-muted mb-0">
                 {{ form.plan.is_active ? 'This plan is active.' : 'This plan is inactive.' }}
               </p>
@@ -215,7 +219,7 @@ const deleteDetail = (detail) => {
               />
 
               <label class="form-check-label" for="planStatus">
-                {{ form.plan.is_active ? 'Active' : 'Inactive' }}
+                {{ form.plan.is_active ? $t('t-active') : $t('ui-inactive') }}
               </label>
             </div>
           </div>
@@ -226,7 +230,7 @@ const deleteDetail = (detail) => {
             </div>
 
             <div>
-              <span>Global Questions</span>
+              <span>{{ $t('ui-global-questions') }}</span>
               <h3>{{ globalQuestions }}</h3>
             </div>
           </div>
@@ -250,30 +254,30 @@ const deleteDetail = (detail) => {
               variant="light"
               @click="startAddRoot"
             >
-              Root
+              {{ $t('ui-root') }}
             </BButton>
           </div>
 
           <div v-if="parentDetail" class="alert alert-info py-2">
-            Parent:
+            {{ $t('ui-parent') }}
             <strong>{{ parentDetail.name }}</strong>
           </div>
 
           <div class="mb-3">
             <label class="form-label">
-              Name <span class="text-danger">*</span>
+              {{ $t('ui-name') }} <span class="text-danger">*</span>
             </label>
 
             <input
               v-model="detailForm.name"
               type="text"
               class="form-control modern-input"
-              placeholder="Example: Chapter 1 / Sub chapter 1.1"
+              :placeholder="$t('ui-example-chapter-1-sub-chapter-1-1')"
             />
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Own Questions</label>
+            <label class="form-label">{{ $t('ui-own-questions') }}</label>
 
             <input
               v-model="detailForm.own_questions"
@@ -300,7 +304,7 @@ const deleteDetail = (detail) => {
             class="w-100 builder-action-btn mt-2"
             @click="resetDetailForm"
           >
-            Cancel
+            {{ $t('ui-cancel') }}
           </BButton>
         </div>
       </BCol>
@@ -316,8 +320,8 @@ const deleteDetail = (detail) => {
 
         <div v-else class="empty-box">
           <i class="ri-node-tree"></i>
-          <h6>No plan details added yet</h6>
-          <p>Add a root detail to start building your recursive plan.</p>
+          <h6>{{ $t('ui-no-plan-details-added-yet') }}</h6>
+          <p>{{ $t('ui-add-a-root-detail-to-start-building-your-recursive-plan') }}</p>
         </div>
       </BCol>
     </BRow>

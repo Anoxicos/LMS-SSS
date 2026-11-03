@@ -386,5 +386,4 @@ const allTask = [{
     priority: "Medium",
     priorityClass: "warning",
 }];
-
 export { unassigned, todo, inprogress, reviews, completed, newData, allTask };

@@ -17,7 +17,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Privacy Policy" />
+    <Head :title="$t('ui-privacy-policy')" />
     <BContainer>
          <BRow class="justify-content-center">
           <BCol col lg="10">
@@ -25,7 +25,7 @@ export default {
               <div class="bg-dark-subtle position-relative">
                 <BCardBody class="p-5">
                   <div class="text-center">
-                    <h3>Privacy Policy</h3>
+                    <h3>{{ $t('ui-privacy-policy') }}</h3>
                     <p class="mb-0 text-muted">Last update: 16 Sept, 2022</p>
                   </div>
                 </BCardBody>

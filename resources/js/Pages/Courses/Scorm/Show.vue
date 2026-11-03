@@ -1,4 +1,8 @@
 <script setup>
+import { formatCourseLabel } from '@/composables/course-labels'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 
@@ -41,7 +45,7 @@ const formattedCreatedAt = computed(() => {
     return '-'
   }
 
-  return new Date(props.course.created_at).toLocaleDateString('en-GB', {
+  return new Date(props.course.created_at).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -52,14 +56,14 @@ const formattedPrice = computed(() => {
   const price = Number(props.course.price || 0)
 
   if (props.course.type !== 'paid' || price === 0) {
-    return 'Free'
+    return t('t-free')
   }
 
   return `${price.toFixed(2)} ${props.course.currency || ''}`.trim()
 })
 
 const courseStatusLabel = computed(() => {
-  return props.course.is_published ? 'Published' : 'Draft'
+  return props.course.is_published ? t('ui-published') : t('ui-draft')
 })
 
 const scormVersion = computed(() => {
@@ -101,8 +105,8 @@ onBeforeUnmount(() => {
     <Head :title="course.title" />
 
     <PageHeader
-      title="SCORM Course"
-      pageTitle="Courses"
+      :title="$t('ui-scorm-course')"
+      :page-title="$t('ui-courses')"
     />
 
     <div class="scorm-admin-page">
@@ -181,8 +185,8 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Type</span>
-                  <strong>{{ course.type || '-' }}</strong>
+                  <span>{{ $t('ui-type') }}</span>
+                  <strong>{{ course.type === 'paid' ? $t('ui-paid') : course.type ? $t('t-free') : '-' }}</strong>
                 </div>
               </div>
 
@@ -192,8 +196,8 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Training</span>
-                  <strong>{{ course.training_type || '-' }}</strong>
+                  <span>{{ $t('ui-training') }}</span>
+                  <strong>{{ formatCourseLabel(course.training_type) }}</strong>
                 </div>
               </div>
 
@@ -203,8 +207,8 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Course Type</span>
-                  <strong>{{ course.skill_level || '-' }}</strong>
+                  <span>{{ $t('ui-course-type') }}</span>
+                  <strong>{{ formatCourseLabel(course.skill_level) }}</strong>
                 </div>
               </div>
 
@@ -214,8 +218,8 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Language</span>
-                  <strong>{{ course.language || '-' }}</strong>
+                  <span>{{ $t('ui-language') }}</span>
+                  <strong>{{ formatCourseLabel(course.language) }}</strong>
                 </div>
               </div>
 
@@ -225,7 +229,7 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Price</span>
+                  <span>{{ $t('ui-price') }}</span>
                   <strong>{{ formattedPrice }}</strong>
                 </div>
               </div>
@@ -236,8 +240,8 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Content</span>
-                  <strong>SCORM</strong>
+                  <span>{{ $t('ui-content') }}</span>
+                  <strong>{{ $t('ui-scorm') }}</strong>
                 </div>
               </div>
 
@@ -247,7 +251,7 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Package</span>
+                  <span>{{ $t('ui-package') }}</span>
 
                   <strong>
                     {{
@@ -265,7 +269,7 @@ onBeforeUnmount(() => {
                 </span>
 
                 <div class="scorm-admin-stat__content">
-                  <span>Version</span>
+                  <span>{{ $t('ui-version') }}</span>
                   <strong>{{ scormVersion }}</strong>
                 </div>
               </div>
@@ -279,7 +283,7 @@ onBeforeUnmount(() => {
             class="scorm-admin-action scorm-admin-action--light"
           >
             <i class="ri-arrow-left-line"></i>
-            <span>Back</span>
+            <span>{{ $t('ui-back') }}</span>
           </Link>
 
           <a
@@ -290,7 +294,7 @@ onBeforeUnmount(() => {
             class="scorm-admin-action scorm-admin-action--outline"
           >
             <i class="ri-file-pdf-2-line"></i>
-            <span>View Syllabus</span>
+            <span>{{ $t('t-view-syllabus') }}</span>
           </a>
 
           <Link
@@ -299,7 +303,7 @@ onBeforeUnmount(() => {
             class="scorm-admin-action scorm-admin-action--outline"
           >
             <i class="ri-edit-2-line"></i>
-            <span>Edit</span>
+            <span>{{ $t('ui-edit') }}</span>
           </Link>
         </div>
       </section>
@@ -314,8 +318,8 @@ onBeforeUnmount(() => {
           </span>
 
           <div>
-            <span>Course Format</span>
-            <strong>SCORM</strong>
+            <span>{{ $t('ui-course-format') }}</span>
+            <strong>{{ $t('ui-scorm') }}</strong>
           </div>
         </article>
 
@@ -325,7 +329,7 @@ onBeforeUnmount(() => {
           </span>
 
           <div>
-            <span>Category</span>
+            <span>{{ $t('ui-category') }}</span>
             <strong>{{ course.category?.name || '-' }}</strong>
           </div>
         </article>
@@ -336,7 +340,7 @@ onBeforeUnmount(() => {
           </span>
 
           <div>
-            <span>Course Focus</span>
+            <span>{{ $t('ui-course-focus') }}</span>
             <strong>{{ course.course_focus || 'Not specified' }}</strong>
           </div>
         </article>
@@ -369,8 +373,8 @@ onBeforeUnmount(() => {
             class="scorm-admin-empty"
           >
             <i class="ri-code-box-line"></i>
-            <h5>No SCORM package available</h5>
-            <p>The course does not contain a launchable SCORM package.</p>
+            <h5>{{ $t('ui-no-scorm-package-available') }}</h5>
+            <p>{{ $t('ui-the-course-does-not-contain-a-launchable-scorm-package') }}</p>
           </div>
         </div>
       </section>

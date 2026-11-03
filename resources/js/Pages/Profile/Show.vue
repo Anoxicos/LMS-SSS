@@ -15,10 +15,10 @@ defineProps({
 
 <template>
     <Layout>
-        <Head title="Profile" />
+        <Head :title="$t('t-profile')" />
         <template #header>
             <h2 class="fw-semibold">
-                Profile
+                {{ $t('t-profile') }}
             </h2>
         </template>
 

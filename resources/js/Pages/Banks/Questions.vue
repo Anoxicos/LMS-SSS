@@ -4,6 +4,9 @@ import { Head, Link, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 import Lottie from '@/Components/widgets/lottie.vue'
@@ -75,7 +78,7 @@ watch(searchQuery, () => {
 const formatDate = (date) => {
   if (!date) return '-'
 
-  return new Date(date).toLocaleDateString('en-GB', {
+  return new Date(date).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -84,15 +87,15 @@ const formatDate = (date) => {
 
 const getCorrectAnswerLabel = (question) => {
   if (question.correct_answer_key) {
-    if (question.correct_answer_key === 'response1') return 'Response 1'
-    if (question.correct_answer_key === 'response2') return 'Response 2'
-    if (question.correct_answer_key === 'response3') return 'Response 3'
+    if (question.correct_answer_key === 'response1') return t('ui-response-1')
+    if (question.correct_answer_key === 'response2') return t('ui-response-2')
+    if (question.correct_answer_key === 'response3') return t('ui-response-3')
   }
 
-  if (question.correct_answer === question.response2) return 'Response 2'
-  if (question.correct_answer === question.response3) return 'Response 3'
+  if (question.correct_answer === question.response2) return t('ui-response-2')
+  if (question.correct_answer === question.response3) return t('ui-response-3')
 
-  return 'Response 1'
+  return t('ui-response-1')
 }
 
 const isCorrectResponse = (question, responseKey) => {
@@ -238,8 +241,8 @@ const addData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Question added successfully.',
+        title: t('ui-success'),
+        text: t('ui-question-added-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -251,8 +254,8 @@ const addData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please check the question information.',
+        title: t('t-error'),
+        text: t('ui-please-check-the-question-information'),
       })
     },
   })
@@ -268,8 +271,8 @@ const updateData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Question updated successfully.',
+        title: t('ui-success'),
+        text: t('ui-question-updated-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -282,8 +285,8 @@ const updateData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please check the question information.',
+        title: t('t-error'),
+        text: t('ui-please-check-the-question-information'),
       })
     },
   })
@@ -308,8 +311,8 @@ const handleDeleteData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Deleted',
-        text: 'Question deleted successfully.',
+        title: t('ui-deleted'),
+        text: t('ui-question-deleted-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -317,8 +320,8 @@ const handleDeleteData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please try again.',
+        title: t('t-error'),
+        text: t('t-try-again'),
         timer: 3000,
         showConfirmButton: false,
       })
@@ -347,8 +350,8 @@ const handleImportFile = (event) => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Imported',
-        text: 'Questions imported successfully.',
+        title: t('ui-imported'),
+        text: t('ui-questions-imported-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -363,8 +366,8 @@ const handleImportFile = (event) => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Import Error',
-        text: 'Please check your Excel file.',
+        title: t('ui-import-error'),
+        text: t('ui-please-check-your-excel-file'),
       })
 
       if (importInput.value) {
@@ -381,11 +384,11 @@ const exportQuestions = () => {
 
 <template>
   <Layout>
-    <Head :title="`Questions - ${bank.title}`" />
+    <Head :title="$t('ui-questions-bank', { bank: bank.title })" />
 
     <PageHeader
-      title="Bank Questions"
-      pageTitle="Question Banks"
+      :title="$t('ui-bank-questions')"
+      :page-title="$t('ui-question-banks')"
     />
 
     <div>
@@ -409,7 +412,7 @@ const exportQuestions = () => {
                   </h5>
 
                   <p class="text-muted mb-0">
-                    Manage questions for bank
+                    {{ $t('ui-manage-questions-for-bank') }}
                     <strong>{{ bank.ref }}</strong>.
                   </p>
                 </div>
@@ -428,7 +431,7 @@ const exportQuestions = () => {
                     v-model="searchQuery"
                     type="text"
                     class="form-control"
-                    placeholder="Search question..."
+                    :placeholder="$t('ui-search-question')"
                   />
                   <i class="ri-search-line search-icon"></i>
                 </div>
@@ -438,7 +441,7 @@ const exportQuestions = () => {
                   class="btn btn-light add-btn company-add-btn"
                 >
                   <i class="ri-arrow-left-line align-bottom me-1"></i>
-                  Banks
+                  {{ $t('ui-banks') }}
                 </Link>
 
                 <BButton
@@ -449,7 +452,7 @@ const exportQuestions = () => {
                   @click="exportQuestions"
                 >
                   <i class="ri-download-2-line align-bottom me-1"></i>
-                  Export
+                  {{ $t('ui-export') }}
                 </BButton>
 
                 <BButton
@@ -460,7 +463,7 @@ const exportQuestions = () => {
                   @click="openImportInput"
                 >
                   <i class="ri-upload-2-line align-bottom me-1"></i>
-                  Import
+                  {{ $t('ui-import') }}
                 </BButton>
 
                 <BButton
@@ -471,7 +474,7 @@ const exportQuestions = () => {
                   @click="openCreateQuestion"
                 >
                   <i class="ri-add-line align-bottom me-1"></i>
-                  Add Question
+                  {{ $t('ui-add-question') }}
                 </BButton>
 
                 <input
@@ -494,14 +497,14 @@ const exportQuestions = () => {
                 <thead>
                   <tr>
                     <th class="question-id-col">
-                      ID
+                      {{ $t('ui-id') }}
                     </th>
 
                     <th
                       class="sort"
                       @click="onSort('name_chapter')"
                     >
-                      Chapter
+                      {{ $t('ui-chapter') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
@@ -509,16 +512,16 @@ const exportQuestions = () => {
                       class="question-main-col sort"
                       @click="onSort('question')"
                     >
-                      Question
+                      {{ $t('ui-question') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
                     <th class="text-center">
-                      Created
+                      {{ $t('ui-created') }}
                     </th>
 
                     <th class="text-center actions-col">
-                      Actions
+                      {{ $t('ui-actions') }}
                     </th>
                   </tr>
                 </thead>
@@ -552,7 +555,7 @@ const exportQuestions = () => {
                             class="answer-chip"
                             :class="{ correct: isCorrectResponse(data, 'response1') }"
                           >
-                            <strong>A:</strong>
+                            <strong>{{ $t('ui-a') }}</strong>
                             {{ data.response1 || '-' }}
                           </span>
 
@@ -560,7 +563,7 @@ const exportQuestions = () => {
                             class="answer-chip"
                             :class="{ correct: isCorrectResponse(data, 'response2') }"
                           >
-                            <strong>B:</strong>
+                            <strong>{{ $t('ui-b') }}</strong>
                             {{ data.response2 || '-' }}
                           </span>
 
@@ -568,7 +571,7 @@ const exportQuestions = () => {
                             class="answer-chip"
                             :class="{ correct: isCorrectResponse(data, 'response3') }"
                           >
-                            <strong>C:</strong>
+                            <strong>{{ $t('ui-c') }}</strong>
                             {{ data.response3 || '-' }}
                           </span>
                         </div>
@@ -588,7 +591,7 @@ const exportQuestions = () => {
                           variant="soft-primary"
                           size="sm"
                           class="question-action-btn"
-                          title="Edit"
+                          :title="$t('ui-edit')"
                           @click="openEditQuestion(data)"
                         >
                           <i class="ri-pencil-fill"></i>
@@ -599,7 +602,7 @@ const exportQuestions = () => {
                           variant="soft-danger"
                           size="sm"
                           class="question-action-btn"
-                          title="Delete"
+                          :title="$t('ui-delete')"
                           @click="deleteData(data)"
                         >
                           <i class="ri-delete-bin-line"></i>
@@ -644,7 +647,7 @@ const exportQuestions = () => {
                     variant="soft-primary"
                     size="sm"
                     class="question-action-btn"
-                    title="Edit"
+                    :title="$t('ui-edit')"
                     @click="openEditQuestion(data)"
                   >
                     <i class="ri-pencil-fill"></i>
@@ -655,7 +658,7 @@ const exportQuestions = () => {
                     variant="soft-danger"
                     size="sm"
                     class="question-action-btn"
-                    title="Delete"
+                    :title="$t('ui-delete')"
                     @click="deleteData(data)"
                   >
                     <i class="ri-delete-bin-line"></i>
@@ -673,7 +676,7 @@ const exportQuestions = () => {
                     class="answer-chip"
                     :class="{ correct: isCorrectResponse(data, 'response1') }"
                   >
-                    <strong>A:</strong>
+                    <strong>{{ $t('ui-a') }}</strong>
                     {{ data.response1 || '-' }}
                   </span>
 
@@ -681,7 +684,7 @@ const exportQuestions = () => {
                     class="answer-chip"
                     :class="{ correct: isCorrectResponse(data, 'response2') }"
                   >
-                    <strong>B:</strong>
+                    <strong>{{ $t('ui-b') }}</strong>
                     {{ data.response2 || '-' }}
                   </span>
 
@@ -689,7 +692,7 @@ const exportQuestions = () => {
                     class="answer-chip"
                     :class="{ correct: isCorrectResponse(data, 'response3') }"
                   >
-                    <strong>C:</strong>
+                    <strong>{{ $t('ui-c') }}</strong>
                     {{ data.response3 || '-' }}
                   </span>
                 </div>
@@ -697,7 +700,7 @@ const exportQuestions = () => {
                 <div class="mobile-info-row">
                   <span>
                     <i class="ri-calendar-line me-1"></i>
-                    Created
+                    {{ $t('ui-created') }}
                   </span>
 
                   <strong>
@@ -722,11 +725,11 @@ const exportQuestions = () => {
             />
 
             <h5 class="mt-3 mb-1">
-              No questions found
+              {{ $t('ui-no-questions-found') }}
             </h5>
 
             <p class="text-muted mb-0">
-              Add the first question to this bank.
+              {{ $t('ui-add-the-first-question-to-this-bank') }}
             </p>
           </div>
 
@@ -736,11 +739,11 @@ const exportQuestions = () => {
             class="company-pagination"
           >
             <div class="text-muted company-pagination-text">
-              Showing
+              {{ $t('ui-showing') }}
               <span class="fw-semibold">{{ paginatedData.length }}</span>
-              of
+              {{ $t('ui-of') }}
               <span class="fw-semibold">{{ filtereData.length }}</span>
-              result(s)
+              {{ $t('ui-result-s') }}
             </div>
 
             <ul class="pagination listjs-pagination mb-0">
@@ -816,7 +819,7 @@ const exportQuestions = () => {
               </h6>
 
               <p class="text-muted mb-0 small">
-                Add question answers and select the correct response.
+                {{ $t('ui-add-question-answers-and-select-the-correct-response') }}
               </p>
             </div>
           </div>
@@ -824,14 +827,14 @@ const exportQuestions = () => {
           <BRow class="g-3">
             <BCol lg="12">
               <label class="form-label">
-                Chapter Name
+                {{ $t('ui-chapter-name') }}
               </label>
 
               <input
                 v-model="form.name_chapter"
                 type="text"
                 class="form-control"
-                placeholder="Enter chapter name"
+                :placeholder="$t('ui-enter-chapter-name')"
               />
 
               <div
@@ -844,19 +847,19 @@ const exportQuestions = () => {
 
             <BCol lg="12">
               <label class="form-label">
-                Question <span class="text-danger">*</span>
+                {{ $t('ui-question') }} <span class="text-danger">*</span>
               </label>
 
               <textarea
                 v-model="form.question"
                 class="form-control"
                 rows="3"
-                placeholder="Enter question"
+                :placeholder="$t('ui-enter-question')"
                 :class="{ 'is-invalid': submitted && !form.question }"
               ></textarea>
 
               <div class="invalid-feedback">
-                Please enter the question.
+                {{ $t('ui-please-enter-the-question') }}
               </div>
 
               <div
@@ -869,19 +872,19 @@ const exportQuestions = () => {
 
             <BCol lg="12">
               <label class="form-label">
-                Response 1 <span class="text-danger">*</span>
+                {{ $t('ui-response-1') }} <span class="text-danger">*</span>
               </label>
 
               <textarea
                 v-model="form.response1"
                 class="form-control"
                 rows="2"
-                placeholder="Enter response 1"
+                :placeholder="$t('ui-enter-response-1')"
                 :class="{ 'is-invalid': submitted && !form.response1 }"
               ></textarea>
 
               <div class="invalid-feedback">
-                Please enter response 1.
+                {{ $t('ui-please-enter-response-1') }}
               </div>
 
               <div
@@ -894,19 +897,19 @@ const exportQuestions = () => {
 
             <BCol lg="12">
               <label class="form-label">
-                Response 2 <span class="text-danger">*</span>
+                {{ $t('ui-response-2') }} <span class="text-danger">*</span>
               </label>
 
               <textarea
                 v-model="form.response2"
                 class="form-control"
                 rows="2"
-                placeholder="Enter response 2"
+                :placeholder="$t('ui-enter-response-2')"
                 :class="{ 'is-invalid': submitted && !form.response2 }"
               ></textarea>
 
               <div class="invalid-feedback">
-                Please enter response 2.
+                {{ $t('ui-please-enter-response-2') }}
               </div>
 
               <div
@@ -919,19 +922,19 @@ const exportQuestions = () => {
 
             <BCol lg="12">
               <label class="form-label">
-                Response 3 <span class="text-danger">*</span>
+                {{ $t('ui-response-3') }} <span class="text-danger">*</span>
               </label>
 
               <textarea
                 v-model="form.response3"
                 class="form-control"
                 rows="2"
-                placeholder="Enter response 3"
+                :placeholder="$t('ui-enter-response-3')"
                 :class="{ 'is-invalid': submitted && !form.response3 }"
               ></textarea>
 
               <div class="invalid-feedback">
-                Please enter response 3.
+                {{ $t('ui-please-enter-response-3') }}
               </div>
 
               <div
@@ -944,7 +947,7 @@ const exportQuestions = () => {
 
             <BCol lg="12">
               <label class="form-label">
-                Correct Answer <span class="text-danger">*</span>
+                {{ $t('ui-correct-answer') }} <span class="text-danger">*</span>
               </label>
 
               <div class="correct-answer-box">
@@ -957,7 +960,7 @@ const exportQuestions = () => {
                     type="radio"
                     value="response1"
                   />
-                  Response 1
+                  {{ $t('ui-response-1') }}
                 </label>
 
                 <label
@@ -969,7 +972,7 @@ const exportQuestions = () => {
                     type="radio"
                     value="response2"
                   />
-                  Response 2
+                  {{ $t('ui-response-2') }}
                 </label>
 
                 <label
@@ -981,7 +984,7 @@ const exportQuestions = () => {
                     type="radio"
                     value="response3"
                   />
-                  Response 3
+                  {{ $t('ui-response-3') }}
                 </label>
               </div>
 
@@ -1001,7 +1004,7 @@ const exportQuestions = () => {
                 variant="light"
                 @click="questionModal = false"
               >
-                Close
+                {{ $t('ui-close') }}
               </BButton>
 
               <BButton
@@ -1039,11 +1042,11 @@ const exportQuestions = () => {
 
           <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
             <h4>
-              Are you sure?
+              {{ $t('ui-are-you-sure') }}
             </h4>
 
             <p class="text-muted mx-4 mb-0">
-              You won't be able to revert this action.
+              {{ $t('ui-you-won-t-be-able-to-revert-this-action') }}
             </p>
           </div>
         </div>
@@ -1054,7 +1057,7 @@ const exportQuestions = () => {
             class="btn w-sm btn-light"
             @click="deleteModal = false"
           >
-            Cancel
+            {{ $t('ui-cancel') }}
           </button>
 
           <button
@@ -1062,7 +1065,7 @@ const exportQuestions = () => {
             class="btn w-sm btn-danger"
             @click="handleDeleteData"
           >
-            Yes, delete
+            {{ $t('ui-yes-delete') }}
           </button>
         </div>
       </BModal>

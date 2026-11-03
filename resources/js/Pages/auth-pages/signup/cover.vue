@@ -106,7 +106,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head :title="$t('ui-register')" />
     <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-overlay"></div>
         <div class="auth-page-content overflow-hidden pt-lg-5">
@@ -162,14 +162,14 @@ export default {
                                     <div class="p-lg-5 p-4">
                                         <div>
                                             <h5 class="text-primary">Register Account</h5>
-                                            <p class="text-muted">Get your Free Velzon account now.</p>
+                                            <p class="text-muted">{{ $t('ui-get-your-free-velzon-account-now') }}</p>
                                         </div>
 
                                         <div class="mt-4">
                                             <form class="needs-validation" novalidate>
 
                                                 <div class="mb-3">
-                                                    <label for="useremail" class="form-label">Email <span class="text-danger">*</span></label>
+                                                    <label for="useremail" class="form-label">{{ $t('ui-email') }} <span class="text-danger">*</span></label>
                                                     <input type="email" class="form-control" id="useremail" placeholder="Enter email address" required>
                                                     <div class="invalid-feedback">
                                                         Please enter email
@@ -184,9 +184,9 @@ export default {
                                                 </div>
 
                                                 <div class="mb-3">
-                                                    <label class="form-label" for="password-input">Password</label>
+                                                    <label class="form-label" for="password-input">{{ $t('ui-password') }}</label>
                                                     <div class="position-relative auth-pass-inputgroup">
-                                                        <input type="password" class="form-control pe-5 password-input" onpaste="return false" placeholder="Enter password" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
+                                                        <input type="password" class="form-control pe-5 password-input" onpaste="return false" :placeholder="$t('ui-enter-password')" id="password-input" aria-describedby="passwordInput" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
                                                         <BButton variant="link" class="position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></BButton>
                                                         <div class="invalid-feedback">
                                                             Please enter password
@@ -218,13 +218,13 @@ export default {
                                                     </p>
                                                 </div>
                                                 <div class="mt-4">
-                                                    <BButton variant="primary" class="w-100" type="button">Sign Up
+                                                    <BButton variant="primary" class="w-100" type="button">{{ $t('t-sign-up') }}
                                                     </BButton>
                                                 </div>
 
                                                 <div class="mt-4 text-center">
                                                     <div class="signin-other-title">
-                                                        <h5 class="fs-13 mb-4 title text-muted">Create account with</h5>
+                                                        <h5 class="fs-13 mb-4 title text-muted">{{ $t('ui-create-account-with') }}</h5>
                                                     </div>
 
                                                     <div>
@@ -240,7 +240,7 @@ export default {
                                         </div>
 
                                         <div class="mt-5 text-center">
-                                            <p class="mb-0">Already have an account ? <Link href="/auth/signin-cover" class="fw-semibold text-primary text-decoration-underline"> Signin
+                                            <p class="mb-0">{{ $t('ui-already-have-an-account') }} <Link href="/auth/signin-cover" class="fw-semibold text-primary text-decoration-underline"> {{ $t('ui-signin') }}
                                                 </Link>
                                             </p>
                                         </div>
@@ -259,7 +259,7 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

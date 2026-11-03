@@ -7,7 +7,7 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Terms of Service" />
+    <Head :title="$t('ui-terms-of-service')" />
 
     <BContainer>
         <BRow class="justify-content-center">

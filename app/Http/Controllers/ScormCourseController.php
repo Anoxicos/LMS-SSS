@@ -153,7 +153,7 @@ class ScormCourseController extends Controller
                     'hashid' => $course->hashid,
                     'step' => 2,
                 ])
-                ->with('success', 'SCORM course has been created successfully. You can now configure its plan.');
+                ->with('success', __('SCORM course has been created successfully. You can now configure its plan.'));
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
@@ -171,7 +171,7 @@ class ScormCourseController extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while creating the SCORM course.',
+                    'error' => __('An error occurred while creating the SCORM course.'),
                 ])
                 ->withInput();
         }
@@ -316,7 +316,7 @@ class ScormCourseController extends Controller
                     'hashid' => $course->hashid,
                     'step' => $validated['next_step'] ?? 1,
                 ])
-                ->with('success', 'SCORM course information has been updated successfully.');
+                ->with('success', __('SCORM course information has been updated successfully.'));
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
@@ -334,7 +334,7 @@ class ScormCourseController extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while updating the SCORM course.',
+                    'error' => __('An error occurred while updating the SCORM course.'),
                 ])
                 ->withInput();
         }
@@ -362,7 +362,7 @@ class ScormCourseController extends Controller
                 'hashid' => $course->hashid,
                 'step' => $validated['next_step'] ?? 2,
             ])
-            ->with('success', 'SCORM course plan has been updated successfully.');
+            ->with('success', __('SCORM course plan has been updated successfully.'));
     }
 
     public function storePlanDetail(Request $request, string $hashid)
@@ -402,7 +402,7 @@ class ScormCourseController extends Controller
                 'hashid' => $course->hashid,
                 'step' => 2,
             ])
-            ->with('success', 'Plan detail has been created successfully.');
+            ->with('success', __('Plan detail has been created successfully.'));
     }
 
     public function updatePlanDetail(Request $request, string $hashid, PlanDetail $detail)
@@ -429,7 +429,7 @@ class ScormCourseController extends Controller
                 'hashid' => $course->hashid,
                 'step' => 2,
             ])
-            ->with('success', 'Plan detail has been updated successfully.');
+            ->with('success', __('Plan detail has been updated successfully.'));
     }
 
     public function destroyPlanDetail(string $hashid, PlanDetail $detail)
@@ -449,7 +449,7 @@ class ScormCourseController extends Controller
                 'hashid' => $course->hashid,
                 'step' => 2,
             ])
-            ->with('success', 'Plan detail has been deleted successfully.');
+            ->with('success', __('Plan detail has been deleted successfully.'));
     }
 
     public function show(string $hashid)
@@ -498,14 +498,14 @@ class ScormCourseController extends Controller
 
             return redirect()
                 ->route('courses.scorm.index')
-                ->with('success', 'SCORM course has been deleted successfully.');
+                ->with('success', __('SCORM course has been deleted successfully.'));
         } catch (\Throwable $e) {
             report($e);
 
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while deleting the SCORM course.',
+                    'error' => __('An error occurred while deleting the SCORM course.'),
                 ]);
         }
     }

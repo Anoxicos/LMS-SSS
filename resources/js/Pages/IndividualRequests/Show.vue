@@ -2,6 +2,9 @@
 import { computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 defineOptions({
@@ -73,7 +76,7 @@ const submitReview = () => {
 const formatDateTime = value => {
   if (!value) return '-'
 
-  return new Date(value).toLocaleString('en-GB', {
+  return new Date(value).toLocaleString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -85,7 +88,7 @@ const formatDateTime = value => {
 const formatDate = value => {
   if (!value) return '-'
 
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', {
+  return new Date(`${value}T00:00:00`).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -94,10 +97,10 @@ const formatDate = value => {
 
 const statusLabel = status => {
   const labels = {
-    pending: 'Pending',
-    approved: 'Approved',
-    partially_approved: 'Partially approved',
-    rejected: 'Rejected',
+    pending: t('t-pending'),
+    approved: t('t-approved'),
+    partially_approved: t('t-partially-approved'),
+    rejected: t('t-rejected'),
   }
 
   return labels[status] || status || '-'
@@ -158,8 +161,8 @@ const formatPrice = value => {
 </script>
 
 <template>
-  <Head :title="`Individual request ${individualRequest.reference}`" />
-  <PageHeader title="Request Details" pageTitle="Individual Requests" />
+  <Head :title="$t('ui-individual-request-reference', { reference: individualRequest.reference })" />
+  <PageHeader :title="$t('ui-request-details')" :page-title="$t('ui-individual-requests')" />
 
   <section class="request-show-page">
     <!-- HERO -->
@@ -183,7 +186,7 @@ const formatPrice = value => {
 
             <span class="hero-mini-badge">
               <i class="ri-book-open-line me-1"></i>
-              {{ individualRequest.items?.length || 0 }} course(s)
+              {{ individualRequest.items?.length || 0 }} {{ $t('ui-course-s') }}
             </span>
 
             <span class="hero-mini-badge">
@@ -195,9 +198,9 @@ const formatPrice = value => {
           <h1>{{ individualRequest.reference }}</h1>
 
           <p>
-            Individual training request submitted by
+            {{ $t('t-individual-request-intro') }}
             <strong>{{ individualRequest.learner?.name || '-' }}</strong>
-            for review and course enrollment approval.
+            {{ $t('t-individual-request-description') }}
           </p>
         </div>
       </div>
@@ -205,7 +208,7 @@ const formatPrice = value => {
       <div class="request-hero-actions">
         <Link :href="route('individual-requests.index')" class="btn btn-light">
           <i class="ri-arrow-left-line me-1"></i>
-          Back
+          {{ $t('t-back') }}
         </Link>
 
         <a
@@ -214,7 +217,7 @@ const formatPrice = value => {
           class="btn btn-passport"
         >
           <i class="ri-download-2-line me-1"></i>
-          Passport
+          {{ $t('t-passport') }}
         </a>
       </div>
     </header>
@@ -226,7 +229,7 @@ const formatPrice = value => {
           <i class="ri-user-3-line"></i>
         </div>
         <div class="min-width-0">
-          <span>Learner</span>
+          <span>{{ $t('t-learner') }}</span>
           <strong>{{ individualRequest.learner?.name || '-' }}</strong>
         </div>
       </div>
@@ -236,7 +239,7 @@ const formatPrice = value => {
           <i class="ri-mail-line"></i>
         </div>
         <div class="min-width-0">
-          <span>Email</span>
+          <span>{{ $t('t-email') }}</span>
           <strong>{{ individualRequest.learner?.email || '-' }}</strong>
         </div>
       </div>
@@ -246,7 +249,7 @@ const formatPrice = value => {
           <i class="ri-book-open-line"></i>
         </div>
         <div>
-          <span>Courses</span>
+          <span>{{ $t('t-courses') }}</span>
           <strong>{{ individualRequest.items?.length || 0 }}</strong>
         </div>
       </div>
@@ -256,7 +259,7 @@ const formatPrice = value => {
           <i class="ri-checkbox-circle-line"></i>
         </div>
         <div>
-          <span>Approved</span>
+          <span>{{ $t('t-approved') }}</span>
           <strong>{{ approvedCount }}</strong>
         </div>
       </div>
@@ -266,7 +269,7 @@ const formatPrice = value => {
           <i class="ri-close-circle-line"></i>
         </div>
         <div>
-          <span>Rejected</span>
+          <span>{{ $t('t-rejected') }}</span>
           <strong>{{ rejectedCount }}</strong>
         </div>
       </div>
@@ -276,7 +279,7 @@ const formatPrice = value => {
           <i class="ri-earth-line"></i>
         </div>
         <div class="min-width-0">
-          <span>Country</span>
+          <span>{{ $t('t-country') }}</span>
           <strong>{{ individualRequest.learner?.country || '-' }}</strong>
         </div>
       </div>
@@ -293,8 +296,8 @@ const formatPrice = value => {
               </div>
 
               <div>
-                <h2>Learner account</h2>
-                <p>Personal information linked to this request.</p>
+                <h2>{{ $t('t-learner-account') }}</h2>
+                <p>{{ $t('t-personal-info-linked-request') }}</p>
               </div>
             </div>
           </header>
@@ -305,7 +308,7 @@ const formatPrice = value => {
                 <img
                   v-if="individualRequest.learner?.photo_url"
                   :src="individualRequest.learner.photo_url"
-                  alt="Learner"
+                  :alt="$t('ui-learner')"
                 >
                 <span v-else>
                   {{ getLearnerInitials(individualRequest.learner?.name) }}
@@ -320,22 +323,22 @@ const formatPrice = value => {
 
             <div class="summary-list learner-summary-list">
               <div class="summary-item">
-                <span>Country</span>
+                <span>{{ $t('t-country') }}</span>
                 <strong>{{ individualRequest.learner?.country || '-' }}</strong>
               </div>
 
               <div class="summary-item">
-                <span>Date of birth</span>
+                <span>{{ $t('t-date-of-birth') }}</span>
                 <strong>{{ individualRequest.learner?.date_of_birth || '-' }}</strong>
               </div>
 
               <div class="summary-item">
-                <span>Place of birth</span>
+                <span>{{ $t('t-place-of-birth') }}</span>
                 <strong>{{ individualRequest.learner?.place_of_birth || '-' }}</strong>
               </div>
 
               <div class="summary-item">
-                <span>Passport number</span>
+                <span>{{ $t('t-passport-number') }}</span>
                 <strong>{{ individualRequest.learner?.passport_number || '-' }}</strong>
               </div>
             </div>
@@ -346,7 +349,7 @@ const formatPrice = value => {
               class="passport-button"
             >
               <i class="ri-download-2-line"></i>
-              Download passport document
+              {{ $t('t-download-passport') }}
             </a>
           </div>
         </section>
@@ -359,8 +362,8 @@ const formatPrice = value => {
               </div>
 
               <div>
-                <h2>Request summary</h2>
-                <p>Main request information.</p>
+                <h2>{{ $t('t-request-summary') }}</h2>
+                <p>{{ $t('t-main-request-information') }}</p>
               </div>
             </div>
           </header>
@@ -368,22 +371,22 @@ const formatPrice = value => {
           <div class="show-card-body">
             <div class="summary-list">
               <div class="summary-item">
-                <span>Reference</span>
+                <span>{{ $t('t-reference') }}</span>
                 <strong>{{ individualRequest.reference }}</strong>
               </div>
 
               <div class="summary-item">
-                <span>Status</span>
+                <span>{{ $t('t-status') }}</span>
                 <strong>{{ statusLabel(individualRequest.status) }}</strong>
               </div>
 
               <div class="summary-item">
-                <span>Submitted at</span>
+                <span>{{ $t('t-submitted-at') }}</span>
                 <strong>{{ formatDateTime(individualRequest.submitted_at) }}</strong>
               </div>
 
               <div class="summary-item">
-                <span>Requested courses</span>
+                <span>{{ $t('t-requested-courses') }}</span>
                 <strong>{{ individualRequest.items?.length || 0 }}</strong>
               </div>
             </div>
@@ -398,8 +401,8 @@ const formatPrice = value => {
               </div>
 
               <div>
-                <h2>Learner note</h2>
-                <p>Message submitted with the request.</p>
+                <h2>{{ $t('t-learner-note') }}</h2>
+                <p>{{ $t('ui-message-submitted-with-the-request') }}</p>
               </div>
             </div>
           </header>
@@ -422,20 +425,20 @@ const formatPrice = value => {
               </div>
 
               <div>
-                <h2>Requested courses</h2>
-                <p>Review each course and define the enrollment conditions.</p>
+                <h2>{{ $t('t-requested-courses') }}</h2>
+                <p>{{ $t('t-review-course-enrollment-conditions') }}</p>
               </div>
             </div>
 
             <div v-if="isPending" class="bulk-actions">
               <button type="button" class="approve-all" @click="approveAll">
                 <i class="ri-check-double-line"></i>
-                Approve all
+                {{ $t('t-approve-all') }}
               </button>
 
               <button type="button" class="reject-all" @click="rejectAll">
                 <i class="ri-close-circle-line"></i>
-                Reject all
+                {{ $t('t-reject-all') }}
               </button>
             </div>
           </header>
@@ -491,7 +494,7 @@ const formatPrice = value => {
                       :disabled="!isPending"
                     >
                     <i class="ri-check-line"></i>
-                    Approve
+                    {{ $t('t-approve') }}
                   </label>
 
                   <label
@@ -505,7 +508,7 @@ const formatPrice = value => {
                       :disabled="!isPending"
                     >
                     <i class="ri-close-line"></i>
-                    Reject
+                    {{ $t('t-reject') }}
                   </label>
                 </div>
               </div>
@@ -514,7 +517,7 @@ const formatPrice = value => {
                 <label>
                   <span>
                     <i class="ri-calendar-event-line"></i>
-                    Start date
+                    {{ $t('t-planned-start-date') }}
                   </span>
                   <input
                     v-model="form.decisions[index].start_date"
@@ -526,7 +529,7 @@ const formatPrice = value => {
                 <label>
                   <span>
                     <i class="ri-calendar-check-line"></i>
-                    End date
+                    {{ $t('t-planned-end-date') }}
                   </span>
                   <input
                     v-model="form.decisions[index].end_date"
@@ -538,7 +541,7 @@ const formatPrice = value => {
                 <label>
                   <span>
                     <i class="ri-timer-line"></i>
-                    Validity in months
+                    {{ $t('t-validity-in-months') }}
                   </span>
                   <input
                     v-model="form.decisions[index].duree_validite_formation"
@@ -552,13 +555,13 @@ const formatPrice = value => {
                 <label class="note-field">
                   <span>
                     <i class="ri-sticky-note-line"></i>
-                    Administrative note for this course
+                    {{ $t('t-admin-note-course') }}
                   </span>
                   <textarea
                     v-model="form.decisions[index].note"
                     rows="3"
                     :disabled="!isPending"
-                    placeholder="Add an administrative note..."
+                    :placeholder="$t('ui-add-an-administrative-note')"
                   ></textarea>
                 </label>
               </div>
@@ -566,10 +569,10 @@ const formatPrice = value => {
               <div v-if="item.enrollment" class="enrollment-line">
                 <i class="ri-checkbox-circle-line"></i>
                 <div>
-                  <strong>Enrollment created</strong>
+                  <strong>{{ $t('t-enrollment-created') }}</strong>
                   <span>
                     {{ item.enrollment.status }} ·
-                    {{ item.enrollment.attempts_rest }} exam attempt(s)
+                    {{ item.enrollment.attempts_rest }} {{ $t('ui-exam-attempt-s') }}
                   </span>
                 </div>
               </div>
@@ -585,8 +588,8 @@ const formatPrice = value => {
               </div>
 
               <div>
-                <h2>Super Admin note</h2>
-                <p>General administrative note for this request.</p>
+                <h2>{{ $t('t-super-admin-note') }}</h2>
+                <p>{{ $t('t-general-admin-note-request') }}</p>
               </div>
             </div>
           </header>
@@ -597,7 +600,7 @@ const formatPrice = value => {
                 v-model="form.admin_note"
                 rows="4"
                 :disabled="!isPending"
-                placeholder="Write a general note for this request..."
+                :placeholder="$t('ui-write-a-general-note-for-this-request')"
               ></textarea>
             </label>
 
@@ -613,7 +616,7 @@ const formatPrice = value => {
           <footer v-if="isPending" class="form-footer">
             <div class="footer-info">
               <i class="ri-information-line"></i>
-              A decision is required for every requested course.
+              {{ $t('t-decision-required-each-course') }}
             </div>
 
             <button

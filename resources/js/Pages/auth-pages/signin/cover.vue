@@ -32,7 +32,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Login" />
+    <Head :title="$t('t-login')" />
     <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-overlay"></div>
         <div class="auth-page-content overflow-hidden pt-lg-5">
@@ -106,12 +106,12 @@ export default {
                                                 <div class="mb-3">
                                                     <div class="float-end">
                                                         <Link href="/auth/reset-pwd-cover" class="text-muted">
-                                                            Forgot password?</Link>
+                                                            {{ $t('t-forgot-password-question') }}</Link>
                                                     </div>
-                                                    <label class="form-label" for="password-input">Password</label>
+                                                    <label class="form-label" for="password-input">{{ $t('ui-password') }}</label>
                                                     <div class="position-relative auth-pass-inputgroup mb-3">
                                                         <input :type="togglePassword ? 'text' : 'password'"
-                                                            class="form-control pe-5" placeholder="Enter password"
+                                                            class="form-control pe-5" :placeholder="$t('ui-enter-password')"
                                                             id="password-input">
                                                         <BButton variant="link"
                                                             class="position-absolute end-0 top-0 text-decoration-none text-muted"
@@ -124,13 +124,11 @@ export default {
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" value=""
                                                         id="auth-remember-check">
-                                                    <label class="form-check-label" for="auth-remember-check">Remember
-                                                        me</label>
+                                                    <label class="form-check-label" for="auth-remember-check">{{ $t('t-remember-me') }}</label>
                                                 </div>
 
                                                 <div class="mt-4">
-                                                    <BButton variant="primary" class="w-100" type="submit">Sign
-                                                        In</BButton>
+                                                    <BButton variant="primary" class="w-100" type="submit">{{ $t('t-sign-in') }}</BButton>
                                                 </div>
 
                                                 <div class="mt-4 text-center">
@@ -173,8 +171,8 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i
-                                    class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i
+                                    class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

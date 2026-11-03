@@ -165,8 +165,8 @@ const clearPhotoFileInput = () => {
 <template>
   <FormSection
     @submitted="updateProfileInformation"
-    title="Profile Information"
-    description="Update your account's profile information and email address."
+    :title="$t('ui-profile-information')"
+    :description="$t('ui-update-your-account-s-profile-information-and-email-ad')"
   >
     <template #form>
       <!-- Profile Photo -->
@@ -179,7 +179,7 @@ const clearPhotoFileInput = () => {
           @change="updatePhotoPreview"
         />
 
-        <InputLabel for="photo" value="Photo" />
+        <InputLabel for="photo" :value="$t('ui-photo')" />
 
         <div class="profile-photo-wrapper mt-3">
           <div class="profile-photo-box">
@@ -199,7 +199,7 @@ const clearPhotoFileInput = () => {
             type="button"
             @click.prevent="selectNewPhoto"
           >
-            Select A New Photo
+            {{ $t('ui-select-a-new-photo') }}
           </BButton>
 
           <BButton
@@ -209,7 +209,7 @@ const clearPhotoFileInput = () => {
             class="btn-sm"
             @click.prevent="deletePhoto"
           >
-            Remove Photo
+            {{ $t('ui-remove-photo') }}
           </BButton>
         </div>
 
@@ -218,7 +218,7 @@ const clearPhotoFileInput = () => {
 
       <!-- Name -->
       <div class="mb-3">
-        <InputLabel for="name" value="Name" />
+        <InputLabel for="name" :value="$t('ui-name')" />
 
         <TextInput
           id="name"
@@ -234,7 +234,7 @@ const clearPhotoFileInput = () => {
 
       <!-- Email -->
       <div class="mb-3">
-        <InputLabel for="email" value="Email" />
+        <InputLabel for="email" :value="$t('t-email')" />
 
         <TextInput
           id="email"
@@ -251,7 +251,7 @@ const clearPhotoFileInput = () => {
           v-if="$page.props.jetstream.hasEmailVerification && user.email_verified_at === null"
         >
           <p class="text-sm mt-2 text-muted">
-            Your email address is unverified.
+            {{ $t('ui-your-email-address-is-unverified') }}
 
             <Link
               :href="route('verification.send')"
@@ -260,7 +260,7 @@ const clearPhotoFileInput = () => {
               class="btn btn-sm btn-warning ms-2"
               @click.prevent="sendEmailVerification"
             >
-              Click here to re-send the verification email.
+              {{ $t('ui-click-here-to-re-send-the-verification-email') }}
             </Link>
           </p>
 
@@ -268,7 +268,7 @@ const clearPhotoFileInput = () => {
             v-show="verificationLinkSent"
             class="alert alert-success text-success mt-2"
           >
-            A new verification link has been sent to your email address.
+            {{ $t('ui-a-new-verification-link-has-been-sent-to-your-email-ad') }}
           </div>
         </div>
       </div>
@@ -282,11 +282,11 @@ const clearPhotoFileInput = () => {
         :class="{ 'opacity-25': form.processing }"
         :disabled="form.processing"
       >
-        Save
+        {{ $t('ui-save') }}
       </BButton>
 
       <p v-if="form.recentlySuccessful" class="alert alert-info mt-3">
-        Profile Saved.
+        {{ $t('ui-profile-saved') }}
       </p>
     </template>
   </FormSection>

@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref, watch } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -101,8 +105,8 @@ const courseVoiceLangLabel = computed(() => {
   const labels = {
     'en-us': 'English - US',
     'en-gb': 'English - UK',
-    'fr-fr': 'French',
-    'ar-sa': 'Arabic',
+    'fr-fr': t('ui-french'),
+    'ar-sa': t('ui-arabic'),
     'es-es': 'Spanish',
   }
 
@@ -201,7 +205,7 @@ const lessonTypes = [
   },
   {
     value: 'file',
-    label: 'File',
+    label: t('ui-file'),
     icon: 'ri-file-3-line',
     description: 'PDF, image or document',
   },
@@ -222,7 +226,7 @@ const lessonTypes = [
 const showSuccess = (message) => {
   Swal.fire({
     icon: 'success',
-    title: 'Success',
+    title: t('ui-success'),
     text: message,
     timer: 1600,
     showConfirmButton: false,
@@ -232,7 +236,7 @@ const showSuccess = (message) => {
 const showError = (message = 'Please check the form and try again.') => {
   Swal.fire({
     icon: 'error',
-    title: 'Error',
+    title: t('t-error'),
     text: message,
     timer: 2200,
     showConfirmButton: false,
@@ -538,12 +542,12 @@ const deleteVoiceOver = () => {
   }
 
   Swal.fire({
-    title: 'Delete voice over?',
-    text: 'The generated audio file will be removed.',
+    title: t('ui-delete-voice-over'),
+    text: t('ui-the-generated-audio-file-will-be-removed'),
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: t('ui-yes-delete'),
+    cancelButtonText: t('ui-cancel'),
     confirmButtonColor: '#f06548',
   }).then((result) => {
     if (!result.isConfirmed) return
@@ -573,12 +577,12 @@ const deleteSlide = (slide) => {
   }
 
   Swal.fire({
-    title: 'Delete slide?',
+    title: t('ui-delete-slide'),
     text: `Are you sure you want to delete "${slide.title}"?`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: t('ui-yes-delete'),
+    cancelButtonText: t('ui-cancel'),
     confirmButtonColor: '#f06548',
   }).then((result) => {
     if (!result.isConfirmed) return
@@ -677,20 +681,20 @@ const formatFileSize = (size) => {
 <template>
   <div class="builder-section">
     <div class="section-heading">
-      <h5>Course Slides</h5>
-      <p>Create lessons, videos, files, links and comprehension questions inside each chapter.</p>
+      <h5>{{ $t('ui-course-slides') }}</h5>
+      <p>{{ $t('ui-create-lessons-videos-files-links-and-comprehension-qu') }}</p>
     </div>
 
     <div v-if="!chapters.length" class="empty-box">
       <i class="ri-list-check-2"></i>
-      <h6>No chapters available</h6>
-      <p>Please add chapters before creating slides.</p>
+      <h6>{{ $t('ui-no-chapters-available') }}</h6>
+      <p>{{ $t('ui-please-add-chapters-before-creating-slides') }}</p>
     </div>
 
     <BRow v-else class="g-4">
       <BCol xl="8">
         <div class="mb-3">
-          <label class="form-label">Select Chapter</label>
+          <label class="form-label">{{ $t('ui-select-chapter') }}</label>
 
           <select v-model="selectedChapterId" class="form-select modern-input">
             <option
@@ -710,7 +714,7 @@ const formatFileSize = (size) => {
             </h6>
 
             <span class="mini-badge">
-              {{ slides.length }} slides
+              {{ slides.length }} {{ $t('ui-slides-label') }}
             </span>
           </div>
 
@@ -738,11 +742,11 @@ const formatFileSize = (size) => {
                   </span>
 
                   <span v-if="slide.is_preview" class="mini-badge success">
-                    Preview
+                    {{ $t('ui-preview') }}
                   </span>
 
                   <span v-if="!slide.is_active" class="mini-badge warning">
-                    Inactive
+                    {{ $t('ui-inactive') }}
                   </span>
 
                   <span
@@ -750,7 +754,7 @@ const formatFileSize = (size) => {
                     class="mini-badge info"
                   >
                     <i class="ri-mic-line me-1"></i>
-                    Voice
+                    {{ $t('ui-voice') }}
                   </span>
                 </div>
 
@@ -771,7 +775,7 @@ const formatFileSize = (size) => {
                   </template>
 
                   <template v-else-if="slide.lesson_type === 'quiz'">
-                    {{ slide.questions?.length || 0 }} comprehension question(s)
+                    {{ slide.questions?.length || 0 }} {{ $t('ui-comprehension-question-s') }}
                   </template>
 
                   <template v-else>
@@ -795,7 +799,7 @@ const formatFileSize = (size) => {
                   size="sm"
                   class="action-btn"
                   :disabled="index === 0"
-                  title="Move up"
+                  :title="$t('ui-move-up')"
                   @click="moveSlide(selectedChapter, index, -1)"
                 >
                   <i class="ri-arrow-up-line"></i>
@@ -807,7 +811,7 @@ const formatFileSize = (size) => {
                   size="sm"
                   class="action-btn"
                   :disabled="index === slides.length - 1"
-                  title="Move down"
+                  :title="$t('ui-move-down')"
                   @click="moveSlide(selectedChapter, index, 1)"
                 >
                   <i class="ri-arrow-down-line"></i>
@@ -818,7 +822,7 @@ const formatFileSize = (size) => {
                   variant="soft-primary"
                   size="sm"
                   class="action-btn"
-                  title="Edit"
+                  :title="$t('t-edit')"
                   @click="editSlide(slide, selectedChapter)"
                 >
                   <i class="ri-edit-2-line"></i>
@@ -829,7 +833,7 @@ const formatFileSize = (size) => {
                   variant="soft-danger"
                   size="sm"
                   class="action-btn"
-                  title="Delete"
+                  :title="$t('ui-delete')"
                   @click="deleteSlide(slide)"
                 >
                   <i class="ri-delete-bin-6-line"></i>
@@ -840,8 +844,8 @@ const formatFileSize = (size) => {
 
           <div v-else class="empty-box">
             <i class="ri-slideshow-line"></i>
-            <h6>No slides in this chapter</h6>
-            <p>Add the first slide using the form on the right.</p>
+            <h6>{{ $t('ui-no-slides-in-this-chapter') }}</h6>
+            <p>{{ $t('ui-add-the-first-slide-using-the-form-on-the-right') }}</p>
           </div>
         </div>
       </BCol>
@@ -856,7 +860,7 @@ const formatFileSize = (size) => {
           <form @submit.prevent="submitSlide">
             <div class="mb-3">
               <label class="form-label">
-                Title <span class="text-danger">*</span>
+                {{ $t('t-title') }} <span class="text-danger">*</span>
               </label>
 
               <input
@@ -864,7 +868,7 @@ const formatFileSize = (size) => {
                 type="text"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': slideForm.errors.title }"
-                placeholder="Slide title"
+                :placeholder="$t('ui-slide-title')"
               />
 
               <div v-if="slideForm.errors.title" class="invalid-feedback d-block">
@@ -874,7 +878,7 @@ const formatFileSize = (size) => {
 
             <div class="mb-3">
               <label class="form-label">
-                Lesson Type <span class="text-danger">*</span>
+                {{ $t('ui-lesson-type') }} <span class="text-danger">*</span>
               </label>
 
               <div class="slide-options">
@@ -900,14 +904,14 @@ const formatFileSize = (size) => {
             </div>
 
             <div v-if="slideForm.lesson_type === 'text'" class="mb-3">
-              <label class="form-label">Content</label>
+              <label class="form-label">{{ $t('ui-content') }}</label>
 
               <textarea
                 v-model="slideForm.content"
                 rows="6"
                 class="form-control modern-textarea"
                 :class="{ 'is-invalid': slideForm.errors.content }"
-                placeholder="Write lesson content"
+                :placeholder="$t('ui-write-lesson-content')"
               ></textarea>
 
               <div v-if="slideForm.errors.content" class="invalid-feedback d-block">
@@ -916,7 +920,7 @@ const formatFileSize = (size) => {
             </div>
 
             <div v-if="slideForm.lesson_type === 'video'" class="mb-3">
-              <label class="form-label">Video URL</label>
+              <label class="form-label">{{ $t('ui-video-url') }}</label>
 
               <input
                 v-model="slideForm.video_url"
@@ -933,7 +937,7 @@ const formatFileSize = (size) => {
                 {{ slideForm.errors.video_url }}
               </div>
 
-              <label class="form-label mt-3">Duration in seconds</label>
+              <label class="form-label mt-3">{{ $t('ui-duration-in-seconds') }}</label>
 
               <input
                 v-model="slideForm.video_duration"
@@ -941,7 +945,7 @@ const formatFileSize = (size) => {
                 min="0"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': slideForm.errors.video_duration }"
-                placeholder="Example: 360"
+                :placeholder="$t('ui-example-360')"
               />
 
               <div
@@ -953,7 +957,7 @@ const formatFileSize = (size) => {
             </div>
 
             <div v-if="slideForm.lesson_type === 'file'" class="mb-3">
-              <label class="form-label">File</label>
+              <label class="form-label">{{ $t('ui-file') }}</label>
 
               <div class="file-upload-card">
                 <div class="file-upload-icon">
@@ -966,7 +970,7 @@ const formatFileSize = (size) => {
                   </label>
 
                   <p class="text-muted mb-0">
-                    Max size: 10 MB
+                    {{ $t('ui-max-size-10-mb') }}
                   </p>
                 </div>
 
@@ -974,7 +978,7 @@ const formatFileSize = (size) => {
                   for="slideFileInput"
                   class="btn btn-soft-primary btn-sm file-upload-btn mb-0"
                 >
-                  Browse
+                  {{ $t('ui-browse') }}
                 </label>
 
                 <input
@@ -986,7 +990,7 @@ const formatFileSize = (size) => {
               </div>
 
               <div v-if="slideForm.file_name" class="mt-2 small text-muted">
-                Current file:
+                {{ $t('ui-current-file') }}
                 <strong>{{ slideForm.file_name }}</strong>
                 <span v-if="slideForm.file_size">
                   · {{ formatFileSize(slideForm.file_size) }}
@@ -999,7 +1003,7 @@ const formatFileSize = (size) => {
             </div>
 
             <div v-if="slideForm.lesson_type === 'link'" class="mb-3">
-              <label class="form-label">External URL</label>
+              <label class="form-label">{{ $t('ui-external-url') }}</label>
 
               <input
                 v-model="slideForm.external_url"
@@ -1020,9 +1024,9 @@ const formatFileSize = (size) => {
             <div v-if="slideForm.lesson_type === 'quiz'" class="mb-3">
               <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
                 <div>
-                  <label class="form-label mb-1">Quiz Questions</label>
+                  <label class="form-label mb-1">{{ $t('ui-quiz-questions') }}</label>
                   <p class="text-muted small mb-0">
-                    Add 1 to 3 QCM or True / False questions.
+                    {{ $t('ui-add-1-to-3-qcm-or-true-false-questions') }}
                   </p>
                 </div>
 
@@ -1034,7 +1038,7 @@ const formatFileSize = (size) => {
                   @click="addQuestion"
                 >
                   <i class="ri-add-line me-1"></i>
-                  Add
+                  {{ $t('ui-add') }}
                 </BButton>
               </div>
 
@@ -1046,7 +1050,7 @@ const formatFileSize = (size) => {
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <h6 class="mb-0">
                     <i class="ri-question-answer-line me-1"></i>
-                    Question {{ questionIndex + 1 }}
+                    {{ $t('t-question') }} {{ questionIndex + 1 }}
                   </h6>
 
                   <BButton
@@ -1062,7 +1066,7 @@ const formatFileSize = (size) => {
 
                 <div class="mb-3">
                   <label class="form-label">
-                    Question Type <span class="text-danger">*</span>
+                    {{ $t('ui-question-type') }} <span class="text-danger">*</span>
                   </label>
 
                   <div class="slide-options">
@@ -1073,7 +1077,7 @@ const formatFileSize = (size) => {
                       @click="setQuestionType(questionItem, 'qcm')"
                     >
                       <i class="ri-list-check-3 me-1"></i>
-                      QCM
+                      {{ $t('ui-qcm') }}
                     </button>
 
                     <button
@@ -1083,7 +1087,7 @@ const formatFileSize = (size) => {
                       @click="setQuestionType(questionItem, 'true_false')"
                     >
                       <i class="ri-checkbox-circle-line me-1"></i>
-                      True / False
+                      {{ $t('ui-true-false') }}
                     </button>
                   </div>
 
@@ -1097,7 +1101,7 @@ const formatFileSize = (size) => {
 
                 <div class="mb-3">
                   <label class="form-label">
-                    Question <span class="text-danger">*</span>
+                    {{ $t('t-question') }} <span class="text-danger">*</span>
                   </label>
 
                   <textarea
@@ -1107,7 +1111,7 @@ const formatFileSize = (size) => {
                     :class="{
                       'is-invalid': questionError(questionIndex, 'question'),
                     }"
-                    placeholder="Write the question..."
+                    :placeholder="$t('ui-write-the-question')"
                   ></textarea>
 
                   <div
@@ -1122,7 +1126,7 @@ const formatFileSize = (size) => {
                   <div class="mb-2">
                     <span class="mini-badge info">
                       <i class="ri-list-check-3 me-1"></i>
-                      Multiple choice
+                      {{ $t('ui-multiple-choice') }}
                     </span>
                   </div>
 
@@ -1135,7 +1139,7 @@ const formatFileSize = (size) => {
                         :class="{
                           'is-invalid': questionError(questionIndex, 'option_a'),
                         }"
-                        placeholder="Option A *"
+                        :placeholder="$t('ui-option-a-label')"
                       />
 
                       <div
@@ -1154,7 +1158,7 @@ const formatFileSize = (size) => {
                         :class="{
                           'is-invalid': questionError(questionIndex, 'option_b'),
                         }"
-                        placeholder="Option B *"
+                        :placeholder="$t('ui-option-b-label')"
                       />
 
                       <div
@@ -1173,7 +1177,7 @@ const formatFileSize = (size) => {
                         :class="{
                           'is-invalid': questionError(questionIndex, 'option_c'),
                         }"
-                        placeholder="Option C (optional)"
+                        :placeholder="$t('ui-option-c-optional')"
                       />
 
                       <div
@@ -1187,7 +1191,7 @@ const formatFileSize = (size) => {
 
                   <div class="mt-3">
                     <label class="form-label">
-                      Correct Answer <span class="text-danger">*</span>
+                      {{ $t('ui-correct-answer') }} <span class="text-danger">*</span>
                     </label>
 
                     <select
@@ -1200,10 +1204,10 @@ const formatFileSize = (size) => {
                         ),
                       }"
                     >
-                      <option value="">Select correct answer</option>
-                      <option value="a">Option A</option>
-                      <option value="b">Option B</option>
-                      <option value="c">Option C</option>
+                      <option value="">{{ $t('ui-select-correct-answer') }}</option>
+                      <option value="a">{{ $t('t-option-a') }}</option>
+                      <option value="b">{{ $t('t-option-b') }}</option>
+                      <option value="c">{{ $t('t-option-c') }}</option>
                     </select>
 
                     <div
@@ -1219,12 +1223,12 @@ const formatFileSize = (size) => {
                   <div class="mb-2">
                     <span class="mini-badge success">
                       <i class="ri-checkbox-circle-line me-1"></i>
-                      True / False
+                      {{ $t('ui-true-false') }}
                     </span>
                   </div>
 
                   <label class="form-label">
-                    Correct Answer <span class="text-danger">*</span>
+                    {{ $t('ui-correct-answer') }} <span class="text-danger">*</span>
                   </label>
 
                   <div class="d-grid gap-2">
@@ -1232,10 +1236,10 @@ const formatFileSize = (size) => {
                       <div>
                         <h6 class="mb-1">
                           <i class="ri-checkbox-circle-line text-success me-1"></i>
-                          True
+                          {{ $t('t-true') }}
                         </h6>
                         <p class="text-muted mb-0">
-                          The statement is correct.
+                          {{ $t('ui-the-statement-is-correct') }}
                         </p>
                       </div>
 
@@ -1252,10 +1256,10 @@ const formatFileSize = (size) => {
                       <div>
                         <h6 class="mb-1">
                           <i class="ri-close-circle-line text-danger me-1"></i>
-                          False
+                          {{ $t('t-false') }}
                         </h6>
                         <p class="text-muted mb-0">
-                          The statement is incorrect.
+                          {{ $t('ui-the-statement-is-incorrect') }}
                         </p>
                       </div>
 
@@ -1278,7 +1282,7 @@ const formatFileSize = (size) => {
                 </template>
 
                 <div class="mt-3">
-                  <label class="form-label">Explanation</label>
+                  <label class="form-label">{{ $t('ui-explanation') }}</label>
 
                   <textarea
                     v-model="questionItem.explanation"
@@ -1287,7 +1291,7 @@ const formatFileSize = (size) => {
                     :class="{
                       'is-invalid': questionError(questionIndex, 'explanation'),
                     }"
-                    placeholder="Optional explanation..."
+                    :placeholder="$t('ui-optional-explanation')"
                   ></textarea>
 
                   <div
@@ -1313,10 +1317,10 @@ const formatFileSize = (size) => {
                 <div>
                   <h6 class="mb-1">
                     <i class="ri-mic-line me-1"></i>
-                    Voice Over
+                    {{ $t('ui-voice-over') }}
                   </h6>
                   <p class="text-muted mb-0">
-                    Add narration text and generate audio using course settings.
+                    {{ $t('ui-add-narration-text-and-generate-audio-using-course-settings') }}
                   </p>
                 </div>
 
@@ -1333,7 +1337,7 @@ const formatFileSize = (size) => {
 
               <div v-if="!courseVoiceEnabled" class="alert alert-warning py-2 mt-3 mb-0">
                 <i class="ri-alert-line me-1"></i>
-                Voice over is disabled in course settings.
+                {{ $t('ui-voice-over-is-disabled-in-course-settings') }}
               </div>
 
               <div v-if="slideForm.voice_over_enabled && courseVoiceEnabled" class="mt-3">
@@ -1341,10 +1345,10 @@ const formatFileSize = (size) => {
                   <div>
                     <h6 class="mb-1">
                       <i class="ri-global-line me-1"></i>
-                      Global Voice Settings
+                      {{ $t('ui-global-voice-settings') }}
                     </h6>
                     <p class="text-muted mb-0">
-                      This slide uses the course voice settings.
+                      {{ $t('ui-this-slide-uses-the-course-voice-settings') }}
                     </p>
                   </div>
 
@@ -1355,9 +1359,9 @@ const formatFileSize = (size) => {
 
                 <div class="publish-card mb-3">
                   <div>
-                    <h6 class="mb-1">Provider</h6>
+                    <h6 class="mb-1">{{ $t('ui-provider') }}</h6>
                     <p class="text-muted mb-0">
-                      TTS provider used to generate this slide audio.
+                      {{ $t('ui-tts-provider-used-to-generate-this-slide-audio') }}
                     </p>
                   </div>
 
@@ -1367,14 +1371,14 @@ const formatFileSize = (size) => {
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label">Voice over text</label>
+                  <label class="form-label">{{ $t('ui-voice-over-text') }}</label>
 
                   <textarea
                     v-model="slideForm.voice_over_text"
                     rows="5"
                     class="form-control modern-textarea"
                     :class="{ 'is-invalid': slideForm.errors.voice_over_text }"
-                    placeholder="Write narration text for this slide..."
+                    :placeholder="$t('ui-write-narration-text-for-this-slide')"
                   ></textarea>
 
                   <div
@@ -1387,9 +1391,9 @@ const formatFileSize = (size) => {
 
                 <div class="publish-card mb-3">
                   <div>
-                    <h6 class="mb-1">Auto play</h6>
+                    <h6 class="mb-1">{{ $t('ui-auto-play-label') }}</h6>
                     <p class="text-muted mb-0">
-                      This option is controlled from course settings.
+                      {{ $t('ui-this-option-is-controlled-from-course-settings') }}
                     </p>
                   </div>
 
@@ -1425,15 +1429,15 @@ const formatFileSize = (size) => {
 
                     <div class="small text-muted mt-1">
                       <span v-if="slideForm.voice_over_audio_size">
-                        Size: {{ formatFileSize(slideForm.voice_over_audio_size) }}
+                        {{ $t('ui-size') }} {{ formatFileSize(slideForm.voice_over_audio_size) }}
                       </span>
 
                       <span>
-                        · Lang: {{ courseVoiceLangLabel }}
+                        {{ $t('ui-lang') }} {{ courseVoiceLangLabel }}
                       </span>
 
                       <span>
-                        · Voice: {{ courseVoiceNameLabel }}
+                        {{ $t('ui-voice-label') }} {{ courseVoiceNameLabel }}
                       </span>
                     </div>
                   </div>
@@ -1448,7 +1452,7 @@ const formatFileSize = (size) => {
                     @click="generateVoiceOver"
                   >
                     <i class="ri-sparkling-line me-1"></i>
-                    Generate Audio
+                    {{ $t('ui-generate-audio') }}
                   </BButton>
 
                   <BButton
@@ -1463,15 +1467,15 @@ const formatFileSize = (size) => {
                 </div>
 
                 <p v-if="!isEditing" class="text-muted small mt-2 mb-0">
-                  Save the slide first, then generate the audio.
+                  {{ $t('ui-save-the-slide-first-then-generate-the-audio') }}
                 </p>
               </div>
             </div>
 
             <div class="publish-card mb-3">
               <div>
-                <h6 class="mb-1">Preview</h6>
-                <p class="text-muted mb-0">Allow learners to preview this slide.</p>
+                <h6 class="mb-1">{{ $t('t-preview') }}</h6>
+                <p class="text-muted mb-0">{{ $t('ui-allow-learners-to-preview-this-slide') }}</p>
               </div>
 
               <div class="form-check form-switch">
@@ -1486,8 +1490,8 @@ const formatFileSize = (size) => {
 
             <div class="publish-card mb-3">
               <div>
-                <h6 class="mb-1">Mandatory</h6>
-                <p class="text-muted mb-0">Learners must complete this slide.</p>
+                <h6 class="mb-1">{{ $t('ui-mandatory') }}</h6>
+                <p class="text-muted mb-0">{{ $t('ui-learners-must-complete-this-slide') }}</p>
               </div>
 
               <div class="form-check form-switch">
@@ -1502,8 +1506,8 @@ const formatFileSize = (size) => {
 
             <div class="publish-card mb-3">
               <div>
-                <h6 class="mb-1">Downloadable</h6>
-                <p class="text-muted mb-0">Allow file download when available.</p>
+                <h6 class="mb-1">{{ $t('ui-downloadable') }}</h6>
+                <p class="text-muted mb-0">{{ $t('ui-allow-file-download-when-available') }}</p>
               </div>
 
               <div class="form-check form-switch">
@@ -1518,8 +1522,8 @@ const formatFileSize = (size) => {
 
             <div class="publish-card mb-3">
               <div>
-                <h6 class="mb-1">Active</h6>
-                <p class="text-muted mb-0">Show this slide in the course.</p>
+                <h6 class="mb-1">{{ $t('t-active') }}</h6>
+                <p class="text-muted mb-0">{{ $t('ui-show-this-slide-in-the-course') }}</p>
               </div>
 
               <div class="form-check form-switch">
@@ -1554,7 +1558,7 @@ const formatFileSize = (size) => {
                 class="builder-action-btn"
                 @click="resetSlideForm"
               >
-                Cancel
+                {{ $t('ui-cancel') }}
               </BButton>
             </div>
           </form>

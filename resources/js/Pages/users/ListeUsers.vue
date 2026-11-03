@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -131,7 +135,7 @@ const formatDate = date => {
     return '-'
   }
 
-  return parsed.toLocaleDateString('en-GB', {
+  return parsed.toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -346,8 +350,8 @@ const handleDeleteData = () => {
       onSuccess: () => {
         Swal.fire({
           icon: 'success',
-          title: 'Deleted',
-          text: 'User deleted successfully.',
+          title: t('ui-deleted'),
+          text: t('ui-user-deleted-successfully'),
           timer: 2000,
           showConfirmButton: false,
         })
@@ -355,8 +359,8 @@ const handleDeleteData = () => {
       onError: () => {
         Swal.fire({
           icon: 'error',
-          title: 'Error',
-          text: 'An error occurred while deleting the user.',
+          title: t('t-error'),
+          text: t('ui-an-error-occurred-while-deleting-the-user'),
         })
       },
       onFinish: closeDeleteModal,
@@ -378,10 +382,10 @@ const handleDeleteData = () => {
 
               <div>
                 <h5 class="mb-1 fw-semibold">
-                  Users
+                  {{ $t('ui-users') }}
                 </h5>
                 <p class="text-muted mb-0">
-                  Manage users, companies, roles and accounts.
+                  {{ $t('ui-manage-users-companies-roles-and-accounts') }}
                 </p>
               </div>
             </div>
@@ -397,7 +401,7 @@ const handleDeleteData = () => {
                   class="form-select"
                 >
                   <option value="">
-                    All companies
+                    {{ $t('ui-all-companies') }}
                   </option>
 
                   <option
@@ -415,7 +419,7 @@ const handleDeleteData = () => {
                   v-model="searchQuery"
                   type="text"
                   class="form-control"
-                  placeholder="Search user..."
+                  :placeholder="$t('ui-search-user')"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -428,7 +432,7 @@ const handleDeleteData = () => {
                 @click="toggleModal"
               >
                 <i class="ri-add-line me-1"></i>
-                Add User
+                {{ $t('ui-add-user') }}
               </BButton>
             </div>
           </BCol>
@@ -445,7 +449,7 @@ const handleDeleteData = () => {
                     class="sort user-column"
                     @click="onSort('full_name')"
                   >
-                    User
+                    {{ $t('ui-user') }}
                     <i
                       :class="getSortIcon('full_name')"
                       class="ms-1"
@@ -456,7 +460,7 @@ const handleDeleteData = () => {
                     class="sort organization-column"
                     @click="onSort('company')"
                   >
-                    Organization
+                    {{ $t('ui-organization') }}
                     <i
                       :class="getSortIcon('company')"
                       class="ms-1"
@@ -467,7 +471,7 @@ const handleDeleteData = () => {
                     class="sort identity-column"
                     @click="onSort('date_of_birth')"
                   >
-                    Identity
+                    {{ $t('ui-identity') }}
                     <i
                       :class="getSortIcon('date_of_birth')"
                       class="ms-1"
@@ -478,7 +482,7 @@ const handleDeleteData = () => {
                     class="sort account-column text-center"
                     @click="onSort('status')"
                   >
-                    Account
+                    {{ $t('ui-account') }}
                     <i
                       :class="getSortIcon('status')"
                       class="ms-1"
@@ -486,7 +490,7 @@ const handleDeleteData = () => {
                   </th>
 
                   <th class="actions-column text-center">
-                    Actions
+                    {{ $t('ui-actions') }}
                   </th>
                 </tr>
               </thead>
@@ -599,8 +603,8 @@ const handleDeleteData = () => {
                         ></i>
                         {{
                           data.email_verified_at
-                            ? 'Verified'
-                            : 'Pending'
+                            ? $t('ui-verified')
+                            : $t('t-pending')
                         }}
                       </span>
 
@@ -618,7 +622,7 @@ const handleDeleteData = () => {
                         </div>
 
                         <span v-else class="text-muted small">
-                          No role
+                          {{ $t('ui-no-role') }}
                         </span>
                         
                     </div>
@@ -632,7 +636,7 @@ const handleDeleteData = () => {
                         variant="soft-primary"
                         size="sm"
                         class="action-btn"
-                        title="Edit user"
+                        :title="$t('ui-edit-user')"
                         @click="triggerShowEdit(data)"
                       >
                         <i class="ri-pencil-fill"></i>
@@ -643,7 +647,7 @@ const handleDeleteData = () => {
                         variant="soft-danger"
                         size="sm"
                         class="action-btn"
-                        title="Delete user"
+                        :title="$t('ui-delete-user')"
                         @click="deleteData(data)"
                       >
                         <i class="ri-delete-bin-fill"></i>
@@ -691,7 +695,7 @@ const handleDeleteData = () => {
                   variant="soft-primary"
                   size="sm"
                   class="action-btn"
-                  title="Edit user"
+                  :title="$t('ui-edit-user')"
                   @click="triggerShowEdit(data)"
                 >
                   <i class="ri-pencil-fill"></i>
@@ -702,7 +706,7 @@ const handleDeleteData = () => {
                   variant="soft-danger"
                   size="sm"
                   class="action-btn"
-                  title="Delete user"
+                  :title="$t('ui-delete-user')"
                   @click="deleteData(data)"
                 >
                   <i class="ri-delete-bin-fill"></i>
@@ -722,8 +726,8 @@ const handleDeleteData = () => {
               >
                 {{
                   data.email_verified_at
-                    ? 'Verified'
-                    : 'Pending'
+                    ? $t('ui-verified')
+                    : $t('t-pending')
                 }}
               </span>
 
@@ -741,7 +745,7 @@ const handleDeleteData = () => {
               </div>
 
               <span v-else class="text-muted small">
-                No role
+                {{ $t('ui-no-role') }}
               </span>
             </div>
 
@@ -749,11 +753,11 @@ const handleDeleteData = () => {
               <div class="mobile-group">
                 <div class="mobile-group-title">
                   <i class="ri-building-line"></i>
-                  Organization
+                  {{ $t('ui-organization') }}
                 </div>
 
                 <div class="mobile-item">
-                  <span>Company</span>
+                  <span>{{ $t('ui-company') }}</span>
                   <strong>
                     {{ getCompanyName(data) }}
                   </strong>
@@ -765,25 +769,25 @@ const handleDeleteData = () => {
               <div class="mobile-group">
                 <div class="mobile-group-title">
                   <i class="ri-profile-line"></i>
-                  Identity
+                  {{ $t('ui-identity') }}
                 </div>
 
                 <div class="mobile-item">
-                  <span>Date of birth</span>
+                  <span>{{ $t('ui-date-of-birth') }}</span>
                   <strong>
                     {{ formatDate(data.date_of_birth) }}
                   </strong>
                 </div>
 
                 <div class="mobile-item">
-                  <span>Place of birth</span>
+                  <span>{{ $t('ui-place-of-birth') }}</span>
                   <strong>
                     {{ data.place_of_birth || '-' }}
                   </strong>
                 </div>
 
                 <div class="mobile-item">
-                  <span>Country</span>
+                  <span>{{ $t('ui-country') }}</span>
                   <strong>
                     {{ data.country || '-' }}
                   </strong>
@@ -806,10 +810,10 @@ const handleDeleteData = () => {
           />
 
           <h5 class="mt-3 mb-1">
-            No users found
+            {{ $t('ui-no-users-found') }}
           </h5>
           <p class="text-muted mb-0">
-            Try changing your search or company filter.
+            {{ $t('ui-try-changing-your-search-or-company-filter') }}
           </p>
         </div>
 
@@ -818,15 +822,15 @@ const handleDeleteData = () => {
           class="pagination-wrapper"
         >
           <div class="text-muted">
-            Showing
+            {{ $t('ui-showing') }}
             <span class="fw-semibold">
               {{ paginatedData.length }}
             </span>
-            of
+            {{ $t('ui-of') }}
             <span class="fw-semibold">
               {{ filteredData.length }}
             </span>
-            result(s)
+            {{ $t('ui-result-s') }}
           </div>
 
           <ul class="pagination mb-0">
@@ -915,9 +919,9 @@ const handleDeleteData = () => {
       />
 
       <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-        <h4>Are you sure?</h4>
+        <h4>{{ $t('ui-are-you-sure') }}</h4>
         <p class="text-muted mx-4 mb-0">
-          You will not be able to restore this user.
+          {{ $t('ui-you-will-not-be-able-to-restore-this-user') }}
         </p>
       </div>
     </div>
@@ -928,7 +932,7 @@ const handleDeleteData = () => {
         class="btn w-sm btn-light"
         @click="closeDeleteModal"
       >
-        Cancel
+        {{ $t('ui-cancel') }}
       </button>
 
       <button
@@ -936,7 +940,7 @@ const handleDeleteData = () => {
         class="btn w-sm btn-danger"
         @click="handleDeleteData"
       >
-        Yes, delete
+        {{ $t('ui-yes-delete') }}
       </button>
     </div>
   </BModal>

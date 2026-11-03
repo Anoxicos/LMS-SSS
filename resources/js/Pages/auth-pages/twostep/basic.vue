@@ -41,7 +41,7 @@ export default {
                   <img src="@assets/images/logo_safesky blue.webp" alt="" height="20">
                 </Link>
               </div>
-              <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
+              <p class="mt-3 fs-15 fw-medium">{{ $t('ui-premium-admin-dashboard-template') }}</p>
             </div>
           </BCol>
         </BRow>
@@ -61,7 +61,7 @@ export default {
 
                 <div class="p-2 mt-4">
                   <div class="text-muted text-center mb-4 mx-lg-3">
-                    <h4 class="">Verify Your Email</h4>
+                    <h4 class="">{{ $t('t-verify-your-email') }}</h4>
                     <p>Please enter the 4 digit code sent to <span class="fw-semibold">example@abc.com</span></p>
                   </div>
 
@@ -98,7 +98,7 @@ export default {
                   </form>
 
                   <div class="mt-3">
-                    <BButton type="button" variant="primary" class="w-100">Confirm</BButton>
+                    <BButton type="button" variant="primary" class="w-100">{{ $t('ui-confirm') }}</BButton>
                   </div>
                 </div>
               </BCardBody>
@@ -119,7 +119,7 @@ export default {
         <BRow>
           <BCol lg="12">
             <div class="text-center">
-              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
             </div>
           </BCol>
         </BRow>

@@ -1,9 +1,13 @@
 <script setup>
+import { formatCourseLabel } from '@/composables/course-labels'
 import { ref, computed, watch } from 'vue'
 import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 import { usePermissions } from '@/composables/permissions'
@@ -87,7 +91,7 @@ const getScormClass = () => {
 const formatDate = (date) => {
   if (!date) return '-'
 
-  return new Date(date).toLocaleDateString('en-GB', {
+  return new Date(date).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -98,7 +102,7 @@ const formatPrice = (course) => {
   const price = Number(course.price || 0)
 
   if (course.type !== 'paid' || price === 0) {
-    return 'Free'
+    return t('t-free')
   }
 
   return `${price.toFixed(2)} ${course.currency || 'MAD'}`
@@ -203,8 +207,8 @@ const handleDeleteData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Deleted',
-        text: 'SCORM course deleted successfully.',
+        title: t('ui-deleted'),
+        text: t('ui-scorm-course-deleted-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -212,8 +216,8 @@ const handleDeleteData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please try again.',
+        title: t('t-error'),
+        text: t('t-try-again'),
         timer: 3000,
         showConfirmButton: false,
       })
@@ -279,8 +283,8 @@ const onSort = (column) => {
 
 <template>
   <Layout>
-    <Head title="SCORM Courses" />
-    <PageHeader title="SCORM Courses" pageTitle="LMS" />
+    <Head :title="$t('ui-scorm-courses')" />
+    <PageHeader :title="$t('ui-scorm-courses')" :page-title="$t('ui-lms')" />
 
     <div>
       <BCard class="course-card border-0 shadow-sm">
@@ -294,9 +298,9 @@ const onSort = (column) => {
                 </div>
 
                 <div>
-                  <h5 class="mb-1 fw-semibold">SCORM Courses</h5>
+                  <h5 class="mb-1 fw-semibold">{{ $t('ui-scorm-courses') }}</h5>
                   <p class="text-muted mb-0">
-                    Manage SCORM packages, launch files, versions, and publication status.
+                    {{ $t('ui-manage-scorm-packages-launch-files-versions-and-public') }}
                   </p>
                 </div>
               </div>
@@ -309,7 +313,7 @@ const onSort = (column) => {
                     v-model="searchQuery"
                     type="text"
                     class="form-control"
-                    placeholder="Search course..."
+                    :placeholder="$t('ui-search-course')"
                   />
                   <i class="ri-search-line search-icon"></i>
                 </div>
@@ -320,7 +324,7 @@ const onSort = (column) => {
                   class="btn btn-primary add-btn course-add-btn"
                 >
                   <i class="ri-add-line align-bottom me-1"></i>
-                  Add 
+                  {{ $t('ui-add') }} 
                 </Link>
               </div>
             </BCol>
@@ -335,39 +339,39 @@ const onSort = (column) => {
                 <thead class="course-head">
                   <tr>
                     <th class="sort" @click="onSort('title')">
-                      Course
+                      {{ $t('ui-course') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
                     <th class="sort" @click="onSort('category')">
-                      Category
+                      {{ $t('ui-category') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
                    
 
                     <th class="sort" @click="onSort('type')">
-                      Type
+                      {{ $t('ui-type') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
                     <th class="sort" @click="onSort('price')">
-                      Price
+                      {{ $t('ui-price') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
                     <th class="sort text-center" @click="onSort('is_published')">
-                      Status
+                      {{ $t('ui-status') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
                     <th class="sort" @click="onSort('created_at')">
-                      Created
+                      {{ $t('ui-created') }}
                       <i class="ri-arrow-up-down-line ms-1"></i>
                     </th>
 
                     <th class="text-center">
-                      Actions
+                      {{ $t('ui-actions') }}
                     </th>
                   </tr>
                 </thead>
@@ -383,7 +387,7 @@ const onSort = (column) => {
                           <img
                             v-if="getCourseImage(course)"
                             :src="getCourseImage(course)"
-                            alt="Course image"
+                            :alt="$t('t-course-image')"
                             class="course-image"
                           />
 
@@ -401,9 +405,9 @@ const onSort = (column) => {
                           </h6>
 
                           <small class="text-muted">
-                            {{ course.training_type || '-' }}
+                            {{ formatCourseLabel(course.training_type) }}
                             <span v-if="course.skill_level">
-                              · {{ course.skill_level }}
+                              · {{ formatCourseLabel(course.skill_level) }}
                             </span>
                           </small>
                         </div>
@@ -420,7 +424,7 @@ const onSort = (column) => {
                     <td>
                       <span :class="getTypeClass(course.type)">
                         <i class="ri-graduation-cap-line me-1"></i>
-                        {{ course.type || '-' }}
+                        {{ course.type === 'paid' ? $t('ui-paid') : course.type ? $t('t-free') : '-' }}
                       </span>
                     </td>
 
@@ -435,7 +439,7 @@ const onSort = (column) => {
                         <i
                           :class="course.is_published ? 'ri-checkbox-circle-line me-1' : 'ri-draft-line me-1'"
                         ></i>
-                        {{ course.is_published ? 'Published' : 'Draft' }}
+                        {{ course.is_published ? $t('ui-published') : $t('ui-draft') }}
                       </span>
                     </td>
 
@@ -450,7 +454,7 @@ const onSort = (column) => {
                         <Link
                           :href="route('courses.scorm.show', course.hashid)"
                           class="btn btn-sm btn-soft-info action-btn"
-                          title="View"
+                          :title="$t('ui-view')"
                         >
                           <i class="ri-eye-line"></i>
                         </Link>
@@ -459,7 +463,7 @@ const onSort = (column) => {
                           v-if="hasPermission('update course')"
                           :href="route('courses.scorm.edit', course.hashid)"
                           class="btn btn-sm btn-soft-primary action-btn"
-                          title="Edit"
+                          :title="$t('ui-edit')"
                         >
                           <i class="ri-pencil-fill"></i>
                         </Link>
@@ -469,7 +473,7 @@ const onSort = (column) => {
                           variant="soft-danger"
                           size="sm"
                           class="action-btn"
-                          title="Delete"
+                          :title="$t('ui-delete')"
                           @click="deleteData(course)"
                         >
                           <i class="ri-delete-bin-fill"></i>
@@ -495,7 +499,7 @@ const onSort = (column) => {
                     <img
                       v-if="getCourseImage(course)"
                       :src="getCourseImage(course)"
-                      alt="Course image"
+                      :alt="$t('t-course-image')"
                       class="course-image"
                     />
 
@@ -514,11 +518,11 @@ const onSort = (column) => {
 
                     <div class="d-flex flex-wrap gap-2">
                       <span :class="getStatusClass(course.is_published)">
-                        {{ course.is_published ? 'Published' : 'Draft' }}
+                        {{ course.is_published ? $t('ui-published') : $t('ui-draft') }}
                       </span>
 
                       <span :class="getScormClass()">
-                        SCORM
+                        {{ $t('ui-scorm') }}
                       </span>
                     </div>
                   </div>
@@ -528,7 +532,7 @@ const onSort = (column) => {
                   <Link
                     :href="route('courses.scorm.show', course.hashid)"
                     class="btn btn-sm btn-soft-info action-btn"
-                    title="View"
+                    :title="$t('ui-view')"
                   >
                     <i class="ri-eye-line"></i>
                   </Link>
@@ -537,7 +541,7 @@ const onSort = (column) => {
                     v-if="hasPermission('update course')"
                     :href="route('courses.scorm.edit', course.hashid)"
                     class="btn btn-sm btn-soft-primary action-btn"
-                    title="Edit"
+                    :title="$t('ui-edit')"
                   >
                     <i class="ri-pencil-fill"></i>
                   </Link>
@@ -547,7 +551,7 @@ const onSort = (column) => {
                     variant="soft-danger"
                     size="sm"
                     class="action-btn"
-                    title="Delete"
+                    :title="$t('ui-delete')"
                     @click="deleteData(course)"
                   >
                     <i class="ri-delete-bin-fill"></i>
@@ -559,7 +563,7 @@ const onSort = (column) => {
                 <div class="course-mobile-item">
                   <span class="course-mobile-label">
                     <i class="ri-price-tag-3-line me-1"></i>
-                    Category
+                    {{ $t('ui-category') }}
                   </span>
 
                   <span class="category-badge">
@@ -570,7 +574,7 @@ const onSort = (column) => {
                 <div class="course-mobile-item">
                   <span class="course-mobile-label">
                     <i class="ri-code-box-line me-1"></i>
-                    Version
+                    {{ $t('ui-version') }}
                   </span>
 
                   <span :class="getScormClass()">
@@ -581,7 +585,7 @@ const onSort = (column) => {
                 <div class="course-mobile-item">
                   <span class="course-mobile-label">
                     <i class="ri-file-zip-line me-1"></i>
-                    Package
+                    {{ $t('ui-package') }}
                   </span>
 
                   <span class="course-mobile-value">
@@ -592,18 +596,18 @@ const onSort = (column) => {
                 <div class="course-mobile-item">
                   <span class="course-mobile-label">
                     <i class="ri-graduation-cap-line me-1"></i>
-                    Type
+                    {{ $t('ui-type') }}
                   </span>
 
                   <span :class="getTypeClass(course.type)">
-                    {{ course.type || '-' }}
+                    {{ course.type === 'paid' ? $t('ui-paid') : course.type ? $t('t-free') : '-' }}
                   </span>
                 </div>
 
                 <div class="course-mobile-item">
                   <span class="course-mobile-label">
                     <i class="ri-money-dollar-circle-line me-1"></i>
-                    Price
+                    {{ $t('ui-price') }}
                   </span>
 
                   <span class="price-badge">
@@ -614,7 +618,7 @@ const onSort = (column) => {
                 <div class="course-mobile-item">
                   <span class="course-mobile-label">
                     <i class="ri-calendar-line me-1"></i>
-                    Created
+                    {{ $t('ui-created') }}
                   </span>
 
                   <span class="course-mobile-value">
@@ -634,9 +638,9 @@ const onSort = (column) => {
               <i class="ri-code-box-line"></i>
             </div>
 
-            <h5 class="mt-3 mb-1">No SCORM courses found</h5>
+            <h5 class="mt-3 mb-1">{{ $t('ui-no-scorm-courses-found') }}</h5>
             <p class="text-muted mb-0">
-              Try changing your search keywords or create your first SCORM course.
+              {{ $t('ui-try-changing-your-search-keywords-or-create-your-first-scorm-course') }}
             </p>
 
             <Link
@@ -645,7 +649,7 @@ const onSort = (column) => {
               class="btn btn-primary mt-3"
             >
               <i class="ri-add-line me-1"></i>
-              Add SCORM Course
+              {{ $t('ui-add-scorm-course') }}
             </Link>
           </div>
 
@@ -655,11 +659,11 @@ const onSort = (column) => {
             class="course-pagination"
           >
             <div class="text-muted course-pagination-text">
-              Showing
+              {{ $t('ui-showing') }}
               <span class="fw-semibold">{{ paginatedData.length }}</span>
-              of
+              {{ $t('ui-of') }}
               <span class="fw-semibold">{{ filtereData.length }}</span>
-              result(s)
+              {{ $t('ui-result-s') }}
             </div>
 
             <ul class="pagination listjs-pagination mb-0">
@@ -722,9 +726,9 @@ const onSort = (column) => {
           </div>
 
           <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-            <h4>Are you sure?</h4>
+            <h4>{{ $t('ui-are-you-sure') }}</h4>
             <p class="text-muted mx-4 mb-0">
-              This SCORM course and its package files will be deleted.
+              {{ $t('ui-this-scorm-course-and-its-package-files-will-be-deleted') }}
             </p>
           </div>
         </div>
@@ -735,7 +739,7 @@ const onSort = (column) => {
             class="btn w-sm btn-light"
             @click="deleteModal = false"
           >
-            Cancel
+            {{ $t('ui-cancel') }}
           </button>
 
           <button
@@ -743,7 +747,7 @@ const onSort = (column) => {
             class="btn w-sm btn-danger"
             @click="handleDeleteData"
           >
-            Yes, delete
+            {{ $t('ui-yes-delete') }}
           </button>
         </div>
       </BModal>

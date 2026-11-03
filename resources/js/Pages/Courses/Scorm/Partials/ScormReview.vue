@@ -39,8 +39,8 @@ const packageLabel = computed(() => {
 <template>
   <div class="builder-section">
     <div class="section-heading">
-      <h5>Review SCORM Course</h5>
-      <p>Check the course information, SCORM package and assessment plan before finishing.</p>
+      <h5>{{ $t('ui-review-scorm-course') }}</h5>
+      <p>{{ $t('ui-check-the-course-information-scorm-package-and-assessm') }}</p>
     </div>
 
     <div class="review-grid">
@@ -50,7 +50,7 @@ const packageLabel = computed(() => {
         </div>
 
         <div>
-          <span>Course</span>
+          <span>{{ $t('ui-course') }}</span>
           <h6>{{ form.title || 'Untitled SCORM course' }}</h6>
           <p>{{ selectedCategory?.name || 'No category selected' }}</p>
         </div>
@@ -62,7 +62,7 @@ const packageLabel = computed(() => {
         </div>
 
         <div>
-          <span>SCORM Package</span>
+          <span>{{ $t('ui-scorm-package') }}</span>
           <h6>{{ packageLabel }}</h6>
           <p>{{ form.scorm_version || 'Version not detected' }}</p>
         </div>
@@ -74,9 +74,9 @@ const packageLabel = computed(() => {
         </div>
 
         <div>
-          <span>Plan</span>
+          <span>{{ $t('ui-plan') }}</span>
           <h6>{{ form.plan?.name || 'No plan name' }}</h6>
-          <p>{{ planDetailsCount }} saved detail{{ planDetailsCount === 1 ? '' : 's' }}</p>
+          <p>{{ planDetailsCount }} {{ $t('ui-saved-detail') }}{{ planDetailsCount === 1 ? '' : 's' }}</p>
         </div>
       </div>
 
@@ -86,9 +86,9 @@ const packageLabel = computed(() => {
         </div>
 
         <div>
-          <span>Questions</span>
+          <span>{{ $t('ui-questions') }}</span>
           <h6>{{ globalQuestions }}</h6>
-          <p>Total questions configured in the plan</p>
+          <p>{{ $t('ui-total-questions-configured-in-the-plan') }}</p>
         </div>
       </div>
 
@@ -98,9 +98,9 @@ const packageLabel = computed(() => {
         </div>
 
         <div>
-          <span>Status</span>
-          <h6>{{ form.is_published ? 'Published' : 'Draft' }}</h6>
-          <p>Publication status</p>
+          <span>{{ $t('ui-status') }}</span>
+          <h6>{{ form.is_published ? $t('ui-published') : $t('ui-draft') }}</h6>
+          <p>{{ $t('ui-publication-status') }}</p>
         </div>
       </div>
     </div>
@@ -112,10 +112,10 @@ const packageLabel = computed(() => {
         </div>
 
         <div class="min-width-0">
-          <span class="text-muted d-block mb-1">Launch file</span>
+          <span class="text-muted d-block mb-1">{{ $t('ui-launch-file') }}</span>
           <h6 class="mb-1 text-break">{{ form.scorm_entry_file }}</h6>
           <p class="text-muted mb-0 text-break" v-if="form.scorm_identifier">
-            Identifier: {{ form.scorm_identifier }}
+            {{ $t('ui-identifier') }} {{ form.scorm_identifier }}
           </p>
         </div>
       </div>

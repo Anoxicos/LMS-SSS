@@ -136,13 +136,13 @@ class UserController extends Controller
                 $user->syncRoles([$validated['role']]);
             });
 
-            return back()->with('success', 'User added successfully.');
+            return back()->with('success', __('User added successfully.'));
         } catch (Throwable $exception) {
             $this->deletePublicFile($photoPath);
             report($exception);
 
             return back()->withErrors([
-                'error' => 'An error occurred while adding the user.',
+                'error' => __('An error occurred while adding the user.'),
             ]);
         }
     }
@@ -234,13 +234,13 @@ class UserController extends Controller
                 $this->deletePublicFile($oldPhotoPath);
             }
 
-            return back()->with('success', 'User updated successfully.');
+            return back()->with('success', __('User updated successfully.'));
         } catch (Throwable $exception) {
             $this->deletePublicFile($newPhotoPath);
             report($exception);
 
             return back()->withErrors([
-                'error' => 'An error occurred while updating the user.',
+                'error' => __('An error occurred while updating the user.'),
             ]);
         }
     }
@@ -264,12 +264,12 @@ class UserController extends Controller
 
             $this->deletePublicFile($photoPath);
 
-            return back()->with('success', 'User deleted successfully.');
+            return back()->with('success', __('User deleted successfully.'));
         } catch (Throwable $exception) {
             report($exception);
 
             return back()->withErrors([
-                'error' => 'An error occurred while deleting the user.',
+                'error' => __('An error occurred while deleting the user.'),
             ]);
         }
     }

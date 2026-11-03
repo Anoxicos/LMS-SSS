@@ -214,7 +214,7 @@ class CourseController extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while creating the course.',
+                    'error' => __('An error occurred while creating the course.'),
                 ])
                 ->withInput();
         }
@@ -228,7 +228,7 @@ class CourseController extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'Invalid course ID.',
+                    'error' => __('Invalid course ID.'),
                 ]);
         }
 
@@ -417,7 +417,7 @@ class CourseController extends Controller
             DB::rollBack();
 
             return back()->withErrors([
-                'error' => 'An error occurred while deleting the course.',
+                'error' => __('An error occurred while deleting the course.'),
             ]);
         }
     }
@@ -562,7 +562,7 @@ class CourseController extends Controller
                     'course' => $course->hashid,
                     'step' => 2,
                 ])
-                ->with('success', 'Course information has been updated successfully.');
+                ->with('success', __('Course information has been updated successfully.'));
         } catch (\Throwable $e) {
             DB::rollBack();
 
@@ -579,7 +579,7 @@ class CourseController extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while updating the course.',
+                    'error' => __('An error occurred while updating the course.'),
                 ])
                 ->withInput();
         }
@@ -604,12 +604,12 @@ class CourseController extends Controller
 
             return redirect()
                 ->route('courses.edit', ['course' => $course->hashid, 'step' => 2])
-                ->with('success', 'Chapter has been created successfully.');
+                ->with('success', __('Chapter has been created successfully.'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while creating the chapter.',
+                    'error' => __('An error occurred while creating the chapter.'),
                 ]);
         }
     }
@@ -631,12 +631,12 @@ class CourseController extends Controller
 
             return redirect()
                 ->route('courses.edit', ['course' => $course->hashid, 'step' => 2])
-                ->with('success', 'Chapter has been updated successfully.');
+                ->with('success', __('Chapter has been updated successfully.'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while updating the chapter.',
+                    'error' => __('An error occurred while updating the chapter.'),
                 ]);
         }
     }
@@ -659,12 +659,12 @@ class CourseController extends Controller
                 });
             return redirect()
                 ->route('courses.edit', ['course' => $course->hashid, 'step' => 2])
-                ->with('success', 'Chapter has been deleted successfully.');
+                ->with('success', __('Chapter has been deleted successfully.'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while deleting the chapter.',
+                    'error' => __('An error occurred while deleting the chapter.'),
                 ]);
         }
     }
@@ -690,12 +690,12 @@ class CourseController extends Controller
 
             return redirect()
                 ->route('courses.edit', ['course' => $course->hashid, 'step' => 2])
-                ->with('success', 'Chapters order has been updated successfully.');
+                ->with('success', __('Chapters order has been updated successfully.'));
         } catch (\Exception $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while reordering chapters.',
+                    'error' => __('An error occurred while reordering chapters.'),
                 ]);
         }
     }
@@ -865,7 +865,7 @@ class CourseController extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'voice_over' => 'Voice over is not enabled for this course.',
+                    'voice_over' => __('Voice over is not enabled for this course.'),
                 ]);
         }
 
@@ -879,7 +879,7 @@ class CourseController extends Controller
             return redirect()
                 ->back()
                 ->withErrors([
-                    'voice_over_text' => 'Voice over text is required.',
+                    'voice_over_text' => __('Voice over text is required.'),
                 ]);
         }
 
@@ -904,7 +904,7 @@ class CourseController extends Controller
                 return redirect()
                     ->back()
                     ->withErrors([
-                        'voice_over' => 'Generated audio content is empty.',
+                        'voice_over' => __('Generated audio content is empty.'),
                     ]);
             }
 
@@ -927,7 +927,7 @@ class CourseController extends Controller
                     'course' => $course->hashid,
                     'step' => 3,
                 ])
-                ->with('success', 'Voice over has been generated successfully.');
+                ->with('success', __('Voice over has been generated successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
@@ -964,12 +964,12 @@ class CourseController extends Controller
                     'course' => $course->hashid,
                     'step' => 3,
                 ])
-                ->with('success', 'Voice over audio has been deleted successfully.');
+                ->with('success', __('Voice over audio has been deleted successfully.'));
         } catch (\Throwable $e) {
             return redirect()
                 ->back()
                 ->withErrors([
-                    'error' => 'An error occurred while deleting voice over audio.',
+                    'error' => __('An error occurred while deleting voice over audio.'),
                 ]);
         }
     }
@@ -1101,7 +1101,7 @@ class CourseController extends Controller
                 'course' => $course->hashid,
                 'step' => $validated['next_step'] ?? 4,
             ])
-            ->with('success', 'Plan has been updated successfully.');
+            ->with('success', __('Plan has been updated successfully.'));
     }
 
     public function storePlanDetail(Request $request, Course $course)
@@ -1144,7 +1144,7 @@ class CourseController extends Controller
 
         return redirect()
             ->route('courses.edit', ['course' => $course->hashid, 'step' => 4])
-            ->with('success', 'Plan detail has been created successfully.');
+            ->with('success', __('Plan detail has been created successfully.'));
     }
 
     public function updatePlanDetail(Request $request, Course $course, PlanDetail $detail)
@@ -1167,7 +1167,7 @@ class CourseController extends Controller
 
         return redirect()
             ->route('courses.edit', ['course' => $course->hashid, 'step' => 4])
-            ->with('success', 'Plan detail has been updated successfully.');
+            ->with('success', __('Plan detail has been updated successfully.'));
     }
 
     public function destroyPlanDetail(Course $course, PlanDetail $detail)
@@ -1182,7 +1182,7 @@ class CourseController extends Controller
 
         return redirect()
             ->route('courses.edit', ['course' => $course->hashid, 'step' => 4])
-            ->with('success', 'Plan detail has been deleted successfully.');
+            ->with('success', __('Plan detail has been deleted successfully.'));
     }
 
     private function updatePlanTotals(Plan $plan): void

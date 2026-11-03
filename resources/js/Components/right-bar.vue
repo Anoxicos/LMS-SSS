@@ -578,7 +578,7 @@ export default {
     <div id="preloader">
       <div id="status">
         <div class="spinner-border text-primary avatar-sm" role="status">
-          <span class="visually-hidden">Loading...</span>
+          <span class="visually-hidden">{{ $t('ui-loading') }}</span>
         </div>
       </div>
     </div>
@@ -598,19 +598,19 @@ export default {
       footer-class="offcanvas-footer border-top p-3 text-center" placement="end" v-model="show">
       <template #header>
         <div class="me-2">
-          <h5 class="m-0 me-2 text-white">Theme Customizer</h5>
+          <h5 class="m-0 me-2 text-white">{{ $t('ui-theme-customizer') }}</h5>
         </div>
         <button type="button" class="btn-close btn-close-white ms-auto" id="customizerclose-btn" @click="click"></button>
       </template>
       <simplebar class="h-100">
         <div class="p-4">
-          <h6 class="mb-0 fw-semibold text-uppercase">Layout</h6>
-          <p class="text-muted">Choose your layout</p>
+          <h6 class="mb-0 fw-semibold text-uppercase">{{ $t('ui-layout') }}</h6>
+          <p class="text-muted">{{ $t('ui-choose-your-layout') }}</p>
 
           <BRow class="gy-3">
             <BCol cols="4">
               <div class="form-check card-radio">
-                <input id="customizer-layout01" name="data-layout" type="radio" value="vertical" class="form-check-input"
+                <input id="customizer-layout01" name="data-layout" type="radio" :value="$t('ui-vertical')" class="form-check-input"
                   v-model="layoutType" />
                 <label class="form-check-label p-0 avatar-md w-100" for="customizer-layout01">
                   <span class="d-flex gap-1 h-100">
@@ -631,11 +631,11 @@ export default {
                   </span>
                 </label>
               </div>
-              <h5 class="fs-13 text-center mt-2">Vertical</h5>
+              <h5 class="fs-13 text-center mt-2">{{ $t('ui-vertical') }}</h5>
             </BCol>
             <BCol cols="4">
               <div class="form-check card-radio">
-                <input id="customizer-layout02" name="data-layout" type="radio" value="horizontal"
+                <input id="customizer-layout02" name="data-layout" type="radio" :value="$t('ui-horizontal')"
                   class="form-check-input" v-model="layoutType" />
                 <label class="form-check-label p-0 avatar-md w-100" for="customizer-layout02">
                   <span class="d-flex h-100 flex-column gap-1">
@@ -649,7 +649,7 @@ export default {
                   </span>
                 </label>
               </div>
-              <h5 class="fs-13 text-center mt-2">Horizontal</h5>
+              <h5 class="fs-13 text-center mt-2">{{ $t('ui-horizontal') }}</h5>
             </BCol>
             <BCol cols="4">
               <div class="form-check card-radio">
@@ -682,7 +682,7 @@ export default {
                   </span>
                 </label>
               </div>
-              <h5 class="fs-13 text-center mt-2">Two Column</h5>
+              <h5 class="fs-13 text-center mt-2">{{ $t('ui-two-column') }}</h5>
             </BCol>
             <BCol cols="4">
               <div class="form-check card-radio">
@@ -707,18 +707,18 @@ export default {
                   </span>
                 </label>
               </div>
-              <h5 class="fs-13 text-center mt-2">Semi Box</h5>
+              <h5 class="fs-13 text-center mt-2">{{ $t('ui-semi-box') }}</h5>
             </BCol>
           </BRow>
 
-          <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Color Scheme</h6>
-          <p class="text-muted">Choose Light or Dark Scheme.</p>
+          <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-color-scheme') }}</h6>
+          <p class="text-muted">{{ $t('ui-choose-light-or-dark-scheme') }}</p>
 
           <div class="colorscheme-cardradio">
             <BRow>
               <BCol cols="4">
                 <div class="form-check card-radio">
-                  <input class="form-check-input" type="radio" name="data-bs-theme" id="layout-mode-light" value="light"
+                  <input class="form-check-input" type="radio" name="data-bs-theme" id="layout-mode-light" :value="$t('ui-light')"
                     v-model="mode" />
                   <label class="form-check-label p-0 avatar-md w-100" for="layout-mode-light">
                     <span class="d-flex gap-1 h-100">
@@ -739,13 +739,13 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Light</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-light') }}</h5>
               </BCol>
 
               <BCol cols="4">
                 <div class="form-check card-radio dark">
                   <input class="form-check-input" v-model="mode" type="radio" name="data-bs-theme" id="layout-mode-dark"
-                    value="dark" />
+                    :value="$t('ui-dark')" />
                   <label class="form-check-label p-0 avatar-md w-100 bg-dark" for="layout-mode-dark">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -765,19 +765,19 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Dark</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-dark') }}</h5>
               </BCol>
             </BRow>
           </div>
           <div id="sidebar-visibility" v-if="layoutType == 'semibox'">
-            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Visibility</h6>
-            <p class="text-muted">Choose show or Hidden sidebar.</p>
+            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-sidebar-visibility') }}</h6>
+            <p class="text-muted">{{ $t('ui-choose-show-or-hidden-sidebar') }}</p>
 
             <BRow>
               <BCol cols="4">
                 <div class="form-check card-radio">
                   <input class="form-check-input" type="radio" name="data-sidebar-visibility" id="sidebar-visibility-show"
-                    value="show" v-model="visibility" />
+                    :value="$t('ui-show')" v-model="visibility" />
                   <label class="form-check-label p-0 avatar-md w-100" for="sidebar-visibility-show">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0 p-1">
@@ -797,12 +797,12 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Show</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-show') }}</h5>
               </BCol>
               <BCol cols="4">
                 <div class="form-check card-radio">
                   <input class="form-check-input" type="radio" name="data-sidebar-visibility"
-                    id="sidebar-visibility-hidden" value="hidden" v-model="visibility" />
+                    id="sidebar-visibility-hidden" :value="$t('ui-hidden')" v-model="visibility" />
                   <label class="form-check-label p-0 avatar-md w-100 px-2" for="sidebar-visibility-hidden">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-grow-1">
@@ -814,20 +814,20 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Hidden</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-hidden') }}</h5>
               </BCol>
             </BRow>
           </div>
 
           <div v-if="layoutType == 'vertical' || layoutType == 'horizontal'" id="layout-width">
-            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Layout Width</h6>
-            <p class="text-muted">Choose Fluid or Boxed layout.</p>
+            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-layout-width') }}</h6>
+            <p class="text-muted">{{ $t('ui-choose-fluid-or-boxed-layout') }}</p>
 
             <BRow>
               <BCol cols="4">
                 <div class="form-check card-radio">
                   <input class="form-check-input" type="radio" v-model="layoutWidth" name="data-layout-width"
-                    id="layout-width-fluid" value="fluid" />
+                    id="layout-width-fluid" :value="$t('ui-fluid')" />
                   <label class="form-check-label p-0 avatar-md w-100" for="layout-width-fluid">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -847,12 +847,12 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Fluid</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-fluid') }}</h5>
               </BCol>
               <BCol cols="4">
                 <div class="form-check card-radio">
                   <input class="form-check-input" type="radio" v-model="layoutWidth" name="data-layout-width"
-                    id="layout-width-boxed" value="boxed" />
+                    id="layout-width-boxed" :value="$t('ui-boxed')" />
                   <label class="form-check-label p-0 avatar-md w-100 px-2" for="layout-width-boxed">
                     <span class="d-flex gap-1 h-100 border-start border-end">
                       <span class="flex-shrink-0">
@@ -872,36 +872,36 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Boxed</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-boxed') }}</h5>
               </BCol>
             </BRow>
           </div>
 
           <div v-if="layoutType != 'twocolumn'" id="layout-position">
             <h6 class="mt-4 mb-0 fw-semibold text-uppercase">
-              Layout Position
+              {{ $t('ui-layout-position') }}
             </h6>
             <p class="text-muted">
-              Choose Fixed or Scrollable Layout Position.
+              {{ $t('ui-choose-fixed-or-scrollable-layout-position') }}
             </p>
 
             <div class="btn-group radio" role="group">
-              <input type="radio" class="btn-check" name="data-layout-position" id="layout-position-fixed" value="fixed"
+              <input type="radio" class="btn-check" name="data-layout-position" id="layout-position-fixed" :value="$t('ui-fixed')"
                 v-model="position" />
-              <label class="btn btn-light w-sm" for="layout-position-fixed">Fixed</label>
+              <label class="btn btn-light w-sm" for="layout-position-fixed">{{ $t('ui-fixed') }}</label>
 
               <input type="radio" class="btn-check" name="data-layout-position" id="layout-position-scrollable"
-                value="scrollable" v-model="position" />
-              <label class="btn btn-light w-sm ms-0" for="layout-position-scrollable">Scrollable</label>
+                :value="$t('ui-scrollable')" v-model="position" />
+              <label class="btn btn-light w-sm ms-0" for="layout-position-scrollable">{{ $t('ui-scrollable') }}</label>
             </div>
           </div>
-          <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Topbar Color</h6>
-          <p class="text-muted">Choose Light or Dark Topbar Color.</p>
+          <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-topbar-color') }}</h6>
+          <p class="text-muted">{{ $t('ui-choose-light-or-dark-topbar-color') }}</p>
 
           <BRow>
             <BCol cols="4">
               <div class="form-check card-radio">
-                <input class="form-check-input" type="radio" name="data-topbar" id="topbar-color-light" value="light"
+                <input class="form-check-input" type="radio" name="data-topbar" id="topbar-color-light" :value="$t('ui-light')"
                   v-model="topbar" />
                 <label class="form-check-label p-0 avatar-md w-100" for="topbar-color-light">
                   <span class="d-flex gap-1 h-100">
@@ -929,11 +929,11 @@ export default {
                   </span>
                 </label>
               </div>
-              <h5 class="fs-13 text-center mt-2">Light</h5>
+              <h5 class="fs-13 text-center mt-2">{{ $t('ui-light') }}</h5>
             </BCol>
             <BCol cols="4">
               <div class="form-check card-radio">
-                <input class="form-check-input" type="radio" name="data-topbar" id="topbar-color-dark" value="dark"
+                <input class="form-check-input" type="radio" name="data-topbar" id="topbar-color-dark" :value="$t('ui-dark')"
                   v-model="topbar" />
                 <label class="form-check-label p-0 avatar-md w-100" for="topbar-color-dark">
                   <span class="d-flex gap-1 h-100">
@@ -961,12 +961,12 @@ export default {
                   </span>
                 </label>
               </div>
-              <h5 class="fs-13 text-center mt-2">Dark</h5>
+              <h5 class="fs-13 text-center mt-2">{{ $t('ui-dark') }}</h5>
             </BCol>
           </BRow>
           <div v-if="layoutType == 'vertical' || (layoutType == 'semibox' && visibility == 'show')" id="sidebar-size">
-            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar Size</h6>
-            <p class="text-muted">Choose a size of Sidebar.</p>
+            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-sidebar-size') }}</h6>
+            <p class="text-muted">{{ $t('ui-choose-a-size-of-sidebar') }}</p>
 
             <BRow>
               <BCol cols="4">
@@ -999,7 +999,7 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Default</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-default') }}</h5>
               </BCol>
 
               <BCol cols="4">
@@ -1025,7 +1025,7 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Compact</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-compact') }}</h5>
               </BCol>
 
               <BCol cols="4">
@@ -1051,7 +1051,7 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Small (Icon View)</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-small-icon-view') }}</h5>
               </BCol>
 
               <BCol cols="4">
@@ -1077,20 +1077,20 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Small Hover View</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-small-hover-view') }}</h5>
               </BCol>
             </BRow>
           </div>
 
           <div v-if="layoutType == 'vertical'" id="sidebar-view">
-            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Sidebar View</h6>
-            <p class="text-muted">Choose Default or Detached Sidebar view.</p>
+            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-sidebar-view') }}</h6>
+            <p class="text-muted">{{ $t('ui-choose-default-or-detached-sidebar-view') }}</p>
 
             <BRow>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" v-model="sidebarView" type="radio" name="data-layout-style"
-                    id="sidebar-view-default" value="default" />
+                    id="sidebar-view-default" :value="$t('ui-default')" />
                   <label class="form-check-label p-0 avatar-md w-100" for="sidebar-view-default">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -1117,12 +1117,12 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Default</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-default') }}</h5>
               </BCol>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" v-model="sidebarView" type="radio" name="data-layout-style"
-                    id="sidebar-view-detached" value="detached" />
+                    id="sidebar-view-detached" :value="$t('ui-detached')" />
                   <label class="form-check-label p-0 avatar-md w-100" for="sidebar-view-detached">
                     <span class="d-flex h-100 flex-column">
                       <span class="
@@ -1164,7 +1164,7 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Detached</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-detached') }}</h5>
               </BCol>
             </BRow>
           </div>
@@ -1173,15 +1173,15 @@ export default {
             v-if="layoutType == 'vertical' || layoutType === 'twocolumn' || (layoutType === 'semibox' && visibility === 'show')"
             id="sidebar-color">
             <h6 class="mt-4 mb-0 fw-semibold text-uppercase">
-              Sidebar Color
+              {{ $t('ui-sidebar-color') }}
             </h6>
-            <p class="text-muted">Choose Ligth or Dark Sidebar Color.</p>
+            <p class="text-muted">{{ $t('ui-choose-ligth-or-dark-sidebar-color') }}</p>
 
             <BRow>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" v-model="sidebarColor" type="radio" name="data-sidebar"
-                    id="sidebar-color-light" value="light" @click="onSideBarColorClick('light')" />
+                    id="sidebar-color-light" :value="$t('ui-light')" @click="onSideBarColorClick('light')" />
                   <label class="form-check-label p-0 avatar-md w-100" for="sidebar-color-light">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -1201,12 +1201,12 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Light</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-light') }}</h5>
               </BCol>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" v-model="sidebarColor" type="radio" name="data-sidebar"
-                    id="sidebar-color-dark" value="dark" @click="onSideBarColorClick('light')" />
+                    id="sidebar-color-dark" :value="$t('ui-dark')" @click="onSideBarColorClick('light')" />
                   <label class="form-check-label p-0 avatar-md w-100" for="sidebar-color-dark">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -1226,7 +1226,7 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Dark</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-dark') }}</h5>
               </BCol>
               <BCol cols="4">
                 <button class="btn btn-link avatar-md w-100 p-0 overflow-hidden border collapsed " type="button"
@@ -1248,7 +1248,7 @@ export default {
                     </span>
                   </span>
                 </button>
-                <h5 class="fs-13 text-center mt-2">Gradient</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-gradient') }}</h5>
               </BCol>
             </BRow>
             <BCollapse v-if="showGradients" id="collapseBgGradient">
@@ -1256,7 +1256,7 @@ export default {
 
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" type="radio" v-model="sidebarColor" name="data-sidebar"
-                    id="sidebar-color-gradient" value="gradient">
+                    id="sidebar-color-gradient" :value="$t('ui-gradient')">
                   <label class="form-check-label p-0 avatar-xs rounded-circle" for="sidebar-color-gradient">
                     <span class="avatar-title rounded-circle bg-vertical-gradient"></span>
                   </label>
@@ -1287,14 +1287,14 @@ export default {
           </div>
 
           <div id="body-img">
-            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Background Image</h6>
-            <p class="text-muted">Choose a body background image.</p>
+            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-background-image') }}</h6>
+            <p class="text-muted">{{ $t('ui-choose-a-body-background-image') }}</p>
 
             <BRow>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" v-model="bodybg" type="radio" name="data-body-image" id="body-img-none"
-                    value="none">
+                    :value="$t('ui-none')">
                   <label class="form-check-label p-0 avatar-md w-100" data-body-image="none" for="body-img-none">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -1314,7 +1314,7 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">None</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-none') }}</h5>
               </BCol>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
@@ -1323,7 +1323,7 @@ export default {
                   <label class="form-check-label p-0 avatar-md w-100" for="body-img-one">
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">One</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-one') }}</h5>
               </BCol>
 
               <BCol cols="4">
@@ -1333,7 +1333,7 @@ export default {
                   <label class="form-check-label p-0 avatar-md w-100" for="body-img-two">
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Two</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-two') }}</h5>
               </BCol>
 
               <BCol cols="4">
@@ -1343,20 +1343,20 @@ export default {
                   <label class="form-check-label p-0 avatar-md w-100" for="body-img-three">
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Three</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-three') }}</h5>
               </BCol>
             </BRow>
           </div>
 
           <div id="preloader-menu">
-            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">Preloader</h6>
-            <p class="text-muted">Choose a preloader.</p>
+            <h6 class="mt-4 mb-0 fw-semibold text-uppercase">{{ $t('ui-preloader') }}</h6>
+            <p class="text-muted">{{ $t('ui-choose-a-preloader') }}</p>
 
             <BRow>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" v-model="preloader" type="radio" name="data-preloader"
-                    id="preloader-view-custom" value="enable">
+                    id="preloader-view-custom" :value="$t('ui-enable')">
                   <label class="form-check-label p-0 avatar-md w-100" for="preloader-view-custom">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -1376,17 +1376,17 @@ export default {
                     </span>
                     <div id="status" class="d-flex align-items-center justify-content-center">
                       <div class="spinner-border text-primary avatar-xxs m-auto" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{{ $t('ui-loading') }}</span>
                       </div>
                     </div>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Enable</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-enable') }}</h5>
               </BCol>
               <BCol cols="4">
                 <div class="form-check sidebar-setting card-radio">
                   <input class="form-check-input" v-model="preloader" type="radio" name="data-preloader"
-                    id="preloader-view-none" value="disable">
+                    id="preloader-view-none" :value="$t('ui-disable')">
                   <label class="form-check-label p-0 avatar-md w-100" for="preloader-view-none">
                     <span class="d-flex gap-1 h-100">
                       <span class="flex-shrink-0">
@@ -1406,7 +1406,7 @@ export default {
                     </span>
                   </label>
                 </div>
-                <h5 class="fs-13 text-center mt-2">Disable</h5>
+                <h5 class="fs-13 text-center mt-2">{{ $t('ui-disable') }}</h5>
               </BCol>
             </BRow>
           </div>
@@ -1416,10 +1416,10 @@ export default {
       <template #footer>
         <BRow>
           <BCol cols="6">
-            <BButton type="button" variant="light" class="w-100" id="reset-layout" @click="resetLayout"> Reset </BButton>
+            <BButton type="button" variant="light" class="w-100" id="reset-layout" @click="resetLayout"> {{ $t('t-reset') }} </BButton>
           </BCol>
           <BCol cols="6">
-            <BButton type="button" variant="primary" class="w-100"> Preview </BButton>
+            <BButton type="button" variant="primary" class="w-100"> {{ $t('t-preview') }} </BButton>
           </BCol>
         </BRow>
       </template>

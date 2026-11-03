@@ -26,8 +26,8 @@ defineProps({
 
 <template>
   <Layout>
-    <Head title="Learners" />
-    <PageHeader title="Learners" pageTitle="Admin" />
+    <Head :title="$t('ui-learners')" />
+    <PageHeader :title="$t('ui-learners')" :page-title="$t('ui-admin')" />
 
     <BRow>
       <BCol xxl="12">

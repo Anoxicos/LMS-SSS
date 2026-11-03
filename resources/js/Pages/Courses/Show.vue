@@ -1,8 +1,12 @@
 <script setup>
+import { formatCourseLabel } from '@/composables/course-labels'
 import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 import './course-viewer.css'
@@ -119,7 +123,7 @@ const courseInitials = computed(() => {
 const formattedCreatedAt = computed(() => {
   if (!props.course.created_at) return '-'
 
-  return new Date(props.course.created_at).toLocaleDateString('en-GB', {
+  return new Date(props.course.created_at).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -130,7 +134,7 @@ const formattedPrice = computed(() => {
   const price = Number(props.course.price || 0)
 
   if (props.course.type !== 'paid' || price === 0) {
-    return 'Free'
+    return t('t-free')
   }
 
   return `${price.toFixed(2)} ${props.course.currency || ''}`
@@ -141,11 +145,11 @@ const courseStatusLabel = computed(() => {
 })
 
 const courseTypeLabel = computed(() => {
-  return props.course.type || '-'
+  return props.course.type === 'paid' ? t('ui-paid') : props.course.type ? t('t-free') : '-'
 })
 
 const voiceOverLabel = computed(() => {
-  return props.course.support_voice_over ? 'Supported' : 'Not Supported'
+  return props.course.support_voice_over ? t('ui-supported') : t('ui-not-supported')
 })
 
 const voiceOverAutoPlay = computed(() => {
@@ -536,7 +540,7 @@ onBeforeUnmount(() => {
 <template>
   <Layout>
     <Head :title="course.title" />
-    <PageHeader title="Course Details" pageTitle="Courses" />
+    <PageHeader :title="$t('ui-course-details')" :page-title="$t('ui-courses')" />
 
     <div class="course-viewer-page protected-content">
       <div class="course-admin-hero">
@@ -617,7 +621,7 @@ onBeforeUnmount(() => {
                 <i class="ri-graduation-cap-line"></i>
 
                 <div>
-                  <span>Type</span>
+                  <span>{{ $t('ui-type') }}</span>
                   <strong>{{ courseTypeLabel }}</strong>
                 </div>
               </div>
@@ -626,8 +630,8 @@ onBeforeUnmount(() => {
                 <i class="ri-computer-line"></i>
 
                 <div>
-                  <span>Training</span>
-                  <strong>{{ course.training_type || '-' }}</strong>
+                  <span>{{ $t('t-training') }}</span>
+                  <strong>{{ formatCourseLabel(course.training_type) }}</strong>
                 </div>
               </div>
 
@@ -635,8 +639,8 @@ onBeforeUnmount(() => {
                 <i class="ri-bar-chart-line"></i>
 
                 <div>
-                  <span>Level</span>
-                  <strong>{{ course.skill_level || '-' }}</strong>
+                  <span>{{ $t('ui-level') }}</span>
+                  <strong>{{ formatCourseLabel(course.skill_level) }}</strong>
                 </div>
               </div>
 
@@ -644,8 +648,8 @@ onBeforeUnmount(() => {
                 <i class="ri-translate-2"></i>
 
                 <div>
-                  <span>Language</span>
-                  <strong>{{ course.language || '-' }}</strong>
+                  <span>{{ $t('t-language') }}</span>
+                  <strong>{{ formatCourseLabel(course.language) }}</strong>
                 </div>
               </div>
 
@@ -653,7 +657,7 @@ onBeforeUnmount(() => {
                 <i class="ri-money-dollar-circle-line"></i>
 
                 <div>
-                  <span>Price</span>
+                  <span>{{ $t('t-price') }}</span>
                   <strong>{{ formattedPrice }}</strong>
                 </div>
               </div>
@@ -662,7 +666,7 @@ onBeforeUnmount(() => {
                 <i class="ri-list-check-2"></i>
 
                 <div>
-                  <span>Chapters</span>
+                  <span>{{ $t('t-chapters') }}</span>
                   <strong>{{ chapters.length }}</strong>
                 </div>
               </div>
@@ -671,7 +675,7 @@ onBeforeUnmount(() => {
                 <i class="ri-slideshow-line"></i>
 
                 <div>
-                  <span>Slides</span>
+                  <span>{{ $t('ui-slides') }}</span>
                   <strong>{{ totalSlides }}</strong>
                 </div>
               </div>
@@ -680,7 +684,7 @@ onBeforeUnmount(() => {
                 <i class="ri-line-chart-line"></i>
 
                 <div>
-                  <span>Progress</span>
+                  <span>{{ $t('t-progress') }}</span>
                   <strong>{{ progressPercent }}%</strong>
                 </div>
               </div>
@@ -694,7 +698,7 @@ onBeforeUnmount(() => {
             class="course-admin-action course-admin-action--light"
           >
             <i class="ri-arrow-left-line me-1"></i>
-            Back
+            {{ $t('t-back') }}
           </Link>
 
           <a
@@ -703,10 +707,10 @@ onBeforeUnmount(() => {
             target="_blank"
             rel="noopener noreferrer"
             class="course-admin-action course-admin-action--outline course-admin-action--syllabus"
-            title="Open syllabus PDF"
+            :title="$t('ui-open-syllabus-pdf')"
           >
             <i class="ri-file-pdf-2-line me-1"></i>
-              Syllabus
+              {{ $t('t-syllabus') }}
           </a>
 
           <Link
@@ -715,7 +719,7 @@ onBeforeUnmount(() => {
             class="course-admin-action course-admin-action--outline"
           >
             <i class="ri-edit-2-line me-1"></i>
-            Edit
+            {{ $t('t-edit') }}
           </Link>
         </div>
       </div>
@@ -727,7 +731,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div>
-            <span>Course Focus</span>
+            <span>{{ $t('t-course-focus') }}</span>
             <strong>{{ course.course_focus || 'Not specified' }}</strong>
           </div>
         </div>
@@ -738,7 +742,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div>
-            <span>Voice Over</span>
+            <span>{{ $t('ui-voice-over') }}</span>
             <strong>{{ voiceOverLabel }}</strong>
           </div>
         </div>
@@ -749,7 +753,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div>
-            <span>Audio Mode</span>
+            <span>{{ $t('ui-audio-mode') }}</span>
             <strong>
               {{
                 course.support_voice_over
@@ -768,7 +772,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div>
-            <span>Voice</span>
+            <span>{{ $t('ui-voice') }}</span>
             <strong>
               {{
                 course.support_voice_over
@@ -785,14 +789,14 @@ onBeforeUnmount(() => {
           <div class="chapters-sidebar">
             <div class="sidebar-title">
               <div>
-                <h6>Course Content</h6>
-                <span>{{ totalSlides }} total slides</span>
+                <h6>{{ $t('ui-course-content') }}</h6>
+                <span>{{ totalSlides }} {{ $t('ui-total-slides-label') }}</span>
               </div>
             </div>
 
             <div class="viewer-progress">
               <div class="viewer-progress-info">
-                <span>Progress</span>
+                <span>{{ $t('t-progress') }}</span>
                 <strong>{{ progressPercent }}%</strong>
               </div>
 
@@ -820,7 +824,7 @@ onBeforeUnmount(() => {
 
                   <p>
                     {{ chapter.slides?.length || 0 }}
-                    slide{{ Number(chapter.slides?.length || 0) > 1 ? 's' : '' }}
+                    {{ $t('ui-slide') }}{{ Number(chapter.slides?.length || 0) > 1 ? 's' : '' }}
                   </p>
                 </div>
               </div>
@@ -844,13 +848,13 @@ onBeforeUnmount(() => {
                   <i
                     v-if="slide.voice_over_enabled && slide.voice_over_audio_url"
                     class="ri-volume-up-line mini-voice-icon"
-                    title="Voice over available"
+                    :title="$t('ui-voice-over-available')"
                   ></i>
 
                   <i
                     v-if="slide.lesson_type === 'quiz'"
                     class="ri-question-answer-line mini-voice-icon"
-                    title="Quiz slide"
+                    :title="$t('ui-quiz-slide')"
                   ></i>
                 </button>
               </div>
@@ -867,7 +871,7 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="slide-progress-text">
-                Slide {{ currentGlobalSlideNumber }} / {{ totalSlides }}
+                {{ $t('ui-slide') }} {{ currentGlobalSlideNumber }} / {{ totalSlides }}
               </div>
             </div>
 
@@ -936,7 +940,7 @@ onBeforeUnmount(() => {
               class="slide-voice-over-empty"
             >
               <i class="ri-mic-off-line"></i>
-              <span>No voice over for this slide.</span>
+              <span>{{ $t('ui-no-voice-over-for-this-slide') }}</span>
             </div>
 
             <div class="slide-content-box">
@@ -958,7 +962,7 @@ onBeforeUnmount(() => {
 
                 <div v-else class="empty-slide-content">
                   <i class="ri-video-off-line"></i>
-                  <p>No video URL available.</p>
+                  <p>{{ $t('t-no-video-url') }}</p>
                 </div>
 
                 <div
@@ -990,7 +994,7 @@ onBeforeUnmount(() => {
                     <h6>{{ currentSlide.file_name || 'Protected file' }}</h6>
 
                     <p class="text-muted mb-0">
-                      Download is disabled for this course file.
+                      {{ $t('ui-download-is-disabled-for-this-course-file') }}
                     </p>
                   </div>
                 </div>
@@ -1002,7 +1006,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div>
-                  <h6>External Resource</h6>
+                  <h6>{{ $t('ui-external-resource') }}</h6>
 
                   <a
                     v-if="currentSlide.external_url"
@@ -1011,11 +1015,11 @@ onBeforeUnmount(() => {
                     class="btn btn-primary btn-sm"
                   >
                     <i class="ri-external-link-line me-1"></i>
-                    Open Link
+                    {{ $t('ui-open-link') }}
                   </a>
 
                   <p v-else class="text-muted mb-0">
-                    No external URL available.
+                    {{ $t('t-no-external-url') }}
                   </p>
                 </div>
               </div>
@@ -1025,27 +1029,27 @@ onBeforeUnmount(() => {
                   <div>
                     <span class="admin-quiz-kicker">
                       <i class="ri-question-answer-line"></i>
-                      Quiz Structure
+                      {{ $t('ui-quiz-structure') }}
                     </span>
 
-                    <h5>Comprehension Questions</h5>
+                    <h5>{{ $t('ui-comprehension-questions') }}</h5>
                   </div>
 
                   <div class="admin-quiz-count">
-                    <span>Questions</span>
+                    <span>{{ $t('ui-questions') }}</span>
                     <strong>{{ totalQuestions }}</strong>
                   </div>
                 </div>
 
                 <div v-if="!hasQuizQuestions" class="empty-slide-content">
                   <i class="ri-question-line"></i>
-                  <p>No questions available for this quiz slide.</p>
+                  <p>{{ $t('ui-no-questions-available-for-this-quiz-slide') }}</p>
                 </div>
 
                 <div v-else>
                   <div class="admin-question-progress">
                     <span>
-                      Question {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}
+                      {{ $t('t-question') }} {{ currentQuestionIndex + 1 }} {{ $t('ui-of') }} {{ totalQuestions }}
                     </span>
 
                     <div class="admin-question-dots">
@@ -1069,7 +1073,7 @@ onBeforeUnmount(() => {
 
                       <div class="flex-grow-1 min-width-0">
                         <div class="admin-question-heading-meta">
-                          <span>Question</span>
+                          <span>{{ $t('t-question') }}</span>
 
                           <span
                             class="admin-question-type-badge"
@@ -1117,7 +1121,7 @@ onBeforeUnmount(() => {
                           class="admin-correct-badge"
                         >
                           <i class="ri-checkbox-circle-line"></i>
-                          Correct
+                          {{ $t('t-correct') }}
                         </div>
                       </div>
                     </div>
@@ -1128,7 +1132,7 @@ onBeforeUnmount(() => {
                     >
                       <span>
                         <i class="ri-lightbulb-line"></i>
-                        Explanation
+                        {{ $t('ui-explanation') }}
                       </span>
 
                       <p>{{ currentQuestion.explanation }}</p>
@@ -1143,7 +1147,7 @@ onBeforeUnmount(() => {
                       @click="goPreviousQuestion"
                     >
                       <i class="ri-arrow-left-line me-1"></i>
-                      Previous Question
+                      {{ $t('ui-previous-question') }}
                     </BButton>
 
                     <BButton
@@ -1152,7 +1156,7 @@ onBeforeUnmount(() => {
                       :disabled="isLastQuestion"
                       @click="goNextQuestion"
                     >
-                      Next Question
+                      {{ $t('ui-next-question') }}
                       <i class="ri-arrow-right-line ms-1"></i>
                     </BButton>
                   </div>
@@ -1172,7 +1176,7 @@ onBeforeUnmount(() => {
                 @click="goPrevious"
               >
                 <i class="ri-arrow-left-line me-1"></i>
-                Previous Slide
+                {{ $t('ui-previous-slide') }}
               </BButton>
 
               <div class="slide-dots">
@@ -1191,7 +1195,7 @@ onBeforeUnmount(() => {
                 :disabled="isLastSlide"
                 @click="goNext"
               >
-                Next Slide
+                {{ $t('ui-next-slide') }}
                 <i class="ri-arrow-right-line ms-1"></i>
               </BButton>
             </div>
@@ -1199,8 +1203,8 @@ onBeforeUnmount(() => {
 
           <div v-else class="empty-viewer">
             <i class="ri-slideshow-line"></i>
-            <h5>No slides available</h5>
-            <p>This course does not have slides yet.</p>
+            <h5>{{ $t('ui-no-slides-available') }}</h5>
+            <p>{{ $t('ui-this-course-does-not-have-slides-yet') }}</p>
           </div>
         </BCol>
       </BRow>

@@ -14,8 +14,8 @@ defineProps({
 
 <template>
   <Layout>
-    <Head title="Courses" />
-    <PageHeader title="Courses" pageTitle="LMS" />
+    <Head :title="$t('ui-courses')" />
+    <PageHeader :title="$t('ui-courses')" :page-title="$t('ui-lms')" />
 
     <ListesCourses :courses="courses" />
   </Layout>

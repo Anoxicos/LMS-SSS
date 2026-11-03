@@ -342,7 +342,7 @@ export default {
               <li class="nav-item">
                 <a class="nav-link" href="#sidebarMore" data-bs-toggle="collapse" role="button" aria-expanded="false"
                   aria-controls="sidebarMore">
-                  <i class="ri-briefcase-2-line"></i> More
+                  <i class="ri-briefcase-2-line"></i> {{ $t('ui-more') }}
                 </a>
                 <div class="collapse menu-dropdown show" id="sidebarMore">
                   <ul class="nav nav-sm flex-column">

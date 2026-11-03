@@ -3,6 +3,9 @@ import { Head, Link, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 import './course-builder.css'
@@ -76,8 +79,8 @@ const validateBasicInfo = () => {
   ) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required fields',
-      text: 'Please fill in all required course information.',
+      title: t('ui-required-fields'),
+      text: t('ui-please-fill-in-all-required-course-information'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -91,8 +94,8 @@ const validateBasicInfo = () => {
   if (Number.isNaN(durationHours) || durationHours <= 0) {
     Swal.fire({
       icon: 'warning',
-      title: 'Invalid duration',
-      text: 'Duration must be greater than 0 hour.',
+      title: t('ui-invalid-duration'),
+      text: t('ui-duration-must-be-greater-than-0-hour'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -103,8 +106,8 @@ const validateBasicInfo = () => {
   if (Number.isNaN(passingScore) || passingScore < 0 || passingScore > 100) {
     Swal.fire({
       icon: 'warning',
-      title: 'Invalid passing score',
-      text: 'Passing score must be between 0 and 100.',
+      title: t('ui-invalid-passing-score'),
+      text: t('ui-passing-score-must-be-between-0-and-100'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -124,8 +127,8 @@ const submit = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Created!',
-        text: 'Course has been created successfully.',
+        title: t('ui-created-label-label'),
+        text: t('ui-course-has-been-created-successfully'),
         timer: 1800,
         showConfirmButton: false,
       })
@@ -133,8 +136,8 @@ const submit = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error!',
-        text: 'Please check the course information.',
+        title: t('ui-error-label'),
+        text: t('ui-please-check-the-course-information'),
         timer: 2500,
         showConfirmButton: false,
       })
@@ -145,8 +148,8 @@ const submit = () => {
 
 <template>
   <Layout>
-    <Head title="Create Course" />
-    <PageHeader title="Create Course" pageTitle="Courses" />
+    <Head :title="$t('ui-create-course')" />
+    <PageHeader :title="$t('ui-create-course')" :page-title="$t('ui-courses')" />
 
     <div class="course-builder-page">
       <BCard class="course-builder-card border-0 shadow-sm">
@@ -158,16 +161,16 @@ const submit = () => {
               </div>
 
               <div>
-                <h4 class="mb-1 fw-bold">Create Course</h4>
+                <h4 class="mb-1 fw-bold">{{ $t('ui-create-course') }}</h4>
                 <p class="text-muted mb-0">
-                  Start by saving the main course information.
+                  {{ $t('ui-start-by-saving-the-main-course-information') }}
                 </p>
               </div>
             </div>
 
             <Link :href="route('courses.index')" class="btn btn-light back-btn">
               <i class="ri-arrow-left-line me-1"></i>
-              Back to Courses
+              {{ $t('ui-back-to-courses') }}
             </Link>
           </div>
         </BCardHeader>
@@ -182,7 +185,7 @@ const submit = () => {
           <div class="builder-footer">
             <Link :href="route('courses.index')" class="btn btn-light footer-btn">
               <i class="ri-arrow-left-line me-1"></i>
-              Cancel
+              {{ $t('ui-cancel') }}
             </Link>
 
             <BButton
@@ -197,7 +200,7 @@ const submit = () => {
                 class="spinner-border spinner-border-sm me-1"
               ></span>
               <i v-else class="ri-save-line me-1"></i>
-              Save & Continue
+              {{ $t('ui-save-continue') }}
             </BButton>
           </div>
         </BCardBody>

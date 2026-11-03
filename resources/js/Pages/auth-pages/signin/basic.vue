@@ -13,7 +13,7 @@ export default {
 </script>
 
 <template>
-  <Head title="Login" />
+  <Head :title="$t('t-login')" />
 
   <div class="auth-page-wrapper pt-5">
     
@@ -28,7 +28,7 @@ export default {
                   <img src="@assets/images/logo_safesky blue.webp" alt="" height="20">
                 </Link>
               </div>
-              <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
+              <p class="mt-3 fs-15 fw-medium">{{ $t('ui-premium-admin-dashboard-template') }}</p>
             </div>
           </BCol>
         </BRow>
@@ -52,12 +52,11 @@ export default {
 
                     <div class="mb-3">
                       <div class="float-end">
-                        <Link href="/auth/reset-pwd-basic" class="text-muted">Forgot
-                          password?</Link>
+                        <Link href="/auth/reset-pwd-basic" class="text-muted">{{ $t('t-forgot-password-question') }}</Link>
                       </div>
-                      <label class="form-label" for="password-input">Password</label>
+                      <label class="form-label" for="password-input">{{ $t('ui-password') }}</label>
                       <div class="position-relative auth-pass-inputgroup mb-3">
-                        <input :type="togglePassword ? 'text' : 'password'" class="form-control pe-5" placeholder="Enter password" id="password-input">
+                        <input :type="togglePassword ? 'text' : 'password'" class="form-control pe-5" :placeholder="$t('ui-enter-password')" id="password-input">
                         <BButton variant="link" class="position-absolute end-0 top-0 text-decoration-none text-muted" type="button" id="password-addon" @click="togglePassword = !togglePassword">
                           <i class="ri-eye-fill align-middle"></i>
                         </BButton>
@@ -66,12 +65,11 @@ export default {
 
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" value="" id="auth-remember-check">
-                      <label class="form-check-label" for="auth-remember-check">Remember
-                        me</label>
+                      <label class="form-check-label" for="auth-remember-check">{{ $t('t-remember-me') }}</label>
                     </div>
 
                     <div class="mt-4">
-                      <BButton variant="primary" class="w-100" type="submit">Sign In</BButton>
+                      <BButton variant="primary" class="w-100" type="submit">{{ $t('t-sign-in') }}</BButton>
                     </div>
 
                     <div class="mt-4 text-center">
@@ -105,7 +103,7 @@ export default {
         <BRow>
           <BCol lg="12">
             <div class="text-center">
-              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
             </div>
           </BCol>
         </BRow>

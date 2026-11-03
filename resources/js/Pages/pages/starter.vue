@@ -15,6 +15,6 @@ export default {
 <template>
   <Layout>
     <Head title="Starter" />
-    <PageHeader title="Starter" pageTitle="Pages" />
+    <PageHeader title="Starter" :pageTitle="$t('t-pages')" />
   </Layout>
 </template>

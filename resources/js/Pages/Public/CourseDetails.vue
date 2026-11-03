@@ -1,4 +1,5 @@
 <script setup>
+import { formatCourseLabel } from '@/composables/course-labels'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
@@ -38,7 +39,7 @@ const goToCart = () => {
     return
   }
 
-  router.visit(route('learner.register'))
+  router.visit(route('login', { mode: 'register' }))
 }
 
 const handleCourseCart = () => {
@@ -50,7 +51,7 @@ const handleCourseCart = () => {
   addCourse(props.course)
 
   if (!authUser.value) {
-    router.visit(route('learner.register'))
+    router.visit(route('login', { mode: 'register' }))
   }
 }
 
@@ -176,14 +177,7 @@ const countTranslationKey = (count, singularKey, pluralKey) => {
   return Number(count) === 1 ? singularKey : pluralKey
 }
 
-const formatLabel = value => {
-  if (!value) return '-'
-
-  return String(value)
-    .replaceAll('_', ' ')
-    .replaceAll('-', ' ')
-    .replace(/\b\w/g, character => character.toUpperCase())
-}
+const formatLabel = value => formatCourseLabel(value)
 
 const isFreeCourse = course => {
   return !course?.price || Number(course.price) <= 0
@@ -333,7 +327,7 @@ onBeforeUnmount(() => {
 
             <span v-if="course.method">
               <i class="ri-route-line"></i>
-              {{ course.method }}
+              {{ formatLabel(course.method) }}
             </span>
 
             <span v-if="course.duration_hours">
@@ -373,7 +367,7 @@ onBeforeUnmount(() => {
               class="purchase-voice-badge"
             >
               <i class="ri-code-box-line"></i>
-              SCORM
+              {{ $t('ui-scorm') }}
             </span>
 
             <span
@@ -481,7 +475,7 @@ onBeforeUnmount(() => {
 
                 <div>
                   <small>{{ $t('t-method') }}</small>
-                  <strong>{{ course.method || '-' }}</strong>
+                  <strong>{{ course.method ? formatLabel(course.method) : '-' }}</strong>
                 </div>
               </div>
 
@@ -589,7 +583,7 @@ onBeforeUnmount(() => {
 
               <div class="learning-item">
                 <i class="ri-checkbox-circle-fill"></i>
-                <span>{{ course.method || $t('t-online-learning-content') }}</span>
+                <span>{{ course.method ? formatLabel(course.method) : $t('t-online-learning-content') }}</span>
               </div>
 
               <div class="learning-item">
@@ -837,7 +831,7 @@ onBeforeUnmount(() => {
               {{ $t('t-method') }}
             </span>
 
-            <strong>{{ course.method || '-' }}</strong>
+            <strong>{{ course.method ? formatLabel(course.method) : '-' }}</strong>
           </div>
 
           <div class="information-row">
@@ -1119,25 +1113,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .course-details-page {
-  --course-cyan: #37cced;
-  --course-blue: #0d8fe9;
-  --course-blue-dark: #087bc9;
-  --course-navy: #071126;
-  --course-navy-hover: #132b4a;
-  --course-soft: #eaf7ff;
-  --course-page-soft: #f4fbff;
-  --course-border: #e4edf4;
-  --course-text: #334155;
-  --course-muted: #64748b;
-  --course-muted-light: #94a3b8;
-  --course-success: #0ab39c;
-  --course-warning: #f7b84b;
-  --course-danger: #f06548;
   --layout-footer-height: 62px;
   --main-gradient: linear-gradient(
     90deg,
-    var(--course-cyan) 0%,
-    var(--course-blue) 100%
+    var(--signal) 0%,
+    var(--signal) 100%
   );
   --card-shadow: 0 16px 38px rgba(15, 23, 42, 0.075);
   --card-shadow-hover: 0 24px 52px rgba(15, 23, 42, 0.12);
@@ -1145,12 +1125,12 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   padding-bottom: calc(var(--layout-footer-height) + 58px);
   overflow: hidden;
-  color: var(--course-navy);
+  color: var(--ink);
   background: linear-gradient(
     180deg,
-    #f4fbff 0%,
-    #ffffff 46%,
-    #f8fafc 100%
+    var(--paper) 0%,
+    var(--chalk) 46%,
+    var(--paper) 100%
   );
 }
 
@@ -1172,16 +1152,8 @@ onBeforeUnmount(() => {
   position: relative;
   overflow: hidden;
   padding: 62px 24px 78px;
-  color: #ffffff;
-  background:
-    linear-gradient(
-      105deg,
-      rgba(7, 17, 38, 0.28) 0%,
-      rgba(7, 17, 38, 0.13) 43%,
-      rgba(7, 17, 38, 0.02) 75%,
-      transparent 100%
-    ),
-    var(--main-gradient);
+  color: var(--chalk);
+  background: radial-gradient(ellipse at 74% 22%, rgba(56, 225, 255, 0.16), transparent 42%), var(--ink);
   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -1248,7 +1220,7 @@ onBeforeUnmount(() => {
   padding: 7px 12px;
   border: 1px solid rgba(255, 255, 255, 0.56);
   border-radius: 999px;
-  color: var(--course-navy);
+  color: var(--ink);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 10px 24px rgba(7, 17, 38, 0.1);
   font-size: 10.5px;
@@ -1260,14 +1232,14 @@ onBeforeUnmount(() => {
 }
 
 .course-breadcrumb a {
-  color: var(--course-navy);
+  color: var(--ink);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .course-breadcrumb a:hover,
 .course-breadcrumb strong {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
 }
 
 .course-breadcrumb strong {
@@ -1285,7 +1257,7 @@ onBeforeUnmount(() => {
   padding: 0 13px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 10px;
-  color: var(--course-navy);
+  color: var(--ink);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 10px 24px rgba(7, 17, 38, 0.1);
   font-size: 10.5px;
@@ -1297,7 +1269,7 @@ onBeforeUnmount(() => {
 }
 
 .hero-category > i {
-  color: var(--course-blue);
+  color: var(--signal);
   font-size: 16px;
 }
 
@@ -1308,7 +1280,7 @@ onBeforeUnmount(() => {
 .hero-content h1 {
   max-width: 860px;
   margin: 0 0 19px;
-  color: #ffffff;
+  color: var(--chalk);
   font-size: clamp(42px, 4.7vw, 66px);
   line-height: 1.035;
   letter-spacing: -0.052em;
@@ -1339,7 +1311,7 @@ onBeforeUnmount(() => {
   padding: 0 11px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 999px;
-  color: #ffffff;
+  color: var(--chalk);
   background: rgba(7, 17, 38, 0.2);
   box-shadow: 0 8px 20px rgba(7, 17, 38, 0.07);
   backdrop-filter: blur(8px);
@@ -1366,7 +1338,7 @@ onBeforeUnmount(() => {
   padding: 0 10px;
   border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: 9px;
-  color: #ffffff;
+  color: var(--chalk);
   background: rgba(255, 255, 255, 0.13);
   font-size: 9.5px;
   font-weight: 800;
@@ -1383,7 +1355,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 24px;
-  background: #ffffff;
+  background: var(--chalk);
   box-shadow: 0 28px 64px rgba(7, 17, 38, 0.22);
   transition:
     transform 0.3s ease,
@@ -1411,7 +1383,7 @@ onBeforeUnmount(() => {
   position: relative;
   height: 222px;
   overflow: hidden;
-  background: #eaf4fa;
+  background: var(--paper);
 }
 
 .purchase-image::after {
@@ -1446,7 +1418,7 @@ onBeforeUnmount(() => {
   padding: 0 11px;
   border: 1px solid rgba(255, 255, 255, 0.82);
   border-radius: 10px;
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 8px 18px rgba(7, 17, 38, 0.14);
   font-size: 9.5px;
@@ -1464,7 +1436,7 @@ onBeforeUnmount(() => {
 .purchase-price {
   display: block;
   margin-bottom: 9px;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 30px;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -1473,7 +1445,7 @@ onBeforeUnmount(() => {
 
 .purchase-content p {
   margin: 0 0 18px;
-  color: #526174;
+  color: var(--slate);
   font-size: 11.5px;
   line-height: 1.65;
 }
@@ -1503,35 +1475,35 @@ onBeforeUnmount(() => {
 .purchase-syllabus-button {
   margin-bottom: 10px;
   border: 1px solid rgba(13, 143, 233, 0.22);
-  color: var(--course-blue-dark);
-  background: var(--course-soft);
+  color: var(--signal-deep);
+  background: var(--paper);
 }
 
 .purchase-syllabus-button:hover {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   border-color: rgba(13, 143, 233, 0.4);
-  background: #dff4ff;
+  background: var(--paper);
   transform: translateY(-1px);
 }
 
 .purchase-button {
-  border: 1px solid var(--course-navy);
-  color: #ffffff;
-  background: var(--course-navy);
+  border: 1px solid var(--ink);
+  color: var(--chalk);
+  background: var(--ink);
   box-shadow: 0 13px 28px rgba(7, 17, 38, 0.2);
 }
 
 .purchase-button:hover {
-  color: #ffffff;
-  border-color: var(--course-navy-hover);
-  background: var(--course-navy-hover);
+  color: var(--chalk);
+  border-color: var(--midnight);
+  background: var(--midnight);
   box-shadow: 0 17px 34px rgba(7, 17, 38, 0.27);
   transform: translateY(-2px);
 }
 
 .purchase-guarantee {
   margin-top: 15px;
-  color: #64748b;
+  color: var(--slate);
   font-size: 9.5px;
   font-weight: 750;
   display: flex;
@@ -1541,7 +1513,7 @@ onBeforeUnmount(() => {
 }
 
 .purchase-guarantee i {
-  color: var(--course-success);
+  color: var(--success);
   font-size: 15px;
 }
 
@@ -1565,9 +1537,9 @@ onBeforeUnmount(() => {
 .course-tabs-card,
 .course-information-card {
   position: relative;
-  border: 1px solid var(--course-border);
+  border: 1px solid var(--sand);
   border-radius: 22px;
-  background: #ffffff;
+  background: var(--chalk);
   box-shadow: var(--card-shadow);
 }
 
@@ -1592,8 +1564,8 @@ onBeforeUnmount(() => {
 .course-tabs {
   min-height: 72px;
   padding: 14px 20px 13px;
-  border-bottom: 1px solid var(--course-border);
-  background: linear-gradient(180deg, #ffffff 0%, #f7fcff 100%);
+  border-bottom: 1px solid var(--sand);
+  background: linear-gradient(180deg, var(--chalk) 0%, var(--paper) 100%);
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -1608,7 +1580,7 @@ onBeforeUnmount(() => {
   padding: 0 17px;
   border: 1px solid transparent;
   border-radius: 12px;
-  color: var(--course-muted);
+  color: var(--slate);
   background: transparent;
   font-size: 10.5px;
   font-weight: 900;
@@ -1626,13 +1598,13 @@ onBeforeUnmount(() => {
 }
 
 .course-tabs button:hover:not(.active) {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   border-color: rgba(13, 143, 233, 0.18);
-  background: var(--course-soft);
+  background: var(--paper);
 }
 
 .course-tabs button.active {
-  color: #ffffff;
+  color: var(--chalk);
   border-color: transparent;
   background: var(--main-gradient);
   box-shadow: 0 9px 22px rgba(13, 143, 233, 0.22);
@@ -1659,7 +1631,7 @@ onBeforeUnmount(() => {
   flex: 0 0 50px;
   border: 1px solid rgba(13, 143, 233, 0.16);
   border-radius: 14px;
-  color: #ffffff;
+  color: var(--chalk);
   background: var(--main-gradient);
   box-shadow: 0 10px 22px rgba(13, 143, 233, 0.18);
   font-size: 21px;
@@ -1669,20 +1641,20 @@ onBeforeUnmount(() => {
 }
 
 .section-title-icon.success {
-  color: #ffffff;
+  color: var(--chalk);
   border-color: rgba(10, 179, 156, 0.3);
-  background: linear-gradient(135deg, #15c7ad, #0a8f7e);
+  background: linear-gradient(135deg, var(--success), var(--success-deep));
 }
 
 .section-title-icon.warning {
-  color: #ffffff;
+  color: var(--chalk);
   border-color: rgba(247, 184, 75, 0.35);
-  background: linear-gradient(135deg, #f7c660, #d99a20);
+  background: linear-gradient(135deg, var(--warning), var(--warning-deep));
 }
 
 .section-title h2 {
   margin: 0 0 4px;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 22px;
   line-height: 1.25;
   letter-spacing: -0.02em;
@@ -1691,14 +1663,14 @@ onBeforeUnmount(() => {
 
 .section-title p {
   margin: 0;
-  color: var(--course-muted-light);
+  color: var(--stone);
   font-size: 10.5px;
   font-weight: 750;
 }
 
 .description-content {
   padding: 2px 1px;
-  color: var(--course-text);
+  color: var(--slate);
   font-size: 13.5px;
   line-height: 1.86;
   white-space: pre-line;
@@ -1718,9 +1690,9 @@ onBeforeUnmount(() => {
   min-width: 0;
   min-height: 88px;
   padding: 16px;
-  border: 1px solid #e2edf5;
+  border: 1px solid var(--sand);
   border-radius: 15px;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fcfe 100%);
+  background: linear-gradient(180deg, var(--chalk) 0%, var(--paper) 100%);
   box-shadow: 0 7px 20px rgba(15, 23, 42, 0.035);
   display: flex;
   align-items: center;
@@ -1743,8 +1715,8 @@ onBeforeUnmount(() => {
   flex: 0 0 44px;
   border: 1px solid rgba(13, 143, 233, 0.15);
   border-radius: 12px;
-  color: var(--course-blue-dark);
-  background: var(--course-soft);
+  color: var(--signal-deep);
+  background: var(--paper);
   font-size: 19px;
   display: inline-flex;
   align-items: center;
@@ -1758,7 +1730,7 @@ onBeforeUnmount(() => {
 .overview-item small {
   display: block;
   margin-bottom: 4px;
-  color: var(--course-muted-light);
+  color: var(--stone);
   font-size: 9.5px;
   font-weight: 800;
   text-transform: uppercase;
@@ -1768,7 +1740,7 @@ onBeforeUnmount(() => {
 .overview-item strong {
   display: block;
   overflow: hidden;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 12px;
   font-weight: 900;
   text-overflow: ellipsis;
@@ -1789,7 +1761,7 @@ onBeforeUnmount(() => {
   padding: 14px 15px;
   border: 1px solid rgba(10, 179, 156, 0.18);
   border-radius: 14px;
-  color: #1e293b;
+  color: var(--ink);
   background: rgba(10, 179, 156, 0.055);
   font-size: 11.5px;
   font-weight: 800;
@@ -1800,7 +1772,7 @@ onBeforeUnmount(() => {
 
 .learning-item i {
   flex: 0 0 auto;
-  color: var(--course-success);
+  color: var(--success);
   font-size: 17px;
 }
 
@@ -1811,9 +1783,9 @@ onBeforeUnmount(() => {
 
 .prerequisite-item {
   padding: 16px;
-  border: 1px solid var(--course-border);
+  border: 1px solid var(--sand);
   border-radius: 15px;
-  background: #fbfdff;
+  background: var(--paper);
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -1821,35 +1793,35 @@ onBeforeUnmount(() => {
 
 .prerequisite-item > i {
   flex: 0 0 auto;
-  color: var(--course-success);
+  color: var(--success);
   font-size: 20px;
 }
 
 .prerequisite-item strong {
   display: block;
   margin-bottom: 4px;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 12.5px;
   font-weight: 900;
 }
 
 .prerequisite-item p {
   margin: 0;
-  color: var(--course-muted);
+  color: var(--slate);
   font-size: 11.5px;
   line-height: 1.58;
 }
 
 .content-empty-state {
   padding: 52px 20px;
-  color: var(--course-muted-light);
+  color: var(--stone);
   text-align: center;
 }
 
 .content-empty-state i {
   display: block;
   margin-bottom: 11px;
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   font-size: 38px;
 }
 
@@ -1866,7 +1838,7 @@ onBeforeUnmount(() => {
   padding: 22px;
   border: 1px solid rgba(13, 143, 233, 0.2);
   border-radius: 18px;
-  background: linear-gradient(135deg, var(--course-soft), #ffffff);
+  background: linear-gradient(135deg, var(--paper), var(--chalk));
   display: flex;
   align-items: center;
   gap: 18px;
@@ -1877,7 +1849,7 @@ onBeforeUnmount(() => {
   height: 62px;
   flex: 0 0 62px;
   border-radius: 17px;
-  color: #ffffff;
+  color: var(--chalk);
   background: var(--main-gradient);
   box-shadow: 0 11px 24px rgba(13, 143, 233, 0.22);
   font-size: 27px;
@@ -1887,7 +1859,7 @@ onBeforeUnmount(() => {
 }
 
 .scorm-curriculum-card small {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   font-size: 9.5px;
   font-weight: 900;
   letter-spacing: 0.06em;
@@ -1896,14 +1868,14 @@ onBeforeUnmount(() => {
 
 .scorm-curriculum-card h3 {
   margin: 5px 0 7px;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 17px;
   font-weight: 900;
 }
 
 .scorm-curriculum-card p {
   margin: 0;
-  color: var(--course-muted);
+  color: var(--slate);
   font-size: 11.5px;
   line-height: 1.6;
 }
@@ -1915,9 +1887,9 @@ onBeforeUnmount(() => {
 
 .chapter-card {
   overflow: hidden;
-  border: 1px solid var(--course-border);
+  border: 1px solid var(--sand);
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--chalk);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -1933,8 +1905,8 @@ onBeforeUnmount(() => {
   min-height: 74px;
   padding: 14px 16px;
   border: 0;
-  color: var(--course-navy);
-  background: #ffffff;
+  color: var(--ink);
+  background: var(--chalk);
   text-align: left;
   display: flex;
   align-items: center;
@@ -1944,7 +1916,7 @@ onBeforeUnmount(() => {
 }
 
 .chapter-header:hover {
-  background: #f7fcff;
+  background: var(--paper);
 }
 
 .chapter-number {
@@ -1952,7 +1924,7 @@ onBeforeUnmount(() => {
   height: 42px;
   flex: 0 0 42px;
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--chalk);
   background: var(--main-gradient);
   box-shadow: 0 8px 18px rgba(13, 143, 233, 0.2);
   font-size: 13px;
@@ -1971,7 +1943,7 @@ onBeforeUnmount(() => {
   display: block;
   margin-bottom: 3px;
   overflow: hidden;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 13.5px;
   font-weight: 900;
   text-overflow: ellipsis;
@@ -1979,25 +1951,25 @@ onBeforeUnmount(() => {
 }
 
 .chapter-heading small {
-  color: var(--course-muted-light);
+  color: var(--stone);
   font-size: 9.5px;
   font-weight: 750;
 }
 
 .chapter-header > i {
   flex: 0 0 auto;
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   font-size: 20px;
 }
 
 .chapter-content {
   padding: 0 16px 16px;
-  border-top: 1px solid var(--course-border);
+  border-top: 1px solid var(--sand);
 }
 
 .chapter-description {
   margin: 14px 0;
-  color: var(--course-muted);
+  color: var(--slate);
   font-size: 11.5px;
   line-height: 1.62;
 }
@@ -2013,7 +1985,7 @@ onBeforeUnmount(() => {
   padding: 10px 12px;
   border: 1px solid transparent;
   border-radius: 12px;
-  background: #f8fafc;
+  background: var(--paper);
   display: flex;
   align-items: center;
   gap: 11px;
@@ -2024,7 +1996,7 @@ onBeforeUnmount(() => {
 
 .lesson-row:hover {
   border-color: rgba(13, 143, 233, 0.18);
-  background: #f3faff;
+  background: var(--paper);
 }
 
 .lesson-icon {
@@ -2033,8 +2005,8 @@ onBeforeUnmount(() => {
   flex: 0 0 35px;
   border: 1px solid rgba(13, 143, 233, 0.12);
   border-radius: 10px;
-  color: var(--course-blue-dark);
-  background: var(--course-soft);
+  color: var(--signal-deep);
+  background: var(--paper);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2049,7 +2021,7 @@ onBeforeUnmount(() => {
   display: block;
   margin-bottom: 2px;
   overflow: hidden;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 11.5px;
   font-weight: 850;
   text-overflow: ellipsis;
@@ -2057,7 +2029,7 @@ onBeforeUnmount(() => {
 }
 
 .lesson-info small {
-  color: var(--course-muted-light);
+  color: var(--stone);
   font-size: 8.5px;
   font-weight: 750;
 }
@@ -2065,14 +2037,14 @@ onBeforeUnmount(() => {
 .preview-badge {
   padding: 6px 9px;
   border-radius: 999px;
-  color: #087f6f;
+  color: var(--success-deep);
   background: rgba(10, 179, 156, 0.11);
   font-size: 8.5px;
   font-weight: 900;
 }
 
 .lesson-lock {
-  color: var(--course-muted-light);
+  color: var(--stone);
 }
 
 /* =========================================================
@@ -2088,8 +2060,8 @@ onBeforeUnmount(() => {
 .information-heading {
   min-height: 88px;
   padding: 22px 22px 18px;
-  border-bottom: 1px solid var(--course-border);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+  border-bottom: 1px solid var(--sand);
+  background: linear-gradient(180deg, var(--chalk) 0%, var(--paper) 100%);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2100,7 +2072,7 @@ onBeforeUnmount(() => {
   height: 47px;
   flex: 0 0 47px;
   border-radius: 13px;
-  color: #ffffff;
+  color: var(--chalk);
   background: var(--main-gradient);
   box-shadow: 0 10px 22px rgba(13, 143, 233, 0.2);
   font-size: 20px;
@@ -2111,14 +2083,14 @@ onBeforeUnmount(() => {
 
 .information-heading h2 {
   margin: 0 0 3px;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 16px;
   font-weight: 900;
 }
 
 .information-heading p {
   margin: 0;
-  color: var(--course-muted-light);
+  color: var(--stone);
   font-size: 9.5px;
   font-weight: 700;
 }
@@ -2130,7 +2102,7 @@ onBeforeUnmount(() => {
 
 .information-row {
   min-height: 58px;
-  border-bottom: 1px solid var(--course-border);
+  border-bottom: 1px solid var(--sand);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2139,7 +2111,7 @@ onBeforeUnmount(() => {
 
 .information-row span {
   min-width: 0;
-  color: var(--course-muted);
+  color: var(--slate);
   font-size: 10.5px;
   font-weight: 750;
   display: inline-flex;
@@ -2149,21 +2121,21 @@ onBeforeUnmount(() => {
 
 .information-row span i {
   flex: 0 0 auto;
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   font-size: 15px;
 }
 
 .information-row strong {
   max-width: 52%;
   overflow-wrap: anywhere;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 10.5px;
   font-weight: 900;
   text-align: right;
 }
 
 .information-file-link {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   font-size: 10.5px;
   font-weight: 900;
   text-decoration: none;
@@ -2173,7 +2145,7 @@ onBeforeUnmount(() => {
 }
 
 .information-file-link:hover {
-  color: var(--course-blue);
+  color: var(--signal);
 }
 
 .sidebar-enroll-button {
@@ -2183,8 +2155,8 @@ onBeforeUnmount(() => {
   min-height: 48px;
   margin: 20px 22px 22px;
   border-radius: 13px;
-  color: #ffffff;
-  background: var(--course-navy);
+  color: var(--chalk);
+  background: var(--ink);
   box-shadow: 0 12px 26px rgba(7, 17, 38, 0.2);
   text-decoration: none;
   font-size: 11.5px;
@@ -2200,8 +2172,8 @@ onBeforeUnmount(() => {
 }
 
 .sidebar-enroll-button:hover {
-  color: #ffffff;
-  background: var(--course-navy-hover);
+  color: var(--chalk);
+  background: var(--midnight);
   box-shadow: 0 16px 32px rgba(7, 17, 38, 0.27);
   transform: translateY(-2px);
 }
@@ -2226,7 +2198,7 @@ onBeforeUnmount(() => {
 .related-heading span {
   display: block;
   margin-bottom: 5px;
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -2235,7 +2207,7 @@ onBeforeUnmount(() => {
 
 .related-heading h2 {
   margin: 0;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 28px;
   letter-spacing: -0.025em;
   font-weight: 950;
@@ -2244,10 +2216,10 @@ onBeforeUnmount(() => {
 .all-courses-link {
   min-height: 41px;
   padding: 0 14px;
-  border: 1px solid var(--course-border);
+  border: 1px solid var(--sand);
   border-radius: 12px;
-  color: var(--course-navy);
-  background: #ffffff;
+  color: var(--ink);
+  background: var(--chalk);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045);
   font-size: 10.5px;
   font-weight: 900;
@@ -2263,9 +2235,9 @@ onBeforeUnmount(() => {
 }
 
 .all-courses-link:hover {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
   border-color: rgba(13, 143, 233, 0.28);
-  background: var(--course-soft);
+  background: var(--paper);
   transform: translateY(-2px);
 }
 
@@ -2279,9 +2251,9 @@ onBeforeUnmount(() => {
   position: relative;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--course-border);
+  border: 1px solid var(--sand);
   border-radius: 21px;
-  background: #ffffff;
+  background: var(--chalk);
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
@@ -2319,7 +2291,7 @@ onBeforeUnmount(() => {
   position: relative;
   height: 190px;
   overflow: hidden;
-  background: #eef5fa;
+  background: var(--paper);
   text-decoration: none;
   display: block;
 }
@@ -2358,7 +2330,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.75);
   border-radius: 10px;
-  color: var(--course-navy);
+  color: var(--ink);
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 7px 16px rgba(7, 17, 38, 0.1);
   font-size: 9.5px;
@@ -2377,7 +2349,7 @@ onBeforeUnmount(() => {
 .related-title {
   display: block;
   margin-bottom: 8px;
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 17px;
   line-height: 1.35;
   font-weight: 900;
@@ -2386,13 +2358,13 @@ onBeforeUnmount(() => {
 }
 
 .related-title:hover {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
 }
 
 .related-body p {
   min-height: 40px;
   margin: 0 0 14px;
-  color: #526174;
+  color: var(--slate);
   font-size: 10.5px;
   line-height: 1.58;
 }
@@ -2406,10 +2378,10 @@ onBeforeUnmount(() => {
 .related-meta span {
   min-height: 28px;
   padding: 0 8px;
-  border: 1px solid var(--course-border);
+  border: 1px solid var(--sand);
   border-radius: 999px;
-  color: #475569;
-  background: #f8fafc;
+  color: var(--slate);
+  background: var(--paper);
   font-size: 8.5px;
   font-weight: 800;
   display: inline-flex;
@@ -2418,7 +2390,7 @@ onBeforeUnmount(() => {
 }
 
 .related-meta i {
-  color: var(--course-blue-dark);
+  color: var(--signal-deep);
 }
 
 .related-footer {
@@ -2430,7 +2402,7 @@ onBeforeUnmount(() => {
 }
 
 .related-footer strong {
-  color: var(--course-navy);
+  color: var(--ink);
   font-size: 18px;
   font-weight: 950;
 }
@@ -2439,8 +2411,8 @@ onBeforeUnmount(() => {
   min-height: 40px;
   padding: 0 13px;
   border-radius: 11px;
-  color: #ffffff;
-  background: var(--course-navy);
+  color: var(--chalk);
+  background: var(--ink);
   box-shadow: 0 9px 20px rgba(7, 17, 38, 0.16);
   font-size: 9.5px;
   font-weight: 900;
@@ -2454,8 +2426,8 @@ onBeforeUnmount(() => {
 }
 
 .related-footer a:hover {
-  color: #ffffff;
-  background: var(--course-navy-hover);
+  color: var(--chalk);
+  background: var(--midnight);
   transform: translateY(-2px);
 }
 
@@ -2588,9 +2560,9 @@ onBeforeUnmount(() => {
   .information-row {
     min-height: 58px;
     padding: 0 12px;
-    border: 1px solid var(--course-border);
+    border: 1px solid var(--sand);
     border-radius: 12px;
-    background: #fbfdff;
+    background: var(--paper);
   }
 
   .sidebar-enroll-button {
@@ -2786,9 +2758,9 @@ onBeforeUnmount(() => {
     min-height: 82px;
     margin: 0 auto 28px;
     padding: 14px;
-    border: 1px solid var(--course-border);
+    border: 1px solid var(--sand);
     border-radius: 18px;
-    background: #ffffff;
+    background: var(--chalk);
     box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
     backdrop-filter: none;
     display: flex;
@@ -2805,7 +2777,7 @@ onBeforeUnmount(() => {
   .mobile-course-action small {
     display: block;
     margin-bottom: 4px;
-    color: var(--course-muted-light);
+    color: var(--stone);
     font-size: 9px;
     font-weight: 850;
     letter-spacing: 0.05em;
@@ -2815,7 +2787,7 @@ onBeforeUnmount(() => {
   .mobile-course-action strong {
     display: block;
     overflow: hidden;
-    color: var(--course-navy);
+    color: var(--ink);
     font-size: 18px;
     font-weight: 950;
     text-overflow: ellipsis;
@@ -2827,8 +2799,8 @@ onBeforeUnmount(() => {
     min-height: 46px;
     padding: 0 17px;
     border-radius: 13px;
-    color: #ffffff;
-    background: var(--course-navy);
+    color: var(--chalk);
+    background: var(--ink);
     box-shadow: 0 10px 22px rgba(7, 17, 38, 0.2);
     text-decoration: none;
     font-size: 11px;
@@ -2845,8 +2817,8 @@ onBeforeUnmount(() => {
   }
 
   .mobile-course-action button:hover {
-    color: #ffffff;
-    background: var(--course-navy-hover);
+    color: var(--chalk);
+    background: var(--midnight);
     box-shadow: 0 14px 28px rgba(7, 17, 38, 0.25);
     transform: translateY(-1px);
   }
@@ -2952,13 +2924,13 @@ onBeforeUnmount(() => {
 .purchase-button.is-added,
 .sidebar-enroll-button.is-added,
 .mobile-course-action button.is-added {
-  background: #0ab39c;
+  background: var(--success);
 }
 
 .purchase-button.is-added:hover,
 .sidebar-enroll-button.is-added:hover,
 .mobile-course-action button.is-added:hover {
-  background: #079b87;
+  background: var(--success-deep);
 }
 
 .mobile-course-action button {

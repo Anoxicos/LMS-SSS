@@ -1,5 +1,10 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref, watch } from 'vue'
+import { formatCourseLabel, formatVoiceLanguageLabel } from '@/composables/course-labels'
 
 const props = defineProps({
   form: {
@@ -19,36 +24,36 @@ const props = defineProps({
 const imagePreview = ref(null)
 const syllabusInput = ref(null)
 
-const methodOptions = [
+const methodOptions = computed(() => [
   {
     value: 'Online e-learning (LMS)',
-    label: 'Online e-learning (LMS)',
+    label: t('ui-online-e-learning-lms'),
   },
   {
     value: 'Virtual classroom',
-    label: 'Virtual classroom',
+    label: t('ui-virtual-classroom'),
   },
   {
     value: 'On-site classroom training',
-    label: 'On-site classroom training',
+    label: t('ui-on-site-classroom-training'),
   },
   {
     value: 'Blended learning',
-    label: 'Blended learning',
+    label: t('ui-blended-learning'),
   },
   {
     value: 'Self-study',
-    label: 'Self-study',
+    label: t('ui-self-study'),
   },
-]
+])
 
-const voiceLanguageOptions = [
-  { value: 'en-us', label: 'English - US' },
-  { value: 'en-gb', label: 'English - UK' },
-  { value: 'fr-fr', label: 'French' },
-  { value: 'ar-sa', label: 'Arabic' },
-  { value: 'es-es', label: 'Spanish' },
-]
+const voiceLanguageOptions = computed(() => [
+  { value: 'en-us', label: t('ui-english-us') },
+  { value: 'en-gb', label: t('ui-english-uk') },
+  { value: 'fr-fr', label: t('ui-french') },
+  { value: 'ar-sa', label: t('ui-arabic') },
+  { value: 'es-es', label: t('ui-spanish') },
+])
 
 const voiceOptionsByLanguage = {
   'en-us': [
@@ -86,9 +91,13 @@ const voiceOptionsByLanguage = {
 }
 
 const availableVoiceOptions = computed(() => {
-  return voiceOptionsByLanguage[props.form.voice_over_lang] || [
+  return (voiceOptionsByLanguage[props.form.voice_over_lang] || [
     { value: 'default', label: 'Default' },
-  ]
+  ]).map(voice => {
+    if (voice.label === 'Default') return { ...voice, label: t('ui-default') }
+    const [name, gender] = voice.label.split(' - ')
+    return { ...voice, label: `${name} · ${t(gender === 'Male' ? 'ui-male' : 'ui-female')}` }
+  })
 })
 
 watch(
@@ -135,15 +144,11 @@ const selectedVoiceLabel = computed(() => {
     return voice.value === props.form.voice_over_voice
   })
 
-  return selectedVoice?.label || 'Default'
+  return selectedVoice?.label || t('ui-default')
 })
 
 const selectedLanguageLabel = computed(() => {
-  const selectedLanguage = voiceLanguageOptions.find((language) => {
-    return language.value === props.form.voice_over_lang
-  })
-
-  return selectedLanguage?.label || 'English - US'
+  return formatVoiceLanguageLabel(props.form.voice_over_lang)
 })
 
 const syllabusFileName = computed(() => {
@@ -225,8 +230,8 @@ const removeSyllabus = () => {
 <template>
   <div class="builder-section">
     <div class="section-heading">
-      <h5>Course Information</h5>
-      <p>Fill in the main course details.</p>
+      <h5>{{ $t('ui-course-information') }}</h5>
+      <p>{{ $t('ui-fill-in-the-main-course-details') }}</p>
     </div>
 
     <BRow class="g-3">
@@ -234,7 +239,7 @@ const removeSyllabus = () => {
         <BRow class="g-3">
           <BCol lg="3">
             <label class="form-label">
-              Reference <span class="text-danger">*</span>
+              {{ $t('ui-reference') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -245,7 +250,7 @@ const removeSyllabus = () => {
                 type="text"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.ref }"
-                placeholder="Example: EWIS-001"
+                :placeholder="$t('ui-example-ewis-001')"
               />
             </div>
 
@@ -256,7 +261,7 @@ const removeSyllabus = () => {
 
           <BCol lg="6">
             <label class="form-label">
-              Title <span class="text-danger">*</span>
+              {{ $t('ui-title') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -267,7 +272,7 @@ const removeSyllabus = () => {
                 type="text"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.title }"
-                placeholder="Enter course title"
+                :placeholder="$t('ui-enter-course-title')"
               />
             </div>
 
@@ -278,7 +283,7 @@ const removeSyllabus = () => {
 
           <BCol lg="3">
             <label class="form-label">
-              Category <span class="text-danger">*</span>
+              {{ $t('ui-category') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -286,7 +291,7 @@ const removeSyllabus = () => {
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.category_id }"
             >
-              <option value="">Select category</option>
+              <option value="">{{ $t('ui-select-category') }}</option>
 
               <option
                 v-for="category in categories"
@@ -303,14 +308,14 @@ const removeSyllabus = () => {
           </BCol>
 
           <BCol cols="12">
-            <label class="form-label">Description</label>
+            <label class="form-label">{{ $t('ui-description') }}</label>
 
             <textarea
               v-model="form.description"
               rows="4"
               class="form-control modern-textarea"
               :class="{ 'is-invalid': form.errors.description }"
-              placeholder="Enter course description"
+              :placeholder="$t('ui-enter-course-description')"
             ></textarea>
 
             <div v-if="form.errors.description" class="invalid-feedback d-block">
@@ -320,7 +325,7 @@ const removeSyllabus = () => {
 
           <BCol md="4">
             <label class="form-label">
-              Type <span class="text-danger">*</span>
+              {{ $t('ui-type') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -328,10 +333,10 @@ const removeSyllabus = () => {
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.type }"
             >
-              <option value="">Select type</option>
-              <option value="free">Free</option>
-              <option value="paid">Paid</option>
-              <option value="private">Private</option>
+              <option value="">{{ $t('ui-select-type') }}</option>
+              <option value="free">{{ $t('ui-free') }}</option>
+              <option value="paid">{{ $t('ui-paid') }}</option>
+              <option value="private">{{ $t('ui-private') }}</option>
             </select>
 
             <div v-if="form.errors.type" class="invalid-feedback d-block">
@@ -341,7 +346,7 @@ const removeSyllabus = () => {
 
           <BCol md="4">
             <label class="form-label">
-              Training Type <span class="text-danger">*</span>
+              {{ $t('ui-training-type') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -349,10 +354,10 @@ const removeSyllabus = () => {
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.training_type }"
             >
-              <option value="">Select training type</option>
-              <option value="online">Online</option>
-              <option value="onsite">Onsite</option>
-              <option value="hybrid">Hybrid</option>
+              <option value="">{{ $t('ui-select-training-type') }}</option>
+              <option value="online">{{ $t('ui-online') }}</option>
+              <option value="onsite">{{ $t('ui-onsite') }}</option>
+              <option value="hybrid">{{ $t('ui-hybrid') }}</option>
             </select>
 
             <div v-if="form.errors.training_type" class="invalid-feedback d-block">
@@ -361,16 +366,16 @@ const removeSyllabus = () => {
           </BCol>
 
           <BCol md="4">
-            <label class="form-label">Course Type</label>
+            <label class="form-label">{{ $t('ui-course-type') }}</label>
 
             <select
               v-model="form.skill_level"
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.skill_level }"
             >
-              <option value="" disabled>Select a training type</option>
-              <option value="initial">Initial</option>
-              <option value="recurrent">Recurrent</option>
+              <option value="" disabled>{{ $t('ui-select-a-training-type') }}</option>
+              <option value="initial">{{ $t('ui-initial') }}</option>
+              <option value="recurrent">{{ $t('ui-recurrent') }}</option>
             </select>
 
             <div v-if="form.errors.skill_level" class="invalid-feedback d-block">
@@ -380,7 +385,7 @@ const removeSyllabus = () => {
 
           <BCol md="6">
             <label for="method-field" class="form-label">
-              Method <span class="text-danger">*</span>
+              {{ $t('ui-method') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -390,7 +395,7 @@ const removeSyllabus = () => {
               :class="{ 'is-invalid': form.errors.method }"
             >
               <option value="" disabled>
-                Select training method
+                {{ $t('ui-select-training-method') }}
               </option>
 
               <option
@@ -409,7 +414,7 @@ const removeSyllabus = () => {
 
           <BCol md="3">
             <label class="form-label">
-              Duration (hours) <span class="text-danger">*</span>
+              {{ $t('ui-duration-hours') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -422,7 +427,7 @@ const removeSyllabus = () => {
                 step="0.25"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.duration_hours }"
-                placeholder="Example: 8"
+                :placeholder="$t('ui-example-8')"
               />
             </div>
 
@@ -436,7 +441,7 @@ const removeSyllabus = () => {
 
           <BCol md="3">
             <label class="form-label">
-              Passing Score (%) <span class="text-danger">*</span>
+              {{ $t('ui-passing-score') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -450,7 +455,7 @@ const removeSyllabus = () => {
                 step="0.01"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.passing_score }"
-                placeholder="Example: 80"
+                :placeholder="$t('ui-example-80')"
               />
             </div>
 
@@ -463,7 +468,7 @@ const removeSyllabus = () => {
           </BCol>
 
           <BCol md="4">
-            <label class="form-label">Course Focus</label>
+            <label class="form-label">{{ $t('ui-course-focus') }}</label>
 
             <div class="input-icon-box">
               <i class="ri-focus-3-line input-icon"></i>
@@ -473,7 +478,7 @@ const removeSyllabus = () => {
                 type="text"
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.course_focus }"
-                placeholder="Example: Web development"
+                :placeholder="$t('ui-example-web-development')"
               />
             </div>
 
@@ -483,17 +488,17 @@ const removeSyllabus = () => {
           </BCol>
 
           <BCol md="4">
-            <label class="form-label">Language</label>
+            <label class="form-label">{{ $t('ui-language') }}</label>
 
             <select
               v-model="form.language"
               class="form-select modern-input"
               :class="{ 'is-invalid': form.errors.language }"
             >
-              <option value="">Select language</option>
-              <option value="English">English</option>
-              <option value="French">French</option>
-              <option value="Arabic">Arabic</option>
+              <option value="">{{ $t('ui-select-language') }}</option>
+              <option value="English">{{ $t('ui-english') }}</option>
+              <option value="French">{{ $t('ui-french') }}</option>
+              <option value="Arabic">{{ $t('ui-arabic') }}</option>
             </select>
 
             <div v-if="form.errors.language" class="invalid-feedback d-block">
@@ -502,7 +507,7 @@ const removeSyllabus = () => {
           </BCol>
 
           <BCol md="2" v-if="form.type === 'paid'">
-            <label class="form-label">Price</label>
+            <label class="form-label">{{ $t('ui-price') }}</label>
 
             <input
               v-model="form.price"
@@ -520,7 +525,7 @@ const removeSyllabus = () => {
           </BCol>
 
           <BCol md="2" v-if="form.type === 'paid'">
-            <label class="form-label">Currency</label>
+            <label class="form-label">{{ $t('ui-currency') }}</label>
 
             <select
               v-model="form.currency"
@@ -538,7 +543,7 @@ const removeSyllabus = () => {
           </BCol>
 
           <BCol cols="12" v-if="tags.length">
-            <label class="form-label">Tags</label>
+            <label class="form-label">{{ $t('ui-tags') }}</label>
 
             <div class="tags-box">
               <button
@@ -562,7 +567,7 @@ const removeSyllabus = () => {
           <BCol cols="12">
             <div class="publish-card">
               <div>
-                <h6 class="mb-1">Publication Status</h6>
+                <h6 class="mb-1">{{ $t('ui-publication-status') }}</h6>
                 <p class="text-muted mb-0">
                   {{
                     form.is_published
@@ -581,7 +586,7 @@ const removeSyllabus = () => {
                 />
 
                 <label class="form-check-label" for="isPublished">
-                  {{ form.is_published ? 'Published' : 'Draft' }}
+                  {{ form.is_published ? $t('ui-published') : $t('ui-draft') }}
                 </label>
               </div>
             </div>
@@ -596,15 +601,15 @@ const removeSyllabus = () => {
       <BCol xl="4">
         <div class="builder-side-form h-100">
           <div class="course-image-card mb-3">
-            <label class="form-label">Course Image</label>
+            <label class="form-label">{{ $t('ui-course-image') }}</label>
 
             <div v-if="imagePreview" class="course-image-preview mb-3">
-              <img :src="imagePreview" alt="Course image" />
+              <img :src="imagePreview" :alt="$t('t-course-image')" />
             </div>
 
             <div v-else class="course-image-empty mb-3">
               <i class="ri-image-add-line"></i>
-              <span>No image selected</span>
+              <span>{{ $t('ui-no-image-selected') }}</span>
             </div>
 
             <input
@@ -618,7 +623,7 @@ const removeSyllabus = () => {
             <div class="d-flex gap-2 flex-wrap">
               <label for="courseImageInput" class="btn btn-soft-primary btn-sm mb-0">
                 <i class="ri-upload-cloud-2-line me-1"></i>
-                Choose Image
+                {{ $t('ui-choose-image') }}
               </label>
 
               <button
@@ -628,7 +633,7 @@ const removeSyllabus = () => {
                 @click="removeImage"
               >
                 <i class="ri-delete-bin-line me-1"></i>
-                Remove
+                {{ $t('ui-remove') }}
               </button>
             </div>
 
@@ -640,14 +645,14 @@ const removeSyllabus = () => {
           <div class="course-image-card mb-3">
             <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
               <div>
-                <label class="form-label mb-1">Course Syllabus</label>
+                <label class="form-label mb-1">{{ $t('ui-course-syllabus') }}</label>
                 <p class="text-muted small mb-0">
-                  Upload the official syllabus as a PDF file (maximum 10 MB).
+                  {{ $t('ui-upload-the-official-syllabus-as-a-pdf-file-maximum-10-mb') }}
                 </p>
               </div>
 
               <span class="badge bg-danger-subtle text-danger syllabus-type-badge">
-                PDF
+                {{ $t('ui-pdf') }}
               </span>
             </div>
 
@@ -676,7 +681,7 @@ const removeSyllabus = () => {
 
             <div v-else class="course-image-empty syllabus-empty mb-3">
               <i class="ri-file-pdf-2-line"></i>
-              <span>No syllabus selected</span>
+              <span>{{ $t('ui-no-syllabus-selected') }}</span>
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
@@ -697,7 +702,7 @@ const removeSyllabus = () => {
                 class="btn btn-soft-info btn-sm"
               >
                 <i class="ri-eye-line me-1"></i>
-                View PDF
+                {{ $t('ui-view-pdf') }}
               </a>
 
               <button
@@ -707,7 +712,7 @@ const removeSyllabus = () => {
                 @click="removeSyllabus"
               >
                 <i class="ri-delete-bin-line me-1"></i>
-                Remove
+                {{ $t('ui-remove') }}
               </button>
             </div>
 
@@ -720,11 +725,11 @@ const removeSyllabus = () => {
             <div>
               <h6 class="mb-1">
                 <i class="ri-mic-line me-1"></i>
-                Voice Over Support
+                {{ $t('ui-voice-over-support') }}
               </h6>
 
               <p class="text-muted mb-0">
-                Enable this if the course supports narrated content.
+                {{ $t('ui-enable-this-if-the-course-supports-narrated-content') }}
               </p>
             </div>
 
@@ -754,24 +759,24 @@ const removeSyllabus = () => {
               <div>
                 <h6 class="mb-1">
                   <i class="ri-settings-3-line me-1"></i>
-                  Global Voice Settings
+                  {{ $t('ui-global-voice-settings') }}
                 </h6>
 
                 <p class="text-muted mb-0">
-                  These settings will be used for all slide voice generation.
+                  {{ $t('ui-these-settings-will-be-used-for-all-slide-voice-generation') }}
                 </p>
               </div>
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Provider</label>
+              <label class="form-label">{{ $t('ui-provider') }}</label>
 
               <select
                 v-model="form.voice_over_provider"
                 class="form-select modern-input"
                 :class="{ 'is-invalid': form.errors.voice_over_provider }"
               >
-                <option value="voicerss">VoiceRSS</option>
+                <option value="voicerss">{{ $t('ui-voicerss') }}</option>
               </select>
 
               <div
@@ -783,7 +788,7 @@ const removeSyllabus = () => {
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Voice Language</label>
+              <label class="form-label">{{ $t('ui-voice-language') }}</label>
 
               <select
                 v-model="form.voice_over_lang"
@@ -808,7 +813,7 @@ const removeSyllabus = () => {
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Voice</label>
+              <label class="form-label">{{ $t('ui-voice') }}</label>
 
               <select
                 v-model="form.voice_over_voice"
@@ -836,11 +841,11 @@ const removeSyllabus = () => {
               <div>
                 <h6 class="mb-1">
                   <i class="ri-play-circle-line me-1"></i>
-                  Voice Over Auto Play
+                  {{ $t('ui-voice-over-auto-play') }}
                 </h6>
 
                 <p class="text-muted mb-0">
-                  Start voice over automatically when the learner opens a slide.
+                  {{ $t('ui-start-voice-over-automatically-when-the-learner-opens-a-slide') }}
                 </p>
               </div>
 
@@ -861,12 +866,12 @@ const removeSyllabus = () => {
 
           <h6 class="mb-3">
             <i class="ri-information-line me-1"></i>
-            Course Summary
+            {{ $t('ui-course-summary') }}
           </h6>
 
           <div class="publish-card mb-3">
             <div>
-              <h6 class="mb-1">Status</h6>
+              <h6 class="mb-1">{{ $t('ui-status') }}</h6>
 
               <p class="text-muted mb-0">
                 {{ form.is_published ? 'Visible to learners' : 'Draft mode' }}
@@ -877,34 +882,34 @@ const removeSyllabus = () => {
               class="mini-badge"
               :class="form.is_published ? 'success' : 'warning'"
             >
-              {{ form.is_published ? 'Published' : 'Draft' }}
+              {{ form.is_published ? $t('ui-published') : $t('ui-draft') }}
             </span>
           </div>
 
           <div class="small text-muted">
             <div class="d-flex justify-content-between mb-2 gap-3">
-              <span>Reference</span>
+              <span>{{ $t('ui-reference') }}</span>
               <strong class="text-dark text-end">
                 {{ form.ref || '-' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2 gap-3">
-              <span>Method</span>
+              <span>{{ $t('ui-method') }}</span>
               <strong class="text-dark text-end summary-truncate">
-                {{ form.method || '-' }}
+                {{ formatCourseLabel(form.method) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Duration</span>
+              <span>{{ $t('ui-duration') }}</span>
               <strong class="text-dark">
                 {{ form.duration_hours ? `${form.duration_hours} h` : '-' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Passing Score</span>
+              <span>{{ $t('ui-passing-score') }}</span>
               <strong class="text-dark">
                 {{ form.passing_score !== '' && form.passing_score !== null
                   ? `${form.passing_score}%`
@@ -914,49 +919,49 @@ const removeSyllabus = () => {
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Syllabus</span>
+              <span>{{ $t('ui-syllabus') }}</span>
               <strong :class="hasSyllabus ? 'text-success' : 'text-muted'">
                 {{ hasSyllabus ? 'Available' : 'Not uploaded' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Type</span>
+              <span>{{ $t('ui-type') }}</span>
               <strong class="text-dark text-capitalize">
-                {{ form.type || '-' }}
+                {{ form.type === 'paid' ? $t('ui-paid') : form.type ? $t('t-free') : '-' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Training</span>
+              <span>{{ $t('ui-training') }}</span>
               <strong class="text-dark text-capitalize">
-                {{ form.training_type || '-' }}
+                {{ formatCourseLabel(form.training_type) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Level</span>
+              <span>{{ $t('ui-level') }}</span>
               <strong class="text-dark text-capitalize">
-                {{ form.skill_level || '-' }}
+                {{ formatCourseLabel(form.skill_level) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Language</span>
+              <span>{{ $t('ui-language') }}</span>
               <strong class="text-dark">
-                {{ form.language || '-' }}
+                {{ formatCourseLabel(form.language) }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Tags</span>
+              <span>{{ $t('ui-tags') }}</span>
               <strong class="text-dark">
                 {{ selectedTags.length }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between mb-2">
-              <span>Voice Over</span>
+              <span>{{ $t('ui-voice-over') }}</span>
               <strong class="text-dark">
                 {{ form.support_voice_over ? 'Supported' : 'Not supported' }}
               </strong>
@@ -966,7 +971,7 @@ const removeSyllabus = () => {
               v-if="form.support_voice_over"
               class="d-flex justify-content-between mb-2"
             >
-              <span>Voice Lang</span>
+              <span>{{ $t('ui-voice-lang') }}</span>
               <strong class="text-dark">
                 {{ selectedLanguageLabel }}
               </strong>
@@ -976,7 +981,7 @@ const removeSyllabus = () => {
               v-if="form.support_voice_over"
               class="d-flex justify-content-between mb-2"
             >
-              <span>Voice</span>
+              <span>{{ $t('ui-voice') }}</span>
               <strong class="text-dark">
                 {{ selectedVoiceLabel }}
               </strong>
@@ -986,14 +991,14 @@ const removeSyllabus = () => {
               v-if="form.support_voice_over"
               class="d-flex justify-content-between mb-2"
             >
-              <span>Auto Play</span>
+              <span>{{ $t('ui-auto-play') }}</span>
               <strong class="text-dark">
                 {{ form.voice_over_auto_play ? 'Enabled' : 'Disabled' }}
               </strong>
             </div>
 
             <div class="d-flex justify-content-between" v-if="form.type === 'paid'">
-              <span>Price</span>
+              <span>{{ $t('ui-price') }}</span>
               <strong class="text-dark">
                 {{ form.price || 0 }} {{ form.currency || 'MAD' }}
               </strong>

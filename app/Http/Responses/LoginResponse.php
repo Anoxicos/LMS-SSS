@@ -47,6 +47,6 @@ class LoginResponse implements LoginResponseContract
 
         return redirect()->intended(
             config('fortify.home', '/')
-        );
+        )->with('arrival_intro', true);
     }
 }

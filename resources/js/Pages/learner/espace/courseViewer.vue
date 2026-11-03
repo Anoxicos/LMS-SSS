@@ -10,6 +10,9 @@ import {
 } from 'vue'
 
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 
 defineOptions({
   layout: LayoutAnonyme,
@@ -81,7 +84,7 @@ const trainingRequest = computed(() => {
 const formatTrainingDate = value => {
   if (!value) return '-'
 
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', {
+  return new Date(`${value}T00:00:00`).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -468,11 +471,11 @@ const getQuizOptionClass = (question, answer) => {
 const getCorrectAnswerLabel = answer => {
   const normalizedAnswer = normalizeQuizAnswer(answer)
 
-  if (normalizedAnswer === 'a') return 'Option A'
-  if (normalizedAnswer === 'b') return 'Option B'
-  if (normalizedAnswer === 'c') return 'Option C'
-  if (normalizedAnswer === 'true') return 'True'
-  if (normalizedAnswer === 'false') return 'False'
+  if (normalizedAnswer === 'a') return t('t-option-a')
+  if (normalizedAnswer === 'b') return t('t-option-b')
+  if (normalizedAnswer === 'c') return t('t-option-c')
+  if (normalizedAnswer === 'true') return t('t-true')
+  if (normalizedAnswer === 'false') return t('t-false')
 
   return '-'
 }
@@ -650,31 +653,31 @@ const audioButtonIcon = computed(() => {
 
 const audioButtonTitle = computed(() => {
   if (audioFinished.value || isAudioAtStart.value) {
-    return 'Replay audio'
+    return t('t-replay-audio')
   }
 
   if (isAudioPlaying.value) {
-    return 'Audio playing'
+    return t('t-audio-playing')
   }
 
-  return 'Audio stopped'
+  return t('t-audio-stopped')
 })
 
 const audioLabelText = computed(() => {
   if (isCurrentSlideCompleted.value) {
-    return 'Slide completed'
+    return t('t-slide-completed')
   }
 
   if (audioFinished.value) {
-    return 'Audio completed'
+    return t('t-audio-completed')
   }
 
   if (isAudioAtStart.value && voiceOverAutoPlay.value) {
-    return 'Auto play enabled'
+    return t('t-auto-play-enabled')
   }
 
   if (isAudioAtStart.value) {
-    return 'Replay from start'
+    return t('t-replay-from-start')
   }
 
   if (isAudioPlaying.value) {
@@ -685,7 +688,7 @@ const audioLabelText = computed(() => {
     return 'Audio stopped'
   }
 
-  return 'Start voice over'
+  return t('t-start-voice-over')
 })
 
 const audioButtonStateClass = computed(() => {
@@ -1257,7 +1260,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <Head :title="enrollment.course?.title || 'Course Viewer'" />
+  <Head :title="enrollment.course?.title || $t('ui-course-viewer')" />
 
   <section class="compact-player-page">
     <button
@@ -1283,7 +1286,7 @@ onBeforeUnmount(() => {
 
           <div class="min-width-0">
             <h6>{{ enrollment.course?.title || 'Course' }}</h6>
-            <span>{{ progressPercent }}% completed</span>
+            <span>{{ $t('t-percent-completed', { percent: progressPercent }) }}</span>
           </div>
 
           <button
@@ -1393,7 +1396,7 @@ onBeforeUnmount(() => {
 
             <div class="min-width-0">
               <span class="slide-counter">
-                Slide {{ currentGlobalSlideNumber }} / {{ totalSlides }}
+                {{ $t('ui-slide') }} {{ currentGlobalSlideNumber }} / {{ totalSlides }}
               </span>
 
               <h1>{{ selectedSlide?.title || '-' }}</h1>
@@ -1419,12 +1422,12 @@ onBeforeUnmount(() => {
               type="button"
               variant="primary"
               class="topbar-finish-course-btn"
-              title="Finish course and access the final exam"
+              :title="$t('t-finish-course-exam')"
               @click="goToCourseFinish"
             >
               <i class="ri-flag-line"></i>
 
-              <span>Finish course</span>
+              <span>{{ $t('t-finish-course') }}</span>
             </BButton>
           </div>
         </div>
@@ -1437,7 +1440,7 @@ onBeforeUnmount(() => {
             <i class="ri-calendar-check-line"></i>
 
             <div>
-              <span>Training period</span>
+              <span>{{ $t('t-training-period') }}</span>
               <strong>{{ trainingPeriodLabel }}</strong>
             </div>
           </div>
@@ -1476,7 +1479,7 @@ onBeforeUnmount(() => {
 
               <div v-else class="compact-empty-content">
                 <i class="ri-video-off-line"></i>
-                <p>No video URL available.</p>
+                <p>{{ $t('t-no-video-url') }}</p>
               </div>
             </div>
 
@@ -1498,7 +1501,7 @@ onBeforeUnmount(() => {
 
               <div v-else class="compact-empty-content">
                 <i class="ri-file-lock-line"></i>
-                <p>Protected file</p>
+                <p>{{ $t('t-protected-file') }}</p>
               </div>
             </div>
 
@@ -1514,10 +1517,10 @@ onBeforeUnmount(() => {
                 target="_blank"
                 class="open-link-btn"
               >
-                Open resource
+                {{ $t('t-open-resource') }}
               </a>
 
-              <p v-else>No external URL available.</p>
+              <p v-else>{{ $t('t-no-external-url') }}</p>
             </div>
 
             <div
@@ -1533,7 +1536,7 @@ onBeforeUnmount(() => {
 
                     <div class="min-width-0">
                       <span class="quiz-kicker">
-                        Comprehension Quiz
+                        {{ $t('ui-comprehension-quiz') }}
                       </span>
 
                       <h2>{{ selectedSlide.title }}</h2>
@@ -1578,7 +1581,7 @@ onBeforeUnmount(() => {
                         @click="goToPreviousQuizQuestion"
                       >
                         <i class="ri-arrow-left-line"></i>
-                        <span>Précédente</span>
+                        <span>{{ $t('t-previous-feminine') }}</span>
                       </BButton>
 
                       <BButton
@@ -1591,7 +1594,7 @@ onBeforeUnmount(() => {
                         "
                         @click="goToNextQuizQuestion"
                       >
-                        <span>Suivante</span>
+                        <span>{{ $t('t-next-feminine') }}</span>
                         <i class="ri-arrow-right-line"></i>
                       </BButton>
 
@@ -1607,7 +1610,7 @@ onBeforeUnmount(() => {
                         @click="checkQuizAnswers"
                       >
                         <i class="ri-check-double-line"></i>
-                        <span>Vérifier</span>
+                        <span>{{ $t('t-check-answers') }}</span>
                       </BButton>
 
                       <BButton
@@ -1618,13 +1621,13 @@ onBeforeUnmount(() => {
                         @click="showResultSummary"
                       >
                         <i class="ri-bar-chart-box-line"></i>
-                        <span>Résumé</span>
+                        <span>{{ $t('t-summary') }}</span>
                       </BButton>
 
                       <button
                         type="button"
                         class="quiz-header-reset-btn"
-                        title="Réinitialiser le quiz"
+                        :title="$t('t-reset-quiz')"
                         @click="resetQuiz"
                       >
                         <i class="ri-restart-line"></i>
@@ -1641,8 +1644,8 @@ onBeforeUnmount(() => {
                     <i class="ri-question-line"></i>
                   </div>
 
-                  <h5>Aucune question disponible</h5>
-                  <p>Cette slide quiz ne contient encore aucune question.</p>
+                  <h5>{{ $t('t-no-quiz-questions') }}</h5>
+                  <p>{{ $t('t-quiz-empty') }}</p>
                 </div>
 
                 <div
@@ -1660,7 +1663,7 @@ onBeforeUnmount(() => {
                     </div>
 
                     <span class="quiz-result-kicker">
-                      Résultat du quiz
+                      {{ $t('ui-resultat-du-quiz') }}
                     </span>
 
                     <h3>
@@ -1681,7 +1684,7 @@ onBeforeUnmount(() => {
                   </div>
 
                   <div class="quiz-result-score">
-                    <span>Votre score</span>
+                    <span>{{ $t('t-your-score') }}</span>
 
                     <div class="quiz-result-score-value">
                       <strong>{{ quizCorrectCount }}</strong>
@@ -1700,7 +1703,7 @@ onBeforeUnmount(() => {
                       </div>
 
                       <div>
-                        <span>Bonnes réponses</span>
+                        <span>{{ $t('t-correct-answers') }}</span>
                         <strong>{{ quizCorrectCount }}</strong>
                       </div>
                     </div>
@@ -1711,7 +1714,7 @@ onBeforeUnmount(() => {
                       </div>
 
                       <div>
-                        <span>Réponses incorrectes</span>
+                        <span>{{ $t('t-incorrect-answers') }}</span>
                         <strong>{{ quizIncorrectCount }}</strong>
                       </div>
                     </div>
@@ -1722,7 +1725,7 @@ onBeforeUnmount(() => {
                       </div>
 
                       <div>
-                        <span>Total des questions</span>
+                        <span>{{ $t('t-total-questions') }}</span>
                         <strong>{{ selectedSlideQuestions.length }}</strong>
                       </div>
                     </div>
@@ -1736,7 +1739,7 @@ onBeforeUnmount(() => {
                       @click="reviewQuizAnswers"
                     >
                       <i class="ri-arrow-left-line"></i>
-                      Retour aux questions
+                      {{ $t('ui-retour-aux-questions') }}
                     </BButton>
 
                     <BButton
@@ -1746,7 +1749,7 @@ onBeforeUnmount(() => {
                       @click="resetQuiz"
                     >
                       <i class="ri-restart-line"></i>
-                      Réinitialiser le quiz
+                      {{ $t('t-reset-quiz') }}
                     </BButton>
                   </div>
                 </div>
@@ -1755,7 +1758,7 @@ onBeforeUnmount(() => {
                   <div class="quiz-compact-progress">
                     <div class="quiz-compact-progress-head">
                       <span>
-                        Question {{ currentQuizQuestionIndex + 1 }}
+                        {{ $t('t-question') }} {{ currentQuizQuestionIndex + 1 }}
                         / {{ selectedSlideQuestions.length }}
                       </span>
 
@@ -1802,7 +1805,7 @@ onBeforeUnmount(() => {
                       <div class="quiz-question-heading">
                         <div class="quiz-question-meta">
                           <span class="quiz-question-label">
-                            Question
+                            {{ $t('t-question') }}
                           </span>
 
                           <span
@@ -1887,7 +1890,7 @@ onBeforeUnmount(() => {
 
           <div v-else class="compact-empty-content">
             <i class="ri-slideshow-line"></i>
-            <p>No slide available.</p>
+            <p>{{ $t('t-no-slide-available') }}</p>
           </div>
         </div>
 
@@ -1939,7 +1942,7 @@ onBeforeUnmount(() => {
               </div>
 
               <span class="no-audio-text">
-                No voice over
+                {{ $t('t-no-voice-over') }}
               </span>
             </template>
           </div>
@@ -1952,7 +1955,7 @@ onBeforeUnmount(() => {
               @click="prevSlide"
             >
               <i class="ri-arrow-left-line"></i>
-              <span>Previous</span>
+              <span>{{ $t('t-previous') }}</span>
             </BButton>
 
             <BButton
@@ -1990,7 +1993,7 @@ onBeforeUnmount(() => {
               class="compact-nav-btn finish-course-btn"
               @click="goToCourseFinish"
             >
-              <span>Finish course</span>
+              <span>{{ $t('t-finish-course') }}</span>
               <i class="ri-flag-line"></i>
             </BButton>
 
@@ -2001,7 +2004,7 @@ onBeforeUnmount(() => {
               :disabled="!canGoNext"
               @click="nextSlide"
             >
-              <span>Next</span>
+              <span>{{ $t('t-next') }}</span>
               <i class="ri-arrow-right-line"></i>
             </BButton>
           </div>

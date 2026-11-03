@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -59,8 +63,8 @@ const addData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Bank added successfully',
+        title: t('ui-success'),
+        text: t('ui-bank-added-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -72,8 +76,8 @@ const addData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'An error occurred while adding the bank',
+        title: t('t-error'),
+        text: t('ui-an-error-occurred-while-adding-the-bank'),
       })
     },
   })
@@ -86,8 +90,8 @@ const updateData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Bank updated successfully',
+        title: t('ui-success'),
+        text: t('ui-bank-updated-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -99,8 +103,8 @@ const updateData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'An error occurred while updating the bank',
+        title: t('t-error'),
+        text: t('ui-an-error-occurred-while-updating-the-bank'),
       })
     },
   })
@@ -142,7 +146,7 @@ defineExpose({
             {{ dataEdit ? 'Update Question Bank' : 'Create Question Bank' }}
           </h6>
           <p class="text-muted mb-0 small">
-            Select a course and define the bank information.
+            {{ $t('ui-select-a-course-and-define-the-bank-information') }}
           </p>
         </div>
       </div>
@@ -151,7 +155,7 @@ defineExpose({
         <BCol lg="6">
           <div>
             <label class="form-label">
-              Course <span class="text-danger">*</span>
+              {{ $t('ui-course') }} <span class="text-danger">*</span>
             </label>
 
             <select
@@ -159,7 +163,7 @@ defineExpose({
               class="form-select"
               :class="{ 'is-invalid': submitted && !form.course_id }"
             >
-              <option value="">Select course</option>
+              <option value="">{{ $t('ui-select-course') }}</option>
 
               <option
                 v-for="course in courses"
@@ -173,7 +177,7 @@ defineExpose({
               </option>
             </select>
 
-            <div class="invalid-feedback">Please select a course.</div>
+            <div class="invalid-feedback">{{ $t('ui-please-select-a-course') }}</div>
 
             <div v-if="form.errors.course_id" class="text-danger small mt-1">
               {{ form.errors.course_id }}
@@ -183,13 +187,13 @@ defineExpose({
 
         <BCol lg="6">
           <div>
-            <label class="form-label">Reference</label>
+            <label class="form-label">{{ $t('t-reference') }}</label>
 
             <input
               v-model="form.ref"
               type="text"
               class="form-control"
-              placeholder="Auto generated if empty"
+              :placeholder="$t('ui-auto-generated-if-empty')"
             />
 
             <div v-if="form.errors.ref" class="text-danger small mt-1">
@@ -201,14 +205,14 @@ defineExpose({
         <BCol lg="12">
           <div>
             <label class="form-label">
-              Title <span class="text-danger">*</span>
+              {{ $t('t-title') }} <span class="text-danger">*</span>
             </label>
 
             <input
               v-model="form.title"
               type="text"
               class="form-control"
-              placeholder="Enter bank title"
+              :placeholder="$t('ui-enter-bank-title')"
               :class="{ 'is-invalid': submitted && !form.title }"
             />
 
@@ -222,13 +226,13 @@ defineExpose({
 
         <BCol lg="12">
           <div>
-            <label class="form-label">Description</label>
+            <label class="form-label">{{ $t('ui-description') }}</label>
 
             <textarea
               v-model="form.description"
               class="form-control"
               rows="4"
-              placeholder="Enter bank description"
+              :placeholder="$t('ui-enter-bank-description')"
             ></textarea>
 
             <div v-if="form.errors.description" class="text-danger small mt-1">
@@ -245,7 +249,7 @@ defineExpose({
             variant="light"
             @click="addModal = false"
           >
-            Close
+            {{ $t('t-close') }}
           </BButton>
 
           <BButton

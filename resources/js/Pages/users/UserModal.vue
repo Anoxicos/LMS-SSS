@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -202,8 +206,8 @@ const validateRequiredFields = () => {
   if (!requiredFieldsAreValid) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required fields',
-      text: 'Please fill in all required fields.',
+      title: t('ui-required-fields'),
+      text: t('ui-please-fill-in-all-required-fields'),
       timer: 2000,
       showConfirmButton: false,
     })
@@ -214,8 +218,8 @@ const validateRequiredFields = () => {
   if (isSuperAdmin.value && !form.company_id) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required fields',
-      text: 'Please select a company.',
+      title: t('ui-required-fields'),
+      text: t('ui-please-select-a-company'),
       timer: 2000,
       showConfirmButton: false,
     })
@@ -244,8 +248,8 @@ const addData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'User added successfully.',
+        title: t('ui-success'),
+        text: t('ui-user-added-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -255,7 +259,7 @@ const addData = () => {
     onError: errors => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
+        title: t('t-error'),
         text: errors?.company_id
           ? errors.company_id
           : 'Please check the entered information.',
@@ -276,8 +280,8 @@ const updateData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'User updated successfully.',
+        title: t('ui-success'),
+        text: t('ui-user-updated-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -287,7 +291,7 @@ const updateData = () => {
     onError: errors => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
+        title: t('t-error'),
         text: errors?.company_id
           ? errors.company_id
           : 'Please check the entered information.',
@@ -327,7 +331,7 @@ defineExpose({
           <div class="upload-panel">
             <div class="panel-title">
               <i class="ri-user-3-line"></i>
-              Profile photo
+              {{ $t('ui-profile-photo') }}
             </div>
 
             <div class="user-photo-wrapper">
@@ -344,7 +348,7 @@ defineExpose({
                   v-if="photoPreview !== defaultImage"
                   type="button"
                   class="photo-delete-btn"
-                  title="Remove photo"
+                  :title="$t('ui-remove-photo')"
                   @click.stop="removePhoto"
                 >
                   <i class="ri-delete-bin-line"></i>
@@ -361,7 +365,7 @@ defineExpose({
               </div>
 
               <p class="text-muted mb-0 mt-3 small">
-                JPG, JPEG, PNG or WEBP. Maximum 2 MB.
+                {{ $t('ui-jpg-jpeg-png-or-webp-maximum-2-mb') }}
               </p>
 
               <input
@@ -386,13 +390,13 @@ defineExpose({
           <div class="form-section">
             <div class="panel-title">
               <i class="ri-user-settings-line"></i>
-              Personal information
+              {{ $t('ui-personal-information') }}
             </div>
 
             <BRow class="g-3">
               <BCol md="4">
                 <label class="form-label">
-                  First name <span class="text-danger">*</span>
+                  {{ $t('ui-first-name') }} <span class="text-danger">*</span>
                 </label>
 
                 <input
@@ -406,7 +410,7 @@ defineExpose({
                 />
 
                 <div class="invalid-feedback">
-                  Please enter the first name.
+                  {{ $t('ui-please-enter-the-first-name') }}
                 </div>
 
                 <div
@@ -419,8 +423,8 @@ defineExpose({
 
               <BCol md="4">
                 <label class="form-label">
-                  Middle name
-                  <span class="text-muted small">(optional)</span>
+                  {{ $t('ui-middle-name') }}
+                  <span class="text-muted small">{{ $t('ui-optional') }}</span>
                 </label>
 
                 <input
@@ -440,7 +444,7 @@ defineExpose({
 
               <BCol md="4">
                 <label class="form-label">
-                  Last name <span class="text-danger">*</span>
+                  {{ $t('ui-last-name') }} <span class="text-danger">*</span>
                 </label>
 
                 <input
@@ -454,7 +458,7 @@ defineExpose({
                 />
 
                 <div class="invalid-feedback">
-                  Please enter the last name.
+                  {{ $t('ui-please-enter-the-last-name') }}
                 </div>
 
                 <div
@@ -467,8 +471,8 @@ defineExpose({
 
               <BCol md="4">
                 <label class="form-label">
-                  Date of birth
-                  <span class="text-muted small">(optional)</span>
+                  {{ $t('ui-date-of-birth') }}
+                  <span class="text-muted small">{{ $t('ui-optional') }}</span>
                 </label>
 
                 <input
@@ -488,8 +492,8 @@ defineExpose({
 
               <BCol md="4">
                 <label class="form-label">
-                  Place of birth
-                  <span class="text-muted small">(optional)</span>
+                  {{ $t('ui-place-of-birth') }}
+                  <span class="text-muted small">{{ $t('ui-optional') }}</span>
                 </label>
 
                 <input
@@ -509,8 +513,8 @@ defineExpose({
 
               <BCol md="4">
                 <label class="form-label">
-                  Country
-                  <span class="text-muted small">(optional)</span>
+                  {{ $t('ui-country') }}
+                  <span class="text-muted small">{{ $t('ui-optional') }}</span>
                 </label>
 
                 <input
@@ -533,13 +537,13 @@ defineExpose({
           <div class="form-section mt-3">
             <div class="panel-title">
               <i class="ri-shield-user-line"></i>
-              Account information
+              {{ $t('ui-account-information') }}
             </div>
 
             <BRow class="g-3">
               <BCol md="6">
                 <label class="form-label">
-                  Email <span class="text-danger">*</span>
+                  {{ $t('ui-email') }} <span class="text-danger">*</span>
                 </label>
 
                 <input
@@ -553,7 +557,7 @@ defineExpose({
                 />
 
                 <div class="invalid-feedback">
-                  Please enter the email address.
+                  {{ $t('ui-please-enter-the-email-address') }}
                 </div>
 
                 <div
@@ -566,9 +570,9 @@ defineExpose({
 
               <BCol md="6">
                 <label class="form-label">
-                  Password
+                  {{ $t('ui-password') }}
                   <span v-if="!dataEdit" class="text-danger">*</span>
-                  <span v-else class="text-muted small">(optional)</span>
+                  <span v-else class="text-muted small">{{ $t('ui-optional') }}</span>
                 </label>
 
                 <input
@@ -587,7 +591,7 @@ defineExpose({
                 />
 
                 <div class="invalid-feedback">
-                  Please enter the password.
+                  {{ $t('ui-please-enter-the-password') }}
                 </div>
 
                 <div
@@ -600,7 +604,7 @@ defineExpose({
 
               <BCol md="6">
                 <label class="form-label">
-                  Role <span class="text-danger">*</span>
+                  {{ $t('ui-role') }} <span class="text-danger">*</span>
                 </label>
 
                 <Multiselect
@@ -617,7 +621,7 @@ defineExpose({
                   v-if="submitted && !form.role"
                   class="text-danger small mt-1"
                 >
-                  Please select a role.
+                  {{ $t('ui-please-select-a-role') }}
                 </div>
 
                 <div
@@ -630,7 +634,7 @@ defineExpose({
 
               <BCol md="6">
                 <label class="form-label">
-                  Company
+                  {{ $t('ui-company') }}
                   <span v-if="isSuperAdmin" class="text-danger">*</span>
                 </label>
 
@@ -655,14 +659,14 @@ defineExpose({
                   "
                   class="text-danger small mt-1"
                 >
-                  Please select a company.
+                  {{ $t('ui-please-select-a-company') }}
                 </div>
 
                 <div
                   v-if="isAdmin"
                   class="text-muted small mt-1"
                 >
-                  The company is assigned automatically.
+                  {{ $t('ui-the-company-is-assigned-automatically') }}
                 </div>
 
                 <div
@@ -675,7 +679,7 @@ defineExpose({
 
               <BCol md="6">
                 <label class="form-label">
-                  Status <span class="text-danger">*</span>
+                  {{ $t('ui-status') }} <span class="text-danger">*</span>
                 </label>
 
                 <select
@@ -685,12 +689,12 @@ defineExpose({
                     'is-invalid': submitted && !form.status,
                   }"
                 >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="active">{{ $t('ui-active') }}</option>
+                  <option value="inactive">{{ $t('ui-inactive') }}</option>
                 </select>
 
                 <div class="invalid-feedback">
-                  Please select a status.
+                  {{ $t('ui-please-select-a-status') }}
                 </div>
 
                 <div
@@ -712,7 +716,7 @@ defineExpose({
             variant="light"
             @click="addModal = false"
           >
-            Close
+            {{ $t('ui-close') }}
           </BButton>
 
           <BButton

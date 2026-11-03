@@ -26,11 +26,11 @@ defineProps({
 
 <template>
   <Layout>
-    <Head title="Users" />
+    <Head :title="$t('ui-users')" />
 
     <PageHeader
-      title="Users"
-      pageTitle="Admin"
+      :title="$t('ui-users')"
+      :page-title="$t('ui-admin')"
     />
 
     <BRow>

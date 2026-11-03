@@ -269,7 +269,7 @@ class IndividualRequestController extends Controller
 
         return redirect()
             ->route('individual-requests.show', $hashid)
-            ->with('success', 'The individual request has been reviewed successfully.');
+            ->with('success', __('The individual request has been reviewed successfully.'));
     }
 
     public function downloadPassport(string $hashid): StreamedResponse

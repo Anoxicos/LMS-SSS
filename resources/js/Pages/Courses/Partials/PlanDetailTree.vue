@@ -53,11 +53,11 @@ const hasChildren = (detail) => {
             </h6>
 
             <span class="mini-badge file">
-              Own: {{ detail.own_questions || 0 }}
+              {{ $t('ui-own') }} {{ detail.own_questions || 0 }}
             </span>
 
             <span class="mini-badge success">
-              Total: {{ detail.total_questions || 0 }}
+              {{ $t('ui-total') }} {{ detail.total_questions || 0 }}
             </span>
           </div>
 
@@ -84,7 +84,7 @@ const hasChildren = (detail) => {
             size="sm"
             variant="soft-success"
             class="action-btn"
-            title="Add child"
+            :title="$t('ui-add-child')"
             @click="emit('add-child', detail)"
           >
             <i class="ri-add-line"></i>
@@ -95,7 +95,7 @@ const hasChildren = (detail) => {
             size="sm"
             variant="soft-primary"
             class="action-btn"
-            title="Edit"
+            :title="$t('ui-edit')"
             @click="emit('edit-detail', detail)"
           >
             <i class="ri-pencil-line"></i>
@@ -106,7 +106,7 @@ const hasChildren = (detail) => {
             size="sm"
             variant="soft-danger"
             class="action-btn"
-            title="Delete"
+            :title="$t('ui-delete')"
             @click="emit('delete-detail', detail)"
           >
             <i class="ri-delete-bin-6-line"></i>

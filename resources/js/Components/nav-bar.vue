@@ -144,46 +144,8 @@ export default {
       is_hidden: false,
 
       languages: [
-        {
-          flag: us_flag,
-          language: 'en',
-          title: 'English',
-        },
-        {
-          flag: spain,
-          language: 'sp',
-          title: 'Española',
-        },
-        {
-          flag: germany,
-          language: 'gr',
-          title: 'Deutsche',
-        },
-        {
-          flag: italy,
-          language: 'it',
-          title: 'italiana',
-        },
-        {
-          flag: russia,
-          language: 'ru',
-          title: 'русский',
-        },
-        {
-          flag: china,
-          language: 'ch',
-          title: '中國人',
-        },
-        {
-          flag: french,
-          language: 'fr',
-          title: 'Français',
-        },
-        {
-          flag: ae,
-          language: 'ar',
-          title: 'Arabic',
-        },
+        { flag: us_flag, language: 'en', title: 'English' },
+        { flag: french, language: 'fr', title: 'Français' },
       ],
 
       cartItems: [
@@ -229,7 +191,7 @@ export default {
         },
       ],
 
-      lan: i18n.global?.locale || i18n.locale || 'en',
+      lan: typeof window !== 'undefined' && window.localStorage.getItem('lms_language') === 'fr' ? 'fr' : 'en',
       text: null,
       flag: null,
       value: null,
@@ -390,6 +352,12 @@ export default {
       this.text = country
       this.flag = flag
 
+      window.localStorage.setItem('lms_language', locale)
+      document.cookie = `lms_language=${locale}; path=/; max-age=31536000; samesite=lax`
+      window.axios.defaults.headers.common['X-Locale'] = locale
+      document.documentElement.setAttribute('lang', locale)
+      document.documentElement.setAttribute('dir', 'ltr')
+
       const headerLangImg = document.getElementById('header-lang-img')
 
       if (headerLangImg) {
@@ -471,7 +439,7 @@ export default {
               <input
                 type="text"
                 class="form-control"
-                placeholder="Search..."
+                :placeholder="$t('ui-search')"
                 autocomplete="off"
                 id="search-options"
                 value=""
@@ -511,6 +479,20 @@ export default {
             </BButton>
           </div>
 
+          <div class="ms-1 header-item d-flex">
+            <BButton
+              type="button"
+              variant="ghost-secondary"
+              class="btn-topbar d-inline-flex align-items-center gap-2"
+              :aria-label="lan === 'fr' ? 'Switch language to English' : 'Passer l’interface en français'"
+              :title="lan === 'fr' ? 'Switch language to English' : 'Passer l’interface en français'"
+              @click="toggleLanguage"
+            >
+              <img :src="flag" alt="" width="20" height="15" />
+              <span>{{ lan.toUpperCase() }}</span>
+            </BButton>
+          </div>
+
           <!-- User Dropdown -->
           <BDropdown
             variant="link"
@@ -543,12 +525,12 @@ export default {
             </template>
 
             <h6 class="dropdown-header" v-if="$page.props.auth.user?.name">
-              Welcome {{ $page.props.auth.user.name }}!
+              {{ $t('t-welcome-user', { name: $page.props.auth.user.name }) }}
             </h6>
 
             <Link class="dropdown-item" :href="route('profile.show')">
               <i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i>
-              <span class="align-middle">Profile</span>
+              <span class="align-middle">{{ $t('t-profile') }}</span>
             </Link>
 
             <div class="dropdown-divider"></div>
@@ -556,7 +538,7 @@ export default {
             <form method="POST" @submit.prevent="logout" class="dropdown-item">
               <BButton variant="none" type="submit" class="btn p-0">
                 <i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>
-                Logout
+                {{ $t('t-logout') }}
               </BButton>
             </form>
           </BDropdown>

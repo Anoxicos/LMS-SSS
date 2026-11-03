@@ -2,10 +2,13 @@
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
+import i18n from '@/i18n'
 
 defineOptions({
   layout: LayoutAnonyme,
 })
+
+const t = (...args) => i18n.global.t(...args)
 
 const props = defineProps({
   exam: {
@@ -239,7 +242,7 @@ const saveAnswerToServer = async (questionId, answer) => {
 
     if (!response.ok) {
       throw new Error(
-        payload.message || 'Unable to save the answer.'
+        payload.message || t('t-answer-save-failed')
       )
     }
 
@@ -254,7 +257,7 @@ const saveAnswerToServer = async (questionId, answer) => {
     }
   } catch (error) {
     answerSaveError.value =
-      'The answer is stored locally and will be sent with the exam.'
+      t('t-answer-saved-locally')
   }
 }
 
@@ -455,7 +458,7 @@ const getOptionClass = option => {
 </script>
 
 <template>
-  <Head :title="exam.title || 'Exam'" />
+  <Head :title="exam.title || $t('ui-exam')" />
 
   <section
     class="exam-page"
@@ -478,8 +481,8 @@ const getOptionClass = option => {
           </button>
 
           <div class="sidebar-title min-width-0">
-            <span>Final Assessment</span>
-            <h6>{{ exam.course?.title || 'Course Exam' }}</h6>
+          <span>{{ $t('t-final-assessment') }}</span>
+          <h6>{{ exam.course?.title || $t('t-course-exam') }}</h6>
           </div>
         </div>
 
@@ -492,19 +495,19 @@ const getOptionClass = option => {
             <i :class="exam.passed ? 'ri-checkbox-circle-line' : 'ri-close-circle-line'"></i>
           </div>
 
-          <span>{{ exam.passed ? 'Passed' : 'Failed' }}</span>
+          <span>{{ exam.passed ? $t('t-passed') : $t('t-failed') }}</span>
 
           <strong>{{ resultPercent }}%</strong>
 
           <p>
-            Passing score: {{ exam.pass_score }}%
+            {{ $t('t-passing-score') }}: {{ exam.pass_score }}%
           </p>
 
           <small
             v-if="!exam.passed && requiresCourseRetake"
             class="result-retake-note"
           >
-            Complete the course again before your next attempt.
+            {{ $t('t-retake-course-before-exam') }}
           </small>
         </div>
 
@@ -514,7 +517,7 @@ const getOptionClass = option => {
         >
           <div class="progress-main">
             <div>
-              <span>Progress</span>
+              <span>{{ $t('t-progress') }}</span>
               <strong>{{ answeredQuestions }} / {{ totalQuestions }}</strong>
             </div>
 
@@ -541,32 +544,32 @@ const getOptionClass = option => {
           </div>
 
           <div class="sidebar-timer-content">
-            <span>Time remaining</span>
+            <span>{{ $t('t-time-remaining') }}</span>
             <strong>{{ formattedRemainingTime }}</strong>
           </div>
 
           <small>
-            {{ exam.time_limit_minutes }} min
+            {{ exam.time_limit_minutes }} {{ $t('ui-min') }}
           </small>
         </div>
 
         <div v-if="!isSubmitted" class="question-map-card">
           <div class="question-map-header">
             <div>
-              <h6>Question map</h6>
-              <p>Jump to any question and update your answer.</p>
+              <h6>{{ $t('t-question-map') }}</h6>
+              <p>{{ $t('t-question-map-description') }}</p>
             </div>
           </div>
 
           <div class="question-map-legend">
             <span>
               <i class="legend-dot pending"></i>
-              To answer
+              {{ $t('t-to-answer') }}
             </span>
 
             <span>
               <i class="legend-dot answered"></i>
-              Answered
+              {{ $t('t-answered') }}
             </span>
           </div>
 
@@ -592,13 +595,13 @@ const getOptionClass = option => {
           <div class="exam-header-content min-width-0">
             <div class="exam-badge">
               <i class="ri-shield-check-line"></i>
-              Attempt #{{ exam.attempt_number }}
+              {{ $t('t-attempt-number', { number: exam.attempt_number }) }}
             </div>
 
-            <h1>{{ exam.title || 'Final Exam' }}</h1>
+            <h1>{{ exam.title || $t('t-final-exam') }}</h1>
 
             <p>
-              {{ exam.description || 'Answer all questions carefully before submitting your exam.' }}
+              {{ exam.description || $t('t-exam-instructions') }}
             </p>
           </div>
 
@@ -614,7 +617,7 @@ const getOptionClass = option => {
               <i class="ri-time-line"></i>
 
               <div>
-                <span>Remaining</span>
+                <span>{{ $t('t-remaining') }}</span>
                 <strong>{{ formattedRemainingTime }}</strong>
               </div>
             </div>
@@ -635,9 +638,9 @@ const getOptionClass = option => {
                 {{
                   isSubmitted
                     ? exam.passed
-                      ? 'Passed'
-                      : 'Failed'
-                    : 'In progress'
+                      ? $t('t-passed')
+                      : $t('t-failed')
+                    : $t('t-in-progress')
                 }}
               </span>
             </div>
@@ -649,17 +652,17 @@ const getOptionClass = option => {
           class="exam-summary-strip in-progress-summary"
         >
           <div class="summary-item">
-            <span>Total questions</span>
+            <span>{{ $t('t-total-questions') }}</span>
             <strong>{{ totalQuestions }}</strong>
           </div>
 
           <div class="summary-item success">
-            <span>Answered</span>
+            <span>{{ $t('t-answered') }}</span>
             <strong>{{ answeredQuestions }}</strong>
           </div>
 
           <div class="summary-item warning">
-            <span>To answer</span>
+            <span>{{ $t('t-to-answer') }}</span>
             <strong>{{ unansweredQuestions }}</strong>
           </div>
         </div>
@@ -674,16 +677,16 @@ const getOptionClass = option => {
           </div>
 
           <div class="exam-result-overview-copy">
-            <span>Final score</span>
+            <span>{{ $t('t-final-score') }}</span>
             <strong>{{ resultPercent }}%</strong>
             <p>
-              Passing score: {{ exam.pass_score }}%
+              {{ $t('t-passing-score') }}: {{ exam.pass_score }}%
             </p>
           </div>
 
           <div class="exam-result-overview-status">
             <i :class="exam.passed ? 'ri-checkbox-circle-fill' : 'ri-close-circle-fill'"></i>
-            {{ exam.passed ? 'Passed' : 'Failed' }}
+            {{ exam.passed ? $t('t-passed') : $t('t-failed') }}
           </div>
         </div>
 
@@ -696,12 +699,10 @@ const getOptionClass = option => {
           </div>
 
           <div class="course-retake-alert-content">
-            <h3>Complete the course again before your next attempt</h3>
+            <h3>{{ $t('t-retake-course-before-exam') }}</h3>
 
             <p>
-              You still have {{ exam.enrollment.attempts_rest }} attempt(s),
-              but the course progress has been reset. Complete every active
-              slide again to unlock the next exam.
+              {{ $t('t-retake-course-description', { count: exam.enrollment.attempts_rest }) }}
             </p>
           </div>
 
@@ -709,7 +710,7 @@ const getOptionClass = option => {
             type="button"
             @click="goToCourseViewer"
           >
-            Return to course
+            {{ $t('t-return-to-course') }}
             <i class="ri-arrow-right-line"></i>
           </button>
         </div>
@@ -723,11 +724,10 @@ const getOptionClass = option => {
           </div>
 
           <div class="exam-passed-final-alert-content">
-            <h3>Final exam passed</h3>
+            <h3>{{ $t('t-final-exam-passed') }}</h3>
 
             <p>
-              This enrollment is completed. The course is closed and no new
-              exam attempt can be started.
+              {{ $t('t-enrollment-completed-exam-closed') }}
             </p>
           </div>
 
@@ -735,7 +735,7 @@ const getOptionClass = option => {
             type="button"
             @click="goToCourses"
           >
-            My courses
+            {{ $t('t-my-courses') }}
             <i class="ri-arrow-right-line"></i>
           </button>
         </div>
@@ -749,11 +749,10 @@ const getOptionClass = option => {
           </div>
 
           <div class="exam-retry-alert-content">
-            <h3>Another exam attempt is available</h3>
+            <h3>{{ $t('t-exam-retry-available') }}</h3>
 
             <p>
-              You still have {{ exam.enrollment.attempts_rest }} attempt(s).
-              You can retry the exam now without repeating the course.
+              {{ $t('t-exam-retry-description', { count: exam.enrollment.attempts_rest }) }}
             </p>
           </div>
 
@@ -764,7 +763,7 @@ const getOptionClass = option => {
               @click="goToCourseViewer"
             >
               <i class="ri-book-open-line"></i>
-              Review course
+              {{ $t('t-review-course') }}
             </button>
 
             <button
@@ -772,7 +771,7 @@ const getOptionClass = option => {
               class="retry-exam-btn"
               @click="retryExam"
             >
-              Retry exam
+              {{ $t('t-retry-exam') }}
               <i class="ri-arrow-right-line"></i>
             </button>
           </div>
@@ -786,10 +785,10 @@ const getOptionClass = option => {
             <div class="question-card-header">
               <div>
                 <span class="question-step">
-                  Question {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}
+                {{ $t('t-question-count', { current: currentQuestionIndex + 1, total: totalQuestions }) }}
                 </span>
 
-                <h2>{{ currentQuestion.name_chapter || 'Exam section' }}</h2>
+                <h2>{{ currentQuestion.name_chapter || $t('t-exam-section') }}</h2>
               </div>
 
               <div class="question-actions">
@@ -798,7 +797,7 @@ const getOptionClass = option => {
                   class="answered-pill"
                 >
                   <i class="ri-checkbox-circle-line"></i>
-                  Answered
+                  {{ $t('t-answered') }}
                 </div>
 
                 <button
@@ -808,7 +807,7 @@ const getOptionClass = option => {
                   @click="clearCurrentAnswer"
                 >
                   <i class="ri-refresh-line"></i>
-                  Clear answer
+                  {{ $t('t-clear-answer') }}
                 </button>
               </div>
             </div>
@@ -863,9 +862,9 @@ const getOptionClass = option => {
               <i class="ri-question-line"></i>
             </div>
 
-            <h5>No questions available</h5>
+            <h5>{{ $t('t-no-questions-available') }}</h5>
 
-            <p>This exam does not contain questions.</p>
+            <p>{{ $t('t-exam-empty-description') }}</p>
           </div>
         </div>
 
@@ -879,17 +878,17 @@ const getOptionClass = option => {
               @click="previousQuestion"
             >
               <i class="ri-arrow-left-line"></i>
-              Previous
+              {{ $t('t-previous') }}
             </button>
           </div>
 
           <div class="footer-info">
             <span v-if="!isSubmitted">
-              {{ answeredQuestions }} / {{ totalQuestions }} answered
+              {{ $t('t-answered-question-count', { answered: answeredQuestions, total: totalQuestions }) }}
             </span>
 
             <span v-else>
-              Score: {{ resultPercent }}%
+              {{ $t('t-score') }}: {{ resultPercent }}%
             </span>
           </div>
 
@@ -902,7 +901,7 @@ const getOptionClass = option => {
               @click="goToFirstUnanswered"
             >
               <i class="ri-search-eye-line"></i>
-              Review missing
+              {{ $t('t-review-unanswered') }}
             </button>
 
             <button
@@ -911,7 +910,7 @@ const getOptionClass = option => {
               class="footer-btn primary"
               @click="nextQuestion"
             >
-              Next
+              {{ $t('t-next') }}
               <i class="ri-arrow-right-line"></i>
             </button>
 
@@ -932,7 +931,7 @@ const getOptionClass = option => {
                 class="ri-send-plane-line"
               ></i>
 
-              Submit exam
+              {{ $t('t-submit-exam') }}
             </button>
 
             <button
@@ -941,7 +940,7 @@ const getOptionClass = option => {
               class="footer-btn success"
               @click="goToCourseViewer"
             >
-              Complete course again
+              {{ $t('t-complete-course-again') }}
               <i class="ri-book-open-line"></i>
             </button>
 
@@ -952,7 +951,7 @@ const getOptionClass = option => {
                 @click="goToCourseViewer"
               >
                 <i class="ri-book-open-line"></i>
-                Review course
+                {{ $t('t-review-course') }}
               </button>
 
               <button
@@ -960,7 +959,7 @@ const getOptionClass = option => {
                 class="footer-btn success"
                 @click="retryExam"
               >
-                Retry exam
+                {{ $t('t-retry-exam') }}
                 <i class="ri-repeat-line"></i>
               </button>
             </template>
@@ -971,7 +970,7 @@ const getOptionClass = option => {
               class="footer-btn primary"
               @click="goToCourses"
             >
-              My courses
+              {{ $t('t-my-courses') }}
               <i class="ri-book-open-line"></i>
             </button>
           </div>
@@ -988,10 +987,10 @@ const getOptionClass = option => {
           <i class="ri-timer-flash-line"></i>
         </div>
 
-        <h3>Time is over</h3>
+        <h3>{{ $t('t-time-is-over') }}</h3>
 
         <p>
-          Your answers are being submitted automatically.
+          {{ $t('t-auto-submitting-answers') }}
         </p>
 
         <span class="spinner-border"></span>

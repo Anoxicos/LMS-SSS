@@ -3,6 +3,9 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 defineOptions({
@@ -56,10 +59,10 @@ const resetFilters = () => {
 /* ================= HELPERS ================= */
 const statusLabel = value => {
   const labels = {
-    pending: 'Pending',
-    approved: 'Approved',
-    partially_approved: 'Partially approved',
-    rejected: 'Rejected',
+    pending: t('ui-pending'),
+    approved: t('ui-approved'),
+    partially_approved: t('ui-partially-approved'),
+    rejected: t('ui-rejected'),
   }
 
   return labels[value] || value || '-'
@@ -92,7 +95,7 @@ const statusIcon = value => {
 const formatDate = value => {
   if (!value) return '-'
 
-  return new Date(value).toLocaleString('en-GB', {
+  return new Date(value).toLocaleString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -133,9 +136,9 @@ const toResult = () => {
 </script>
 
 <template>
-  <Head title="Individual Requests" />
+  <Head :title="$t('ui-individual-requests')" />
 
-  <PageHeader title="Individual Requests" pageTitle="LMS" />
+  <PageHeader :title="$t('ui-individual-requests')" :page-title="$t('ui-lms')" />
 
   <div>
     <BCard class="request-card border-0 shadow-sm">
@@ -149,10 +152,10 @@ const toResult = () => {
               </div>
 
               <div class="min-width-0">
-                <h5 class="mb-1 fw-semibold">Individual Requests</h5>
+                <h5 class="mb-1 fw-semibold">{{ $t('ui-individual-requests') }}</h5>
 
                 <p class="text-muted mb-0">
-                  Review authenticated learner requests and decide course by course.
+                  {{ $t('ui-review-authenticated-learner-requests-and-decide-course-by-course') }}
                 </p>
               </div>
             </div>
@@ -165,13 +168,13 @@ const toResult = () => {
                   v-model="status"
                   class="form-select status-filter-select"
                 >
-                  <option value="">All statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
+                  <option value="">{{ $t('ui-all-statuses') }}</option>
+                  <option value="pending">{{ $t('ui-pending') }}</option>
+                  <option value="approved">{{ $t('ui-approved') }}</option>
                   <option value="partially_approved">
-                    Partially approved
+                    {{ $t('ui-partially-approved') }}
                   </option>
-                  <option value="rejected">Rejected</option>
+                  <option value="rejected">{{ $t('ui-rejected') }}</option>
                 </select>
               </div>
 
@@ -180,7 +183,7 @@ const toResult = () => {
                   v-model="search"
                   type="search"
                   class="form-control"
-                  placeholder="Search request..."
+                  :placeholder="$t('ui-search-request')"
                 />
 
                 <i class="ri-search-line search-icon"></i>
@@ -190,11 +193,11 @@ const toResult = () => {
                 variant="light"
                 class="request-reset-btn"
                 type="button"
-                title="Reset filters"
+                :title="$t('t-reset-filters')"
                 @click="resetFilters"
               >
                 <i class="ri-refresh-line"></i>
-                <span>Reset</span>
+                <span>{{ $t('ui-reset') }}</span>
               </BButton>
             </div>
           </BCol>
@@ -211,12 +214,12 @@ const toResult = () => {
             <table class="table table-hover align-middle mb-0 request-table">
               <thead>
                 <tr>
-                  <th>Reference</th>
-                  <th>Learner</th>
-                  <th>Courses</th>
-                  <th class="text-center">Status</th>
-                  <th>Submitted</th>
-                  <th class="text-center">Actions</th>
+                  <th>{{ $t('ui-reference') }}</th>
+                  <th>{{ $t('ui-learner') }}</th>
+                  <th>{{ $t('ui-courses') }}</th>
+                  <th class="text-center">{{ $t('ui-status') }}</th>
+                  <th>{{ $t('ui-submitted') }}</th>
+                  <th class="text-center">{{ $t('ui-actions') }}</th>
                 </tr>
               </thead>
 
@@ -232,7 +235,7 @@ const toResult = () => {
                       </h6>
 
                       <small class="text-muted">
-                        Individual request
+                        {{ $t('ui-individual-request') }}
                       </small>
                     </div>
                   </td>
@@ -260,7 +263,7 @@ const toResult = () => {
                       <span class="courses-count-badge">
                         <i class="ri-book-open-line"></i>
                         {{ totalCourses(item) }}
-                        course{{ totalCourses(item) !== 1 ? 's' : '' }}
+                        {{ $t('ui-course-label') }}{{ totalCourses(item) !== 1 ? 's' : '' }}
                       </span>
 
                       <span
@@ -268,7 +271,7 @@ const toResult = () => {
                         class="course-state-badge approved"
                       >
                         <i class="ri-check-line"></i>
-                        {{ approvedCount(item) }} approved
+                        {{ approvedCount(item) }} {{ $t('t-approved') }}
                       </span>
 
                       <span
@@ -276,7 +279,7 @@ const toResult = () => {
                         class="course-state-badge rejected"
                       >
                         <i class="ri-close-line"></i>
-                        {{ rejectedCount(item) }} rejected
+                        {{ rejectedCount(item) }} {{ $t('t-rejected') }}
                       </span>
                     </div>
                   </td>
@@ -301,7 +304,7 @@ const toResult = () => {
                         v-if="item.hashid"
                         :href="route('individual-requests.show', item.hashid)"
                         class="btn btn-sm btn-soft-info action-btn"
-                        title="View"
+                        :title="$t('ui-view')"
                       >
                         <i class="ri-eye-line"></i>
                       </Link>
@@ -346,7 +349,7 @@ const toResult = () => {
                   v-if="item.hashid"
                   :href="route('individual-requests.show', item.hashid)"
                   class="btn btn-sm btn-soft-info action-btn"
-                  title="View"
+                  :title="$t('ui-view')"
                 >
                   <i class="ri-eye-line"></i>
                 </Link>
@@ -357,7 +360,7 @@ const toResult = () => {
               <div class="request-mobile-item">
                 <span class="request-mobile-label">
                   <i class="ri-user-line me-1"></i>
-                  Learner
+                  {{ $t('ui-learner') }}
                 </span>
 
                 <div class="request-mobile-value-block">
@@ -369,27 +372,27 @@ const toResult = () => {
               <div class="request-mobile-item">
                 <span class="request-mobile-label">
                   <i class="ri-book-open-line me-1"></i>
-                  Courses
+                  {{ $t('ui-courses') }}
                 </span>
 
                 <div class="course-summary-badges mobile-course-badges">
                   <span class="courses-count-badge">
                     {{ totalCourses(item) }}
-                    course{{ totalCourses(item) !== 1 ? 's' : '' }}
+                    {{ $t('ui-course-label') }}{{ totalCourses(item) !== 1 ? 's' : '' }}
                   </span>
 
                   <span
                     v-if="approvedCount(item)"
                     class="course-state-badge approved"
                   >
-                    {{ approvedCount(item) }} approved
+                    {{ approvedCount(item) }} {{ $t('t-approved') }}
                   </span>
 
                   <span
                     v-if="rejectedCount(item)"
                     class="course-state-badge rejected"
                   >
-                    {{ rejectedCount(item) }} rejected
+                    {{ rejectedCount(item) }} {{ $t('t-rejected') }}
                   </span>
                 </div>
               </div>
@@ -397,7 +400,7 @@ const toResult = () => {
               <div class="request-mobile-item">
                 <span class="request-mobile-label">
                   <i class="ri-calendar-line me-1"></i>
-                  Submitted
+                  {{ $t('ui-submitted') }}
                 </span>
 
                 <span class="request-mobile-value">
@@ -417,10 +420,10 @@ const toResult = () => {
             <i class="ri-inbox-2-line"></i>
           </div>
 
-          <h5 class="mt-3 mb-1">No individual requests found</h5>
+          <h5 class="mt-3 mb-1">{{ $t('ui-no-individual-requests-found') }}</h5>
 
           <p class="text-muted mb-0">
-            Change the filters or wait for a learner to submit a request.
+            {{ $t('ui-change-the-filters-or-wait-for-a-learner-to-submit-a-request') }}
           </p>
         </div>
 
@@ -430,13 +433,13 @@ const toResult = () => {
           class="request-pagination"
         >
           <div class="text-muted request-pagination-text">
-            Showing
+            {{ $t('ui-showing') }}
             <span class="fw-semibold">{{ fromResult() }}</span>
-            to
+            {{ $t('ui-to') }}
             <span class="fw-semibold">{{ toResult() }}</span>
-            of
+            {{ $t('ui-of') }}
             <span class="fw-semibold">{{ individualRequests.total || 0 }}</span>
-            result(s)
+            {{ $t('ui-result-s') }}
           </div>
 
           <ul

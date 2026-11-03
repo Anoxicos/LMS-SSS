@@ -3,6 +3,9 @@ import { Head, Link } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 const props = defineProps({
@@ -131,7 +134,7 @@ const formatDate = value => {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return '-'
 
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -173,11 +176,11 @@ const getEnrollmentStatusClass = status => {
 const getEnrollmentStatusLabel = status => {
   switch (status) {
     case 'completed':
-      return 'Completed'
+      return t('ui-completed')
     case 'in_progress':
-      return 'In progress'
+      return t('ui-in-progress')
     case 'not_started':
-      return 'Not started'
+      return t('ui-not-started')
     case 'expired':
       return 'Expired'
     default:
@@ -221,11 +224,11 @@ watch(totalPages, value => {
 
 <template>
   <Layout>
-    <Head title="Super Admin Dashboard" />
+    <Head :title="$t('ui-super-admin-dashboard')" />
 
     <PageHeader
-      title="Super Admin Dashboard"
-      pageTitle="Dashboard"
+      :title="$t('ui-super-admin-dashboard')"
+      :page-title="$t('ui-dashboard')"
     />
 
     <section class="super-admin-dashboard">
@@ -239,30 +242,29 @@ watch(totalPages, value => {
             <div>
               <span class="platform-kicker">
                 <i class="ri-shield-star-line"></i>
-                Global platform administration
+                {{ $t('ui-global-platform-administration') }}
               </span>
 
-              <h1>Manage every company from one dashboard</h1>
+              <h1>{{ $t('ui-manage-every-company-from-one-dashboard') }}</h1>
 
               <p>
-                Monitor companies, administrators, learners, training requests,
-                course assignments, exams and certificates across the LMS.
+                {{ $t('ui-monitor-companies-administrators-learners-training-req') }}
               </p>
 
               <div class="platform-summary-chips">
                 <span>
                   <i class="ri-building-line"></i>
-                  {{ companyStats.total || 0 }} companies
+                  {{ companyStats.total || 0 }} {{ $t('t-companies') }}
                 </span>
 
                 <span>
                   <i class="ri-team-line"></i>
-                  {{ userStats.total || 0 }} users
+                  {{ userStats.total || 0 }} {{ $t('t-users') }}
                 </span>
 
                 <span>
                   <i class="ri-book-open-line"></i>
-                  {{ courseStats.total || 0 }} courses
+                  {{ courseStats.total || 0 }} {{ $t('ui-courses-label') }}
                 </span>
               </div>
             </div>
@@ -276,8 +278,8 @@ watch(totalPages, value => {
             >
               <i class="ri-building-line"></i>
               <span>
-                <small>Company portfolio</small>
-                Manage companies
+                <small>{{ $t('ui-company-portfolio') }}</small>
+                {{ $t('ui-manage-companies') }}
               </span>
             </Link>
 
@@ -290,8 +292,8 @@ watch(totalPages, value => {
             >
               <i class="ri-file-list-3-line"></i>
               <span>
-                <small>Approval center</small>
-                Review requests
+                <small>{{ $t('ui-approval-center') }}</small>
+                {{ $t('ui-review-requests') }}
               </span>
             </Link>
           </div>
@@ -305,9 +307,9 @@ watch(totalPages, value => {
           </div>
 
           <div class="global-stat-content">
-            <span>Total companies</span>
+            <span>{{ $t('ui-total-companies') }}</span>
             <strong>{{ companyStats.total || 0 }}</strong>
-            <small>{{ companyStats.active || 0 }} active</small>
+            <small>{{ companyStats.active || 0 }} {{ $t('t-active') }}</small>
           </div>
 
           <Link
@@ -325,9 +327,9 @@ watch(totalPages, value => {
           </div>
 
           <div class="global-stat-content">
-            <span>Total learners</span>
+            <span>{{ $t('ui-total-learners') }}</span>
             <strong>{{ userStats.learners || 0 }}</strong>
-            <small>{{ userStats.admins || 0 }} company admins</small>
+            <small>{{ userStats.admins || 0 }} {{ $t('ui-company-admins') }}</small>
           </div>
 
           <Link
@@ -345,9 +347,9 @@ watch(totalPages, value => {
           </div>
 
           <div class="global-stat-content">
-            <span>Training requests</span>
+            <span>{{ $t('ui-training-requests') }}</span>
             <strong>{{ requestStats.total || 0 }}</strong>
-            <small>{{ requestStats.pending || 0 }} pending approval</small>
+            <small>{{ requestStats.pending || 0 }} {{ $t('t-pending-approval') }}</small>
           </div>
 
           <Link
@@ -365,9 +367,9 @@ watch(totalPages, value => {
           </div>
 
           <div class="global-stat-content">
-            <span>Course enrollments</span>
+            <span>{{ $t('ui-course-enrollments') }}</span>
             <strong>{{ enrollmentStats.total || 0 }}</strong>
-            <small>{{ enrollmentStats.completed || 0 }} completed</small>
+            <small>{{ enrollmentStats.completed || 0 }} {{ $t('t-completed') }}</small>
           </div>
 
           <span class="global-stat-link static">
@@ -381,9 +383,9 @@ watch(totalPages, value => {
           </div>
 
           <div class="global-stat-content">
-            <span>Course catalog</span>
+            <span>{{ $t('ui-course-catalog') }}</span>
             <strong>{{ courseStats.total || 0 }}</strong>
-            <small>{{ courseStats.scorm || 0 }} SCORM courses</small>
+            <small>{{ courseStats.scorm || 0 }} {{ $t('t-scorm-courses') }}</small>
           </div>
 
           <Link
@@ -401,9 +403,9 @@ watch(totalPages, value => {
           </div>
 
           <div class="global-stat-content">
-            <span>Certificates issued</span>
+            <span>{{ $t('ui-certificates-issued') }}</span>
             <strong>{{ stats.certificates || 0 }}</strong>
-            <small>{{ examStats.passed || 0 }} passed exams</small>
+            <small>{{ examStats.passed || 0 }} {{ $t('ui-passed-exams') }}</small>
           </div>
 
           <span class="global-stat-link static">
@@ -422,8 +424,8 @@ watch(totalPages, value => {
                 </div>
 
                 <div>
-                  <h3>Request status</h3>
-                  <p>Global approval workflow.</p>
+                  <h3>{{ $t('ui-request-status') }}</h3>
+                  <p>{{ $t('ui-global-approval-workflow') }}</p>
                 </div>
               </div>
 
@@ -433,7 +435,7 @@ watch(totalPages, value => {
             <div class="progress-overview-list">
               <div class="progress-overview-item">
                 <div class="progress-overview-head">
-                  <span><i class="ri-time-line pending"></i> Pending</span>
+                  <span><i class="ri-time-line pending"></i> {{ $t('t-pending') }}</span>
                   <strong>{{ requestStats.pending || 0 }}</strong>
                 </div>
                 <div class="overview-track">
@@ -446,7 +448,7 @@ watch(totalPages, value => {
 
               <div class="progress-overview-item">
                 <div class="progress-overview-head">
-                  <span><i class="ri-checkbox-circle-line approved"></i> Approved</span>
+                  <span><i class="ri-checkbox-circle-line approved"></i> {{ $t('ui-approved') }}</span>
                   <strong>{{ requestStats.approved || 0 }}</strong>
                 </div>
                 <div class="overview-track">
@@ -459,7 +461,7 @@ watch(totalPages, value => {
 
               <div class="progress-overview-item">
                 <div class="progress-overview-head">
-                  <span><i class="ri-close-circle-line rejected"></i> Rejected</span>
+                  <span><i class="ri-close-circle-line rejected"></i> {{ $t('ui-rejected') }}</span>
                   <strong>{{ requestStats.rejected || 0 }}</strong>
                 </div>
                 <div class="overview-track">
@@ -482,8 +484,8 @@ watch(totalPages, value => {
                 </div>
 
                 <div>
-                  <h3>Course catalog</h3>
-                  <p>Published and content formats.</p>
+                  <h3>{{ $t('ui-course-catalog') }}</h3>
+                  <p>{{ $t('ui-published-and-content-formats') }}</p>
                 </div>
               </div>
 
@@ -493,7 +495,7 @@ watch(totalPages, value => {
             <div class="progress-overview-list">
               <div class="progress-overview-item">
                 <div class="progress-overview-head">
-                  <span><i class="ri-eye-line approved"></i> Published</span>
+                  <span><i class="ri-eye-line approved"></i> {{ $t('ui-published') }}</span>
                   <strong>{{ courseStats.published || 0 }}</strong>
                 </div>
                 <div class="overview-track">
@@ -506,7 +508,7 @@ watch(totalPages, value => {
 
               <div class="progress-overview-item">
                 <div class="progress-overview-head">
-                  <span><i class="ri-draft-line pending"></i> Draft</span>
+                  <span><i class="ri-draft-line pending"></i> {{ $t('ui-draft') }}</span>
                   <strong>{{ courseStats.draft || 0 }}</strong>
                 </div>
                 <div class="overview-track">
@@ -520,13 +522,13 @@ watch(totalPages, value => {
               <div class="format-stats-row">
                 <div>
                   <i class="ri-slideshow-line"></i>
-                  <span>Normal</span>
+                  <span>{{ $t('ui-normal') }}</span>
                   <strong>{{ courseStats.normal || 0 }}</strong>
                 </div>
 
                 <div>
                   <i class="ri-file-zip-line"></i>
-                  <span>SCORM</span>
+                  <span>{{ $t('ui-scorm') }}</span>
                   <strong>{{ courseStats.scorm || 0 }}</strong>
                 </div>
               </div>
@@ -543,8 +545,8 @@ watch(totalPages, value => {
                 </div>
 
                 <div>
-                  <h3>Learning outcomes</h3>
-                  <p>Exams and certification.</p>
+                  <h3>{{ $t('ui-learning-outcomes') }}</h3>
+                  <p>{{ $t('ui-exams-and-certification') }}</p>
                 </div>
               </div>
 
@@ -554,25 +556,25 @@ watch(totalPages, value => {
             <div class="outcome-grid">
               <div class="outcome-item success">
                 <i class="ri-checkbox-circle-line"></i>
-                <span>Passed</span>
+                <span>{{ $t('ui-passed') }}</span>
                 <strong>{{ examStats.passed || 0 }}</strong>
               </div>
 
               <div class="outcome-item danger">
                 <i class="ri-close-circle-line"></i>
-                <span>Failed</span>
+                <span>{{ $t('ui-failed') }}</span>
                 <strong>{{ examStats.failed || 0 }}</strong>
               </div>
 
               <div class="outcome-item info">
                 <i class="ri-loader-2-line"></i>
-                <span>In progress</span>
+                <span>{{ $t('ui-in-progress') }}</span>
                 <strong>{{ examStats.in_progress || 0 }}</strong>
               </div>
 
               <div class="outcome-item primary">
                 <i class="ri-medal-line"></i>
-                <span>Certificates</span>
+                <span>{{ $t('ui-certificates') }}</span>
                 <strong>{{ stats.certificates || 0 }}</strong>
               </div>
             </div>
@@ -588,15 +590,15 @@ watch(totalPages, value => {
             </div>
 
             <div>
-              <h3>Platform activity</h3>
-              <p>New companies, requests and enrollments over six months.</p>
+              <h3>{{ $t('ui-platform-activity') }}</h3>
+              <p>{{ $t('ui-new-companies-requests-and-enrollments-over-six-months') }}</p>
             </div>
           </div>
 
           <div class="activity-legend">
-            <span><i class="legend-dot companies"></i> Companies</span>
-            <span><i class="legend-dot requests"></i> Requests</span>
-            <span><i class="legend-dot enrollments"></i> Enrollments</span>
+            <span><i class="legend-dot companies"></i> {{ $t('ui-companies') }}</span>
+            <span><i class="legend-dot requests"></i> {{ $t('ui-requests') }}</span>
+            <span><i class="legend-dot enrollments"></i> {{ $t('ui-enrollments') }}</span>
           </div>
         </div>
 
@@ -645,8 +647,8 @@ watch(totalPages, value => {
             </div>
 
             <div>
-              <h3>Company management</h3>
-              <p>Search, monitor and open every registered company.</p>
+              <h3>{{ $t('ui-company-management') }}</h3>
+              <p>{{ $t('ui-search-monitor-and-open-every-registered-company') }}</p>
             </div>
           </div>
 
@@ -654,9 +656,9 @@ watch(totalPages, value => {
             <div class="company-filter-box">
               <i class="ri-filter-3-line"></i>
               <select v-model="selectedStatus">
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all">{{ $t('ui-all-statuses') }}</option>
+                <option value="active">{{ $t('ui-active') }}</option>
+                <option value="inactive">{{ $t('ui-inactive') }}</option>
               </select>
             </div>
 
@@ -665,7 +667,7 @@ watch(totalPages, value => {
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Search company..."
+                :placeholder="$t('ui-search-company')"
               />
             </div>
 
@@ -675,7 +677,7 @@ watch(totalPages, value => {
               class="add-company-btn"
             >
               <i class="ri-add-line"></i>
-              Add company
+              {{ $t('ui-add-company') }}
             </Link>
           </div>
         </div>
@@ -684,13 +686,13 @@ watch(totalPages, value => {
           <table class="table company-table align-middle mb-0">
             <thead>
               <tr>
-                <th>Company</th>
-                <th>People</th>
-                <th>Requests</th>
-                <th>Training</th>
-                <th>Average progress</th>
-                <th>Status</th>
-                <th class="text-center">Action</th>
+                <th>{{ $t('ui-company') }}</th>
+                <th>{{ $t('ui-people') }}</th>
+                <th>{{ $t('ui-requests') }}</th>
+                <th>{{ $t('ui-training') }}</th>
+                <th>{{ $t('ui-average-progress') }}</th>
+                <th>{{ $t('ui-status') }}</th>
+                <th class="text-center">{{ $t('ui-action') }}</th>
               </tr>
             </thead>
 
@@ -716,29 +718,29 @@ watch(totalPages, value => {
 
                 <td>
                   <div class="metric-stack">
-                    <span><i class="ri-user-settings-line"></i> {{ company.admins_count }} admin(s)</span>
-                    <span><i class="ri-graduation-cap-line"></i> {{ company.learners_count }} learner(s)</span>
+                    <span><i class="ri-user-settings-line"></i> {{ company.admins_count }} {{ $t('ui-admin-s') }}</span>
+                    <span><i class="ri-graduation-cap-line"></i> {{ company.learners_count }} {{ $t('ui-learner-s') }}</span>
                   </div>
                 </td>
 
                 <td>
                   <div class="metric-stack">
-                    <span>{{ company.requests_count }} total</span>
-                    <span class="warning-text">{{ company.pending_requests }} pending</span>
+                    <span>{{ company.requests_count }} {{ $t('ui-total') }}</span>
+                    <span class="warning-text">{{ company.pending_requests }} {{ $t('ui-pending') }}</span>
                   </div>
                 </td>
 
                 <td>
                   <div class="metric-stack">
-                    <span>{{ company.enrollments_count }} enrollments</span>
-                    <span>{{ company.assigned_courses }} course(s)</span>
+                    <span>{{ company.enrollments_count }} {{ $t('ui-enrollments') }}</span>
+                    <span>{{ company.assigned_courses }} {{ $t('ui-course-s') }}</span>
                   </div>
                 </td>
 
                 <td>
                   <div class="company-progress-cell">
                     <div>
-                      <span>Progress</span>
+                      <span>{{ $t('ui-progress') }}</span>
                       <strong>{{ formatPercent(company.average_progress) }}%</strong>
                     </div>
                     <div class="company-progress-track">
@@ -758,7 +760,7 @@ watch(totalPages, value => {
                     v-if="company.action_url"
                     :href="company.action_url"
                     class="company-action-btn"
-                    title="Open company"
+                    :title="$t('ui-open-company')"
                   >
                     <i class="ri-eye-line"></i>
                   </Link>
@@ -799,15 +801,15 @@ watch(totalPages, value => {
             </div>
 
             <div class="company-mobile-stats">
-              <div><span>Learners</span><strong>{{ company.learners_count }}</strong></div>
-              <div><span>Requests</span><strong>{{ company.requests_count }}</strong></div>
-              <div><span>Enrollments</span><strong>{{ company.enrollments_count }}</strong></div>
-              <div><span>Completed</span><strong>{{ company.completed_enrollments }}</strong></div>
+              <div><span>{{ $t('ui-learners') }}</span><strong>{{ company.learners_count }}</strong></div>
+              <div><span>{{ $t('ui-requests') }}</span><strong>{{ company.requests_count }}</strong></div>
+              <div><span>{{ $t('ui-enrollments') }}</span><strong>{{ company.enrollments_count }}</strong></div>
+              <div><span>{{ $t('ui-completed') }}</span><strong>{{ company.completed_enrollments }}</strong></div>
             </div>
 
             <div class="company-progress-cell">
               <div>
-                <span>Average progress</span>
+                <span>{{ $t('ui-average-progress') }}</span>
                 <strong>{{ formatPercent(company.average_progress) }}%</strong>
               </div>
               <div class="company-progress-track">
@@ -820,7 +822,7 @@ watch(totalPages, value => {
               :href="company.action_url"
               class="company-mobile-action"
             >
-              Open company
+              {{ $t('ui-open-company') }}
               <i class="ri-arrow-right-line"></i>
             </Link>
           </div>
@@ -828,13 +830,13 @@ watch(totalPages, value => {
 
         <div v-if="!paginatedCompanies.length" class="dashboard-empty-state">
           <div class="empty-icon"><i class="ri-building-line"></i></div>
-          <h4>No companies found</h4>
-          <p>No company matches your search or selected status.</p>
+          <h4>{{ $t('ui-no-companies-found') }}</h4>
+          <p>{{ $t('ui-no-company-matches-your-search-or-selected-status') }}</p>
         </div>
 
         <div v-if="filteredCompanies.length" class="company-pagination">
           <span>
-            Showing {{ paginatedCompanies.length }} of {{ filteredCompanies.length }} companies
+            {{ $t('ui-showing') }} {{ paginatedCompanies.length }} {{ $t('ui-of') }} {{ filteredCompanies.length }} {{ $t('t-companies') }}
           </span>
 
           <div class="pagination-buttons">
@@ -877,8 +879,8 @@ watch(totalPages, value => {
                 </div>
 
                 <div>
-                  <h3>Pending company requests</h3>
-                  <p>Requests waiting for Super-admin approval.</p>
+                  <h3>{{ $t('ui-pending-company-requests') }}</h3>
+                  <p>{{ $t('ui-requests-waiting-for-super-admin-approval') }}</p>
                 </div>
               </div>
 
@@ -887,7 +889,7 @@ watch(totalPages, value => {
                 :href="links.requests || '#'"
                 class="panel-link"
               >
-                View all
+                {{ $t('ui-view-all') }}
                 <i class="ri-arrow-right-line"></i>
               </Link>
             </div>
@@ -920,20 +922,20 @@ watch(totalPages, value => {
                   <p>{{ request.course?.title || 'Course unavailable' }}</p>
 
                   <div class="pending-request-meta">
-                    <span><i class="ri-team-line"></i> {{ request.learners_count }} learners</span>
+                    <span><i class="ri-team-line"></i> {{ request.learners_count }} {{ $t('ui-learners-label') }}</span>
                     <span><i class="ri-user-line"></i> {{ request.requested_by?.name || '-' }}</span>
                     <span>
                       <i class="ri-calendar-check-line"></i>
                       {{ formatValidityMonths(request.duree_validite_formation) }}
                     </span>
-                    <span v-if="request.course?.content_type === 'scorm'" class="scorm-tag">SCORM</span>
+                    <span v-if="request.course?.content_type === 'scorm'" class="scorm-tag">{{ $t('ui-scorm') }}</span>
                   </div>
                 </div>
 
                 <Link
                   :href="route('company-requests.show', request.hashid)"
                   class="pending-request-action"
-                  title="Review request"
+                  :title="$t('t-step-review-request')"
                 >
                   <i class="ri-eye-line"></i>
                 </Link>
@@ -942,8 +944,8 @@ watch(totalPages, value => {
 
             <div v-else class="dashboard-empty-state compact">
               <div class="empty-icon"><i class="ri-checkbox-circle-line"></i></div>
-              <h4>No pending requests</h4>
-              <p>All company requests have been processed.</p>
+              <h4>{{ $t('ui-no-pending-requests') }}</h4>
+              <p>{{ $t('ui-all-company-requests-have-been-processed') }}</p>
             </div>
           </BCard>
         </BCol>
@@ -957,8 +959,8 @@ watch(totalPages, value => {
                 </div>
 
                 <div>
-                  <h3>Top companies</h3>
-                  <p>Ranked by course enrollments.</p>
+                  <h3>{{ $t('ui-top-companies') }}</h3>
+                  <p>{{ $t('ui-ranked-by-course-enrollments') }}</p>
                 </div>
               </div>
             </div>
@@ -983,12 +985,12 @@ watch(totalPages, value => {
                 <div class="top-company-content">
                   <div>
                     <h4>{{ company.name }}</h4>
-                    <span>{{ company.learners_count }} learners</span>
+                    <span>{{ company.learners_count }} {{ $t('ui-learners-label') }}</span>
                   </div>
 
                   <div class="top-company-numbers">
                     <strong>{{ company.enrollments_count }}</strong>
-                    <small>enrollments</small>
+                    <small>{{ $t('ui-enrollments') }}</small>
                   </div>
                 </div>
 
@@ -1000,8 +1002,8 @@ watch(totalPages, value => {
 
             <div v-else class="dashboard-empty-state compact">
               <div class="empty-icon"><i class="ri-trophy-line"></i></div>
-              <h4>No company activity</h4>
-              <p>No enrollments are available for ranking.</p>
+              <h4>{{ $t('ui-no-company-activity') }}</h4>
+              <p>{{ $t('ui-no-enrollments-are-available-for-ranking') }}</p>
             </div>
           </BCard>
         </BCol>
@@ -1015,8 +1017,8 @@ watch(totalPages, value => {
             </div>
 
             <div>
-              <h3>Recent course assignments</h3>
-              <p>Latest enrollments across all companies.</p>
+              <h3>{{ $t('ui-recent-course-assignments') }}</h3>
+              <p>{{ $t('ui-latest-enrollments-across-all-companies') }}</p>
             </div>
           </div>
 
@@ -1037,7 +1039,7 @@ watch(totalPages, value => {
               />
               <span v-else>{{ getInitials(enrollment.course?.title, 'CO') }}</span>
 
-              <small v-if="enrollment.course?.content_type === 'scorm'">SCORM</small>
+              <small v-if="enrollment.course?.content_type === 'scorm'">{{ $t('ui-scorm') }}</small>
             </div>
 
             <div class="enrollment-card-body">
@@ -1072,7 +1074,7 @@ watch(totalPages, value => {
               </div>
 
               <div class="enrollment-progress-head">
-                <span>Progress</span>
+                <span>{{ $t('ui-progress') }}</span>
                 <strong>{{ formatPercent(enrollment.progress_percent) }}%</strong>
               </div>
 
@@ -1088,7 +1090,7 @@ watch(totalPages, value => {
 
                 <span v-if="enrollment.expired_at">
                   <i class="ri-calendar-event-line"></i>
-                  Expires {{ formatDate(enrollment.expired_at) }}
+                  {{ $t('ui-expires') }} {{ formatDate(enrollment.expired_at) }}
                 </span>
               </div>
             </div>
@@ -1097,8 +1099,8 @@ watch(totalPages, value => {
 
         <div v-else class="dashboard-empty-state">
           <div class="empty-icon"><i class="ri-bookmark-line"></i></div>
-          <h4>No enrollments found</h4>
-          <p>No company learner has been assigned a course yet.</p>
+          <h4>{{ $t('ui-no-enrollments-found') }}</h4>
+          <p>{{ $t('ui-no-company-learner-has-been-assigned-a-course-yet') }}</p>
         </div>
       </BCard>
     </section>

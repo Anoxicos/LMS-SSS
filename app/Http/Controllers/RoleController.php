@@ -36,12 +36,12 @@ class RoleController extends Controller
         // Vérifier existence (case-insensitive)
         $exists = Role::whereRaw('LOWER(name) = ?', [Str::lower($name)])->exists();
         if ($exists) {
-            return back()->withErrors(['name' => 'Ce rôle existe déjà.']);
+            return back()->withErrors(['name' => __('This role already exists.')]);
         }
 
         Role::create(['name' => $name]);
 
-        return back()->with('success', 'Rôle créé avec succès.');
+        return back()->with('success', __('Role created successfully.'));
     }
 
 
@@ -86,7 +86,7 @@ class RoleController extends Controller
          $roleEdit->permissions()->sync($validatedData['permissions'] ?? []);
 
     
-         return redirect()->back()->with('success', 'Permissions mises à jour avec succès.');
+         return redirect()->back()->with('success', __('Permissions updated successfully.'));
 
     }
 }

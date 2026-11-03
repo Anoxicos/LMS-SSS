@@ -32,7 +32,7 @@ const submit = () => {
 
 <template>
 
-    <Head title="Forgot Password" />
+    <Head :title="$t('t-forgot-password')" />
 
     <div class="auth-page-wrapper pt-5">
 
@@ -61,7 +61,7 @@ const submit = () => {
                             >
                                 <img
                                     src="@assets/images/logo_safesky blue.webp"
-                                    alt="SafeSky LMS"
+                                    :alt="$t('t-safesky-lms')"
                                     height="45"
                                 >
                             </Link>
@@ -73,7 +73,7 @@ const submit = () => {
                                     text-muted
                                 "
                             >
-                                SafeSky Learning Management System
+                                {{ $t('t-safesky-learning-management-system') }}
                             </p>
 
                         </div>
@@ -157,7 +157,7 @@ const submit = () => {
                                             mb-2
                                         "
                                     >
-                                        Forgot Password?
+                                        {{ $t('t-forgot-password-question') }}
                                     </h4>
 
                                     <p
@@ -166,12 +166,7 @@ const submit = () => {
                                             mb-0
                                         "
                                     >
-                                        Enter the email address
-                                        associated with your
-                                        SafeSky LMS account.
-
-                                        We'll send you a secure
-                                        link to reset your password.
+                                        {{ $t('t-forgot-password-description') }}
                                     </p>
 
                                 </div>
@@ -210,7 +205,7 @@ const submit = () => {
 
                                         <InputLabel
                                             for="email"
-                                            value="Email Address"
+                                            :value="$t('t-email-address')"
                                         />
 
                                         <TextInput
@@ -268,8 +263,8 @@ const submit = () => {
 
                                             {{
                                                 form.processing
-                                                    ? 'Sending...'
-                                                    : 'Send Reset Link'
+                                                    ? $t('t-sending')
+                                                    : $t('t-send-reset-link')
                                             }}
 
                                         </BButton>
@@ -293,7 +288,7 @@ const submit = () => {
 
                             <p class="mb-0">
 
-                                Remember your password?
+                                {{ $t('t-remember-password') }}
 
                                 <Link
                                     :href="
@@ -305,7 +300,7 @@ const submit = () => {
                                         text-decoration-none
                                     "
                                 >
-                                    Sign In
+                                    {{ $t('t-sign-in') }}
                                 </Link>
 
                             </p>
@@ -340,7 +335,7 @@ const submit = () => {
                                 {{ new Date().getFullYear() }}
 
                                 SafeSky Solution.
-                                All rights reserved.
+                                {{ $t('t-all-rights-reserved') }}
                             </p>
 
                         </div>

@@ -8,7 +8,7 @@ export default {
 </script>
 
 <template>
-  <Head title="Success Message" />
+  <Head :title="$t('t-success-message')" />
 
   <div class="auth-page-wrapper pt-5">
    
@@ -24,7 +24,7 @@ export default {
                 </Link>
               </div>
               <p class="mt-3 fs-15 fw-medium">
-                Premium Admin & Dashboard Template
+                {{ $t('ui-premium-admin-dashboard-template') }}
               </p>
             </div>
           </BCol>
@@ -62,8 +62,8 @@ export default {
           <BCol lg="12">
             <div class="text-center">
               <p class="mb-0 text-muted">
-                &copy; {{ new Date().getFullYear() }} Velzon. Crafted with
-                <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+                &copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }}
+                <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}
               </p>
             </div>
           </BCol>

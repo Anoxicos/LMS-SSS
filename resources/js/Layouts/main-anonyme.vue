@@ -3,11 +3,13 @@ import { layoutComputed } from "@/state/helpers";
 
 
 import Horizontal from "./horizontal-anonyme.vue";
+import HomeArrival from "@/Components/HomeArrival.vue";
 
 
 export default {
     components: {
-        Horizontal
+        Horizontal,
+        HomeArrival,
     },
     data() {
         return {};
@@ -28,6 +30,7 @@ export default {
         <Horizontal  layout="horizontal">
             <slot />
         </Horizontal>
+        <HomeArrival />
 
 
     </div>

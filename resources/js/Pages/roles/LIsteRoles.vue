@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { ref, computed, watch } from "vue";
 import { Link, useForm } from "@inertiajs/vue3";
 import animationData from "@/Components/widgets/msoeawqm.json";
@@ -41,7 +45,7 @@ watch(searchQuery, () => {
 const formatDate = (date) => {
   if (!date) return "-";
 
-  return new Date(date).toLocaleDateString("en-GB", {
+  return new Date(date).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: "numeric",
     month: "short",
     day: "2-digit",
@@ -134,8 +138,8 @@ function submitCreateRole() {
 
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Role added successfully.",
+        title: t('ui-success'),
+        text: t('ui-role-added-successfully'),
         timer: 2000,
         showConfirmButton: false,
       });
@@ -143,8 +147,8 @@ function submitCreateRole() {
     onError: () => {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: "Please check the form and try again.",
+        title: t('t-error'),
+        text: t('t-check-form-retry'),
         timer: 2500,
         showConfirmButton: false,
       });
@@ -178,9 +182,9 @@ const defaultOptions = {
               </div>
 
               <div>
-                <h5 class="mb-1 fw-semibold">Roles</h5>
+                <h5 class="mb-1 fw-semibold">{{ $t('ui-roles') }}</h5>
                 <p class="text-muted mb-0">
-                  Manage user roles and access permissions.
+                  {{ $t('ui-manage-user-roles-and-access-permissions') }}
                 </p>
               </div>
             </div>
@@ -193,7 +197,7 @@ const defaultOptions = {
                   type="text"
                   class="form-control"
                   v-model="searchQuery"
-                  placeholder="Search role..."
+                  :placeholder="$t('ui-search-role')"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -206,7 +210,7 @@ const defaultOptions = {
                 @click="openAddModal"
               >
                 <i class="ri-add-line align-bottom me-1"></i>
-                Add Role
+                {{ $t('ui-add-role') }}
               </BButton>
             </div>
           </BCol>
@@ -221,12 +225,12 @@ const defaultOptions = {
               <thead>
                 <tr>
                   <th class="sort" @click="onSort('name')">
-                    Role
+                    {{ $t('ui-role') }}
                     <i class="ri-arrow-up-down-line ms-1"></i>
                   </th>
 
                   <th class="text-center">
-                    Actions
+                    {{ $t('ui-actions') }}
                   </th>
                 </tr>
               </thead>
@@ -261,7 +265,7 @@ const defaultOptions = {
                         size="sm"
                         class="action-btn"
                         :href="route('roles.showRole', role.id)"
-                        title="View"
+                        :title="$t('ui-view')"
                       >
                         <i class="ri-eye-fill"></i>
                       </BButton>
@@ -271,7 +275,7 @@ const defaultOptions = {
                         size="sm"
                         class="action-btn"
                         :href="route('roles.editRole', role.id)"
-                        title="Edit"
+                        :title="$t('ui-edit')"
                       >
                         <i class="ri-pencil-fill"></i>
                       </BButton>
@@ -315,7 +319,7 @@ const defaultOptions = {
                   </h6>
 
                   <span class="text-muted small">
-                    ID: {{ role.id || "-" }}
+                    {{ $t('ui-id') }} {{ role.id || "-" }}
                   </span>
                 </div>
               </div>
@@ -326,7 +330,7 @@ const defaultOptions = {
                   size="sm"
                   class="action-btn"
                   :href="route('roles.showRole', role.id)"
-                  title="View"
+                  :title="$t('ui-view')"
                 >
                   <i class="ri-eye-fill"></i>
                 </BButton>
@@ -336,7 +340,7 @@ const defaultOptions = {
                   size="sm"
                   class="action-btn"
                   :href="route('roles.editRole', role.id)"
-                  title="Edit"
+                  :title="$t('ui-edit')"
                 >
                   <i class="ri-pencil-fill"></i>
                 </BButton>
@@ -360,7 +364,7 @@ const defaultOptions = {
               <div class="role-mobile-item">
                 <span class="role-mobile-label">
                   <i class="ri-shield-user-line me-1"></i>
-                  Role Name
+                  {{ $t('ui-role-name') }}
                 </span>
                 <span class="role-mobile-value">
                   {{ role.name || "-" }}
@@ -385,9 +389,9 @@ const defaultOptions = {
             :width="85"
           />
 
-          <h5 class="mt-3 mb-1">No roles found</h5>
+          <h5 class="mt-3 mb-1">{{ $t('ui-no-roles-found') }}</h5>
           <p class="text-muted mb-0">
-            Try changing your search keywords.
+            {{ $t('ui-try-changing-your-search-keywords') }}
           </p>
         </div>
 
@@ -397,11 +401,11 @@ const defaultOptions = {
           v-if="filtereRoles.length > 0"
         >
           <div class="text-muted role-pagination-text">
-            Showing
+            {{ $t('ui-showing') }}
             <span class="fw-semibold">{{ paginatedRoles.length }}</span>
-            of
+            {{ $t('ui-of') }}
             <span class="fw-semibold">{{ filtereRoles.length }}</span>
-            result(s)
+            {{ $t('ui-result-s') }}
           </div>
 
           <ul class="pagination listjs-pagination mb-0">
@@ -453,7 +457,7 @@ const defaultOptions = {
     <!-- Add Role Modal -->
     <BModal
       v-model="showAddModal"
-      title="Add Role"
+      :title="$t('ui-add-role')"
       centered
       hide-footer
       size="md"
@@ -461,12 +465,12 @@ const defaultOptions = {
     >
       <form @submit.prevent="submitCreateRole">
         <div class="mb-3">
-          <label class="form-label">Role Name</label>
+          <label class="form-label">{{ $t('ui-role-name') }}</label>
           <input
             v-model="createForm.name"
             type="text"
             class="form-control"
-            placeholder="Example: HR"
+            :placeholder="$t('ui-example-hr')"
             :class="{ 'is-invalid': createForm.errors.name }"
           />
 
@@ -484,7 +488,7 @@ const defaultOptions = {
             type="button"
             @click="closeAddModal"
           >
-            Cancel
+            {{ $t('ui-cancel') }}
           </BButton>
 
           <BButton

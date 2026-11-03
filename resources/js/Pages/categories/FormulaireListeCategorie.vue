@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 import { onMounted, ref, watch, computed } from 'vue'
@@ -60,8 +64,8 @@ const handleSubmit = () => {
   if (!form.name) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required field',
-      text: 'Category name is required.',
+      title: t('ui-required-field'),
+      text: t('ui-category-name-is-required'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -81,8 +85,8 @@ const addData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Created!',
-        text: 'Category has been created successfully.',
+        title: t('ui-created-label-label'),
+        text: t('ui-category-has-been-created-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -92,8 +96,8 @@ const addData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error!',
-        text: 'An error occurred while creating the category. Please try again.',
+        title: t('ui-error-label'),
+        text: t('ui-an-error-occurred-while-creating-the-category-please-t'),
         timer: 2500,
         showConfirmButton: false,
       })
@@ -108,8 +112,8 @@ const updateData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Updated!',
-        text: 'Category has been updated successfully.',
+        title: t('ui-updated'),
+        text: t('ui-category-has-been-updated-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -119,8 +123,8 @@ const updateData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error!',
-        text: 'An error occurred while updating the category. Please try again.',
+        title: t('ui-error-label'),
+        text: t('ui-an-error-occurred-while-updating-the-category-please-t'),
         timer: 2500,
         showConfirmButton: false,
       })
@@ -153,7 +157,7 @@ const updateData = () => {
         <div class="operation-form-grid">
           <div class="form-group-modern">
             <label class="form-label">
-              Name <span class="text-danger">*</span>
+              {{ $t('ui-name') }} <span class="text-danger">*</span>
             </label>
 
             <div class="input-icon-box">
@@ -163,7 +167,7 @@ const updateData = () => {
                 class="form-control modern-input"
                 :class="{ 'is-invalid': form.errors.name }"
                 v-model="form.name"
-                placeholder="Enter category name"
+                :placeholder="$t('ui-enter-category-name')"
               />
             </div>
 
@@ -174,7 +178,7 @@ const updateData = () => {
 
           <div class="form-group-modern">
             <label class="form-label">
-              Status <span class="text-danger">*</span>
+              {{ $t('ui-status') }} <span class="text-danger">*</span>
             </label>
 
             <div class="status-card">
@@ -221,7 +225,7 @@ const updateData = () => {
           </div>
 
           <div class="min-width-0">
-            <span class="preview-label">Preview</span>
+            <span class="preview-label">{{ $t('ui-preview') }}</span>
             <h6 class="preview-title mb-1">
               {{ form.name || 'Category' }}
             </h6>
@@ -231,7 +235,7 @@ const updateData = () => {
               :class="form.is_active ? 'status-badge-active' : 'status-badge-inactive'"
             >
               <i :class="form.is_active ? 'ri-checkbox-circle-line me-1' : 'ri-close-circle-line me-1'"></i>
-              {{ form.is_active ? 'Active' : 'Inactive' }}
+              {{ form.is_active ? $t('t-active') : $t('ui-inactive') }}
             </span>
           </div>
         </div>
@@ -245,7 +249,7 @@ const updateData = () => {
             @click="resetForm"
           >
             <i class="ri-close-line me-1"></i>
-            Cancel
+            {{ $t('ui-cancel') }}
           </BButton>
 
           <BButton

@@ -296,8 +296,9 @@ class LearnerRegistrationController extends Controller
         */
 
         return redirect()
-            ->route('login')
+            ->route('courses')
             ->with([
+                'arrival_intro' => true,
                 'success' =>
                     'Your learner account has been created successfully. You can now log in.',
 

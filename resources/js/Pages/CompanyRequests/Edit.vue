@@ -1,6 +1,10 @@
 <script setup>
+import { formatCourseLabel } from '@/composables/course-labels'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 import { computed, ref, watch } from 'vue'
 import Swal from 'sweetalert2'
@@ -99,6 +103,8 @@ const form = useForm({
   end_date: props.companyRequest.end_date || '',
   duree_validite_formation:
     props.companyRequest.duree_validite_formation ?? null,
+  certificate_visible_to_learner:
+    props.companyRequest.certificate_visible_to_learner !== false,
   learners: normalizeIds([
     ...initialLearnerIds,
     ...lockedInitialLearnerIds,
@@ -110,32 +116,32 @@ const isApprovedRequest = computed(() => {
   return props.companyRequest.status === 'approved'
 })
 
-const steps = [
+const steps = computed(() => [
   {
     id: 1,
-    title: 'Select Course',
-    description: 'Course details',
+    title: t('t-select-course'),
+    description: t('t-step-course-details'),
     icon: 'ri-book-open-line',
   },
   {
     id: 2,
-    title: 'Training Details',
-    description: 'Dates and approvals',
+    title: t('t-training-details'),
+    description: t('t-step-dates-approvals'),
     icon: 'ri-calendar-check-line',
   },
   {
     id: 3,
-    title: 'Edit Learners',
-    description: 'Manage learners',
+    title: t('t-add-learners'),
+    description: t('t-step-manage-learners'),
     icon: 'ri-team-line',
   },
   {
     id: 4,
-    title: 'Summary',
-    description: 'Review changes',
+    title: t('t-request-summary'),
+    description: t('t-step-review-changes'),
     icon: 'ri-file-check-line',
   },
-]
+])
 const selectedCategory = computed(() => {
   return props.categories.find((category) => {
     return Number(category.id) === Number(selectedCategoryId.value)
@@ -178,10 +184,10 @@ const getLanguageLabel = (value) => {
   const languageKey = getCourseLanguageKey(value)
 
   const labels = {
-    english: 'English',
-    french: 'French',
-    arabic: 'Arabic',
-    unspecified: 'Not specified',
+    english: t('ui-english'),
+    french: t('ui-french'),
+    arabic: t('ui-arabic'),
+    unspecified: t('ui-not-specified'),
   }
 
   if (labels[languageKey]) {
@@ -199,8 +205,8 @@ const getLanguageLabel = (value) => {
 
 const languageFilterOptions = computed(() => {
   const options = new Map([
-    ['english', { value: 'english', label: 'English' }],
-    ['french', { value: 'french', label: 'French' }],
+    ['english', { value: 'english', label: t('ui-english') }],
+    ['french', { value: 'french', label: t('ui-french') }],
   ])
 
   let hasUnspecifiedLanguage = false
@@ -224,7 +230,7 @@ const languageFilterOptions = computed(() => {
   if (hasUnspecifiedLanguage) {
     options.set('unspecified', {
       value: 'unspecified',
-      label: 'Not specified',
+      label: t('ui-not-specified'),
     })
   }
 
@@ -303,7 +309,7 @@ const selectedAccreditations = computed(() => {
 })
 
 const isFirstStep = computed(() => currentStep.value === 1)
-const isLastStep = computed(() => currentStep.value === steps.length)
+const isLastStep = computed(() => currentStep.value === steps.value.length)
 
 const canSave = computed(() => {
   return (
@@ -356,7 +362,7 @@ const formatPrice = (course) => {
   const price = Number(course?.price || 0)
 
   if (course?.type !== 'paid' || price === 0) {
-    return 'Free'
+    return t('t-free')
   }
 
   return `${price.toFixed(2)} ${course.currency || ''}`
@@ -413,7 +419,7 @@ const toggleAccreditation = (accreditation) => {
 const formatTrainingDate = (date) => {
   if (!date) return '-'
 
-  return new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', {
+  return new Date(`${date}T00:00:00`).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -467,8 +473,8 @@ const toggleLearner = (learner) => {
 
     Swal.fire({
       icon: 'info',
-      title: 'Learner locked',
-      text: 'This learner has already started the course and cannot be unchecked.',
+      title: t('t-learner-locked'),
+      text: t('t-learner-course-started-locked'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -517,8 +523,8 @@ const clearLearners = () => {
 
   Swal.fire({
     icon: 'info',
-    title: 'Locked learners kept',
-    text: 'Learners who already started the course cannot be removed.',
+    title: t('t-locked-learners-kept'),
+    text: t('t-started-learners-cannot-remove'),
     timer: 2200,
     showConfirmButton: false,
   })
@@ -598,6 +604,8 @@ const validateLockedLearnersBeforeSubmit = () => {
     form.end_date = props.companyRequest.end_date || ''
     form.duree_validite_formation =
       props.companyRequest.duree_validite_formation ?? null
+    form.certificate_visible_to_learner =
+      props.companyRequest.certificate_visible_to_learner !== false
     form.learners = [...initialLearnerIds]
 
     return true
@@ -619,8 +627,8 @@ const validateLockedLearnersBeforeSubmit = () => {
 
     Swal.fire({
       icon: 'warning',
-      title: 'Locked learners restored',
-      text: 'Learners who already started the course cannot be removed.',
+      title: t('ui-locked-learners-restored'),
+      text: t('t-started-learners-cannot-remove'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -642,7 +650,7 @@ const goToStep = (stepId) => {
 const nextStep = () => {
   if (!validateStep(currentStep.value)) return
 
-  if (currentStep.value < steps.length) {
+  if (currentStep.value < steps.value.length) {
     currentStep.value++
   }
 }
@@ -657,8 +665,8 @@ const submit = () => {
   if (!canSave.value) {
     Swal.fire({
       icon: 'warning',
-      title: 'Request locked',
-      text: 'You cannot update this request.',
+      title: t('t-request-locked'),
+      text: t('ui-you-cannot-update-this-request'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -676,8 +684,8 @@ const submit = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Updated',
-        text: 'Request updated successfully.',
+        title: t('ui-updated-label'),
+        text: t('ui-request-updated-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -685,7 +693,7 @@ const submit = () => {
     onError: (errors) => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
+        title: t('t-error'),
         text: errors?.message || 'Please check the form and try again.',
       })
     },
@@ -728,8 +736,8 @@ watch(
 
 <template>
   <Layout>
-    <Head :title="`Edit ${companyRequest.reference}`" />
-    <PageHeader title="Edit Request" pageTitle="Company Requests" />
+    <Head :title="$t('ui-edit-reference', { reference: companyRequest.reference })" />
+    <PageHeader :title="$t('ui-edit-request')" :page-title="$t('ui-company-requests')" />
 
     <div class="request-edit-page">
       <BCard class="request-wizard-card border-0 shadow-sm">
@@ -742,7 +750,7 @@ watch(
 
               <div>
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                  <h4 class="mb-0 fw-bold">Edit Request</h4>
+                  <h4 class="mb-0 fw-bold">{{ $t('t-edit-request') }}</h4>
 
                   <span :class="getStatusClass(companyRequest.status)">
                     {{ companyRequest.status || 'pending' }}
@@ -760,7 +768,7 @@ watch(
               class="btn btn-light back-btn"
             >
               <i class="ri-arrow-left-line me-1"></i>
-              Back to Details
+              {{ $t('t-back-to-details') }}
             </Link>
           </div>
         </BCardHeader>
@@ -772,9 +780,9 @@ watch(
           >
             <i class="ri-lock-line fs-5"></i>
             <div>
-              <strong>Approved request</strong>
+              <strong>{{ $t('t-approved-request') }}</strong>
               <div>
-                The course, accreditations, training period, validity duration, and learner list are locked. Only notes can be updated.
+                {{ $t('ui-the-course-accreditations-training-period-validity-dur') }}
               </div>
             </div>
           </div>
@@ -785,9 +793,9 @@ watch(
           >
             <i class="ri-information-line fs-5"></i>
             <div>
-              <strong>Super-admin mode</strong>
+              <strong>{{ $t('t-super-admin-mode') }}</strong>
               <div>
-                You can modify the course, accreditations, training period, validity duration, and learners while the request is not approved. Learners who already started this request are locked.
+                {{ $t('ui-you-can-modify-the-course-accreditations-training-peri') }}
               </div>
             </div>
           </div>
@@ -798,9 +806,9 @@ watch(
           >
             <i class="ri-lock-line fs-5"></i>
             <div>
-              <strong>Request locked</strong>
+              <strong>{{ $t('t-request-locked') }}</strong>
               <div>
-                You cannot modify this request because it has already been processed.
+                {{ $t('ui-you-cannot-modify-this-request-because-it-has-already-') }}
               </div>
             </div>
           </div>
@@ -834,7 +842,7 @@ watch(
           <div v-if="currentStep === 1" class="wizard-section">
             <div class="section-heading">
               <div>
-                <h5>Select Course</h5>
+                <h5>{{ $t('t-select-course') }}</h5>
                 <p>
                   {{
                     canChangeCourse
@@ -854,7 +862,7 @@ watch(
                 <div class="side-panel">
                   <div class="side-panel-title">
                     <i class="ri-folder-3-line"></i>
-                    <span>Categories</span>
+                    <span>{{ $t('t-categories') }}</span>
                   </div>
 
                   <div v-if="categories.length" class="category-list">
@@ -877,7 +885,7 @@ watch(
                         <h6>{{ category.name }}</h6>
                         <p>
                           {{ category.courses_count }}
-                          course{{ Number(category.courses_count || 0) > 1 ? 's' : '' }}
+                          {{ $t('ui-course-label') }}{{ Number(category.courses_count || 0) > 1 ? 's' : '' }}
                         </p>
                       </div>
 
@@ -894,7 +902,7 @@ watch(
 
                   <div v-else class="empty-small">
                     <i class="ri-folder-warning-line"></i>
-                    <span>No categories found</span>
+                    <span>{{ $t('t-no-categories') }}</span>
                   </div>
                 </div>
               </BCol>
@@ -917,7 +925,7 @@ watch(
                     </div>
 
                     <span class="section-counter">
-                      {{ filteredCourses.length }} courses
+                      {{ filteredCourses.length }} {{ $t('ui-courses-label') }}
                     </span>
                   </div>
 
@@ -929,7 +937,7 @@ watch(
                       v-model="courseSearch"
                       type="text"
                       class="form-control"
-                      placeholder="Search course..."
+                      :placeholder="$t('ui-search-course')"
                     />
                     <i class="ri-search-line search-icon"></i>
                   </div>
@@ -943,8 +951,8 @@ watch(
                         <i class="ri-translate-2"></i>
 
                         <div>
-                          <strong>Filter by language</strong>
-                          <small>Select one or more languages</small>
+                          <strong>{{ $t('t-filter-by-language') }}</strong>
+                          <small>{{ $t('t-select-languages') }}</small>
                         </div>
                       </div>
 
@@ -955,7 +963,7 @@ watch(
                         @click="selectedCourseLanguages = []"
                       >
                         <i class="ri-close-circle-line"></i>
-                        Clear
+                        {{ $t('t-clear') }}
                       </button>
                     </div>
 
@@ -990,8 +998,8 @@ watch(
                     class="empty-box"
                   >
                     <i class="ri-book-open-line"></i>
-                    <h6>Select category</h6>
-                    <p>Please select a category to display courses.</p>
+                    <h6>{{ $t('t-select-category') }}</h6>
+                    <p>{{ $t('t-select-category-before-courses') }}</p>
                   </div>
 
                   <div v-else-if="filteredCourses.length" class="course-select-list">
@@ -1009,7 +1017,7 @@ watch(
                         <img
                           v-if="getCourseImage(course)"
                           :src="getCourseImage(course)"
-                          alt="Course image"
+                          :alt="$t('t-course-image')"
                         />
 
                         <div v-else class="course-list-fallback">
@@ -1022,7 +1030,7 @@ watch(
                           <h6 class="mb-0">{{ course.title }}</h6>
 
                           <span :class="getTypeClass(course.type)">
-                            {{ course.type || 'course' }}
+                            {{ course.type === 'paid' ? $t('ui-paid') : course.type ? $t('t-free') : $t('t-course') }}
                           </span>
                         </div>
 
@@ -1033,22 +1041,22 @@ watch(
                         <div class="course-meta-row">
                           <span>
                             <i class="ri-computer-line me-1"></i>
-                            {{ course.training_type || '-' }}
+                            {{ formatCourseLabel(course.training_type) }}
                           </span>
 
                           <span>
                             <i class="ri-bar-chart-line me-1"></i>
-                            {{ course.skill_level || '-' }}
+                            {{ formatCourseLabel(course.skill_level) }}
                           </span>
 
                           <span>
                             <i class="ri-list-check-2 me-1"></i>
-                            {{ course.chapters_count || 0 }} chapters
+                            {{ course.chapters_count || 0 }} {{ $t('ui-chapters-label') }}
                           </span>
 
                           <span>
                             <i class="ri-slideshow-line me-1"></i>
-                            {{ course.slides_count || 0 }} slides
+                            {{ course.slides_count || 0 }} {{ $t('ui-slides-label') }}
                           </span>
 
                           <span>
@@ -1077,8 +1085,8 @@ watch(
 
                   <div v-else class="empty-box">
                     <i class="ri-search-eye-line"></i>
-                    <h6>No courses found</h6>
-                    <p>No courses match your search.</p>
+                    <h6>{{ $t('t-no-courses') }}</h6>
+                    <p>{{ $t('t-no-courses-match-search') }}</p>
                   </div>
                 </div>
               </BCol>
@@ -1089,7 +1097,7 @@ watch(
           <div v-if="currentStep === 2" class="wizard-section">
             <div class="section-heading">
               <div>
-                <h5>Training Details</h5>
+                <h5>{{ $t('t-training-details') }}</h5>
                 <p>
                   {{
                     canChangeDetails
@@ -1113,14 +1121,14 @@ watch(
                     </div>
 
                     <div>
-                      <h6>Training Period</h6>
-                      <p>Planned start and end dates.</p>
+                      <h6>{{ $t('t-training-period') }}</h6>
+                      <p>{{ $t('t-planned-dates-help') }}</p>
                     </div>
                   </div>
 
                   <div class="training-date-grid">
                     <div class="form-field-box">
-                      <label for="start_date">Start date</label>
+                      <label for="start_date">{{ $t('t-planned-start-date') }}</label>
                       <div class="date-input-wrap">
                         <i class="ri-calendar-2-line"></i>
                         <input
@@ -1139,7 +1147,7 @@ watch(
                     </div>
 
                     <div class="form-field-box">
-                      <label for="end_date">End date</label>
+                      <label for="end_date">{{ $t('t-planned-end-date') }}</label>
                       <div class="date-input-wrap">
                         <i class="ri-calendar-check-line"></i>
                         <input
@@ -1160,7 +1168,7 @@ watch(
 
                   <div class="form-field-box mt-3">
                     <label for="duree_validite_formation">
-                      Validity duration after completion
+                      {{ $t('t-validity-after-completion') }}
                     </label>
 
                     <div class="date-input-wrap">
@@ -1175,12 +1183,12 @@ watch(
                         class="form-control"
                         :class="{ 'is-invalid': form.errors.duree_validite_formation }"
                         :disabled="!canChangeDetails"
-                        placeholder="Example: 12"
+                        :placeholder="$t('ui-example-12')"
                       />
                     </div>
 
                     <small class="validity-help">
-                      Leave empty when the course or certificate has no expiration date.
+                      {{ $t('ui-leave-empty-when-the-course-or-certificate-has-no-expi') }}
                     </small>
 
                     <div
@@ -1194,7 +1202,7 @@ watch(
                   <div class="period-preview">
                     <i :class="canChangeDetails ? 'ri-time-line' : 'ri-lock-line'"></i>
                     <div>
-                      <span>Selected period</span>
+                      <span>{{ $t('t-selected-period') }}</span>
                       <strong>
                         {{ formatTrainingDate(form.start_date) }}
                         <i class="ri-arrow-right-line mx-1"></i>
@@ -1206,15 +1214,67 @@ watch(
                   <div class="validity-preview">
                     <i class="ri-award-line"></i>
                     <div>
-                      <span>Course / certificate validity</span>
+                      <span>{{ $t('t-course-certificate-validity') }}</span>
                       <strong>
                         {{
                           form.duree_validite_formation
-                            ? `${form.duree_validite_formation} month${Number(form.duree_validite_formation) > 1 ? 's' : ''}`
-                            : 'No expiration'
+                            ? `${form.duree_validite_formation} ${t(Number(form.duree_validite_formation) > 1 ? 't-month-plural' : 't-month-singular')}`
+                            : t('t-no-expiration')
                         }}
                       </strong>
                     </div>
+                  </div>
+
+                  <div
+                    class="certificate-visibility-box"
+                    :class="{
+                      enabled: form.certificate_visible_to_learner,
+                      locked: !canChangeDetails,
+                    }"
+                  >
+                    <div class="certificate-visibility-icon">
+                      <i
+                        :class="
+                          !canChangeDetails
+                            ? 'ri-lock-line'
+                            : form.certificate_visible_to_learner
+                              ? 'ri-eye-line'
+                              : 'ri-eye-off-line'
+                        "
+                      ></i>
+                    </div>
+
+                    <div class="certificate-visibility-content">
+                      <span>{{ $t('t-certificate-distribution') }}</span>
+                      <strong>
+                        {{
+                          form.certificate_visible_to_learner
+                            ? 'Visible to learners'
+                            : 'Hidden from learners'
+                        }}
+                      </strong>
+                      <small>
+                        {{ $t('ui-certificates-are-still-generated-when-hidden-but-learn') }}
+                      </small>
+                    </div>
+
+                    <div class="form-check form-switch certificate-switch">
+                      <input
+                        id="certificate_visible_to_learner"
+                        v-model="form.certificate_visible_to_learner"
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        :disabled="!canChangeDetails"
+                      />
+                    </div>
+                  </div>
+
+                  <div
+                    v-if="form.errors.certificate_visible_to_learner"
+                    class="invalid-feedback d-block mt-2"
+                  >
+                    {{ form.errors.certificate_visible_to_learner }}
                   </div>
                 </div>
               </BCol>
@@ -1227,8 +1287,8 @@ watch(
                     </div>
 
                     <div>
-                      <h6>Requested Accreditations</h6>
-                      <p>Select EASA, DAC Morocco, or both.</p>
+                      <h6>{{ $t('t-requested-accreditations') }}</h6>
+                      <p>{{ $t('t-select-accreditations') }}</p>
                     </div>
                   </div>
 
@@ -1282,7 +1342,7 @@ watch(
 
                   <div v-else class="empty-small accreditation-empty">
                     <i class="ri-shield-cross-line"></i>
-                    <span>No accreditations available</span>
+                    <span>{{ $t('t-no-accreditations') }}</span>
                   </div>
 
                   <div v-if="form.errors.accreditation_ids" class="text-danger small mt-2">
@@ -1297,7 +1357,7 @@ watch(
           <div v-if="currentStep === 3" class="wizard-section">
             <div class="section-heading">
               <div>
-                <h5>{{ isApprovedRequest ? 'Learners' : 'Edit Learners' }}</h5>
+                <h5>{{ isApprovedRequest ? 'Learners' : t('t-add-learners') }}</h5>
                 <p>
                   {{
                     isApprovedRequest
@@ -1308,7 +1368,7 @@ watch(
               </div>
 
               <span class="section-counter">
-                {{ form.learners.length }} selected
+                {{ form.learners.length }} {{ $t('ui-selected-label') }}
               </span>
             </div>
 
@@ -1318,7 +1378,7 @@ watch(
                   v-model="learnerSearch"
                   type="text"
                   class="form-control"
-                  placeholder="Search learner..."
+                  :placeholder="$t('ui-search-learner')"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -1331,7 +1391,7 @@ watch(
                   @click="selectAllFilteredLearners"
                 >
                   <i class="ri-check-double-line me-1"></i>
-                  Select filtered
+                  {{ $t('t-select-filtered') }}
                 </button>
 
                 <button
@@ -1341,7 +1401,7 @@ watch(
                   @click="clearLearners"
                 >
                   <i class="ri-close-circle-line me-1"></i>
-                  Clear
+                  {{ $t('t-clear') }}
                 </button>
               </div>
             </div>
@@ -1362,7 +1422,7 @@ watch(
                   <img
                     v-if="learner.photo_url"
                     :src="learner.photo_url"
-                    alt="Learner"
+                    :alt="$t('ui-learner')"
                   />
 
                   <span v-else>
@@ -1378,14 +1438,14 @@ watch(
                     v-if="isApprovedRequest"
                     class="text-warning fw-semibold"
                   >
-                    Approved request - locked
+                    {{ $t('t-approved-request-locked') }}
                   </small>
 
                   <small
                     v-else-if="learnerIsLocked(learner)"
                     class="text-danger fw-semibold"
                   >
-                    Started this request - locked
+                    {{ $t('t-request-started-locked') }}
                   </small>
                 </div>
 
@@ -1404,8 +1464,8 @@ watch(
 
             <div v-else class="empty-box">
               <i class="ri-user-search-line"></i>
-              <h6>No learners found</h6>
-              <p>No learners match your search.</p>
+              <h6>{{ $t('t-no-learners') }}</h6>
+              <p>{{ $t('t-no-learners-match-search') }}</p>
             </div>
           </div>
 
@@ -1413,12 +1473,12 @@ watch(
           <div v-if="currentStep === 4" class="wizard-section">
             <div class="section-heading">
               <div>
-                <h5>Summary</h5>
-                <p>Review changes before saving.</p>
+                <h5>{{ $t('t-request-summary') }}</h5>
+                <p>{{ $t('t-review-before-saving') }}</p>
               </div>
 
               <span class="section-counter">
-                Update request
+                {{ $t('t-update-request') }}
               </span>
             </div>
 
@@ -1426,29 +1486,29 @@ watch(
               <BCol lg="7">
                 <div class="summary-panel">
                   <div class="summary-block">
-                    <span>Reference</span>
+                    <span>{{ $t('t-reference') }}</span>
                     <strong>{{ companyRequest.reference }}</strong>
                   </div>
 
                   <div class="summary-block">
-                    <span>Status</span>
+                    <span>{{ $t('t-status') }}</span>
                     <strong>{{ companyRequest.status }}</strong>
                   </div>
 
                   <div class="summary-block">
-                    <span>Company</span>
+                    <span>{{ $t('t-company') }}</span>
                     <strong>{{ companyRequest.company?.name || '-' }}</strong>
                   </div>
 
                   <div class="summary-block">
-                    <span>Selected Course</span>
+                    <span>{{ $t('t-selected-course') }}</span>
 
                     <div v-if="selectedCourse" class="summary-course">
                       <div class="summary-course-image">
                         <img
                           v-if="getCourseImage(selectedCourse)"
                           :src="getCourseImage(selectedCourse)"
-                          alt="Course"
+                          :alt="$t('ui-course')"
                         />
 
                         <div v-else>
@@ -1459,20 +1519,20 @@ watch(
                       <div class="min-width-0">
                         <h6>{{ selectedCourse.title }}</h6>
                         <p>
-                          {{ selectedCourse.training_type || '-' }}
+                          {{ formatCourseLabel(selectedCourse.training_type) }}
                           ·
-                          {{ selectedCourse.skill_level || '-' }}
+                          {{ formatCourseLabel(selectedCourse.skill_level) }}
                           ·
                           {{ formatPrice(selectedCourse) }}
                         </p>
                       </div>
                     </div>
 
-                    <strong v-else>No course selected</strong>
+                    <strong v-else>{{ $t('t-no-course-selected') }}</strong>
                   </div>
 
                   <div class="summary-block">
-                    <span>Training Period</span>
+                    <span>{{ $t('t-training-period') }}</span>
                     <strong>
                       {{ formatTrainingDate(form.start_date) }}
                       —
@@ -1481,18 +1541,42 @@ watch(
                   </div>
 
                   <div class="summary-block">
-                    <span>Validity Duration</span>
+                    <span>{{ $t('t-validity-duration') }}</span>
                     <strong>
                       {{
                         form.duree_validite_formation
-                          ? `${form.duree_validite_formation} month${Number(form.duree_validite_formation) > 1 ? 's' : ''}`
-                          : 'No expiration'
+                          ? `${form.duree_validite_formation} ${t(Number(form.duree_validite_formation) > 1 ? 't-month-plural' : 't-month-singular')}`
+                          : t('t-no-expiration')
                       }}
                     </strong>
                   </div>
 
                   <div class="summary-block">
-                    <span>Requested Accreditations</span>
+                    <span>{{ $t('t-certificate-distribution-title') }}</span>
+                    <strong
+                      :class="
+                        form.certificate_visible_to_learner
+                          ? 'text-success'
+                          : 'text-warning'
+                      "
+                    >
+                      <i
+                        :class="
+                          form.certificate_visible_to_learner
+                            ? 'ri-eye-line me-1'
+                            : 'ri-eye-off-line me-1'
+                        "
+                      ></i>
+                      {{
+                        form.certificate_visible_to_learner
+                          ? 'Visible to learners'
+                          : 'Hidden from learners'
+                      }}
+                    </strong>
+                  </div>
+
+                  <div class="summary-block">
+                    <span>{{ $t('t-requested-accreditations') }}</span>
 
                     <div v-if="selectedAccreditations.length" class="summary-accreditations">
                       <span
@@ -1505,17 +1589,17 @@ watch(
                       </span>
                     </div>
 
-                    <strong v-else>Not selected</strong>
+                    <strong v-else>{{ $t('t-not-selected') }}</strong>
                   </div>
 
                   <div class="summary-block">
-                    <span>Notes</span>
+                    <span>{{ $t('t-notes') }}</span>
 
                     <textarea
                       v-model="form.notes"
                       class="form-control modern-textarea"
                       rows="5"
-                      placeholder="Add notes..."
+                      :placeholder="$t('ui-add-notes')"
                     ></textarea>
                   </div>
                 </div>
@@ -1525,8 +1609,8 @@ watch(
                 <div class="summary-panel">
                   <div class="summary-header-mini">
                     <div>
-                      <h6>Selected Learners</h6>
-                      <p>{{ selectedLearners.length }} learner(s)</p>
+                      <h6>{{ $t('t-selected-learners') }}</h6>
+                      <p>{{ selectedLearners.length }} {{ $t('ui-learner-s') }}</p>
                     </div>
 
                     <button
@@ -1535,14 +1619,14 @@ watch(
                       class="btn btn-sm btn-light"
                       @click="currentStep = 3"
                     >
-                      Edit
+                      {{ $t('t-edit') }}
                     </button>
 
                     <span
                       v-else
                       class="mini-badge warning"
                     >
-                      Locked
+                      {{ $t('t-locked') }}
                     </span>
                   </div>
 
@@ -1556,7 +1640,7 @@ watch(
                         <img
                           v-if="learner.photo_url"
                           :src="learner.photo_url"
-                          alt="Learner"
+                          :alt="$t('ui-learner')"
                         />
 
                         <span v-else>
@@ -1573,14 +1657,14 @@ watch(
                         v-if="learnerIsLocked(learner)"
                         class="mini-badge danger"
                       >
-                        Locked
+                        {{ $t('t-locked') }}
                       </span>
                     </div>
                   </div>
 
                   <div v-else class="empty-small">
                     <i class="ri-team-line"></i>
-                    <span>No learners selected</span>
+                    <span>{{ $t('t-no-learners-selected') }}</span>
                   </div>
 
                   <div class="summary-info mt-3">
@@ -1607,7 +1691,7 @@ watch(
               @click="previousStep"
             >
               <i class="ri-arrow-left-line me-1"></i>
-              Previous
+              {{ $t('t-previous') }}
             </BButton>
 
             <div class="d-flex flex-wrap gap-2 justify-content-end">
@@ -1618,7 +1702,7 @@ watch(
                 class="footer-btn"
                 @click="nextStep"
               >
-                Next
+                {{ $t('t-next') }}
                 <i class="ri-arrow-right-line ms-1"></i>
               </BButton>
 
@@ -1636,7 +1720,7 @@ watch(
                 ></span>
 
                 <i v-else class="ri-save-line me-1"></i>
-                Save Changes
+                {{ $t('t-save-changes') }}
               </BButton>
             </div>
           </div>
@@ -2425,6 +2509,64 @@ watch(
   font-size: 12px !important;
   font-weight: 850 !important;
   text-transform: none !important;
+}
+
+.certificate-visibility-box {
+  margin-top: 14px;
+  border: 1px solid rgba(13, 143, 233, 0.18);
+  background: #f8fbff;
+  border-radius: 15px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.certificate-visibility-box.enabled {
+  border-color: rgba(10, 179, 156, 0.22);
+  background: rgba(10, 179, 156, 0.06);
+}
+
+.certificate-visibility-box.locked { opacity: 0.88; }
+
+.certificate-visibility-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eaf7ff;
+  color: #0d8fe9;
+  font-size: 20px;
+}
+
+.certificate-visibility-content { flex: 1; min-width: 0; }
+.certificate-visibility-content span,
+.certificate-visibility-content small { display: block; }
+.certificate-visibility-content span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.certificate-visibility-content strong {
+  display: block;
+  color: #334155;
+  font-size: 13px;
+  margin: 2px 0;
+}
+.certificate-visibility-content small {
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.certificate-switch { margin: 0; padding-left: 2.8em; }
+.certificate-switch .form-check-input {
+  width: 2.4em;
+  height: 1.3em;
+  cursor: pointer;
 }
 
 .learner-toolbar {

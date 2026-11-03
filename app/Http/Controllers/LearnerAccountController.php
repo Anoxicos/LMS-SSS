@@ -86,7 +86,7 @@ class LearnerAccountController extends Controller
 
             return back()
                 ->withErrors([
-                    'profile' => 'The learner profile could not be updated.',
+                    'profile' => __('The learner profile could not be updated.'),
                 ])
                 ->withInput();
         }
@@ -101,7 +101,7 @@ class LearnerAccountController extends Controller
 
         return redirect()
             ->route('public.individual-requests.create')
-            ->with('success', 'Your learner profile has been updated successfully.');
+            ->with('success', __('Your learner profile has been updated successfully.'));
     }
 
     private function learner(Request $request): User

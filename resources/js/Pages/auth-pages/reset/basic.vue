@@ -34,7 +34,7 @@ export default {
                   <img src="@assets/images/logo_safesky blue.webp" alt="" height="20">
                 </Link>
               </div>
-              <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
+              <p class="mt-3 fs-15 fw-medium">{{ $t('ui-premium-admin-dashboard-template') }}</p>
             </div>
           </BCol>
         </BRow>
@@ -45,7 +45,7 @@ export default {
 
               <BCardBody class="p-4">
                 <div class="text-center mt-2">
-                  <h5 class="text-primary">Forgot Password?</h5>
+                  <h5 class="text-primary">{{ $t('t-forgot-password-question') }}</h5>
                   <p class="text-muted">Reset password with velzon</p>
 
                   <lottie class="avatar-xl some-class" colors="primary:#8c68cd" :options="defaultOptions" :height="120" :width="120" />
@@ -58,12 +58,12 @@ export default {
                 <div class="p-2">
                   <form>
                     <div class="mb-4">
-                      <label class="form-label">Email</label>
+                      <label class="form-label">{{ $t('ui-email') }}</label>
                       <input type="email" class="form-control" id="email" placeholder="Enter Email">
                     </div>
 
                     <div class="text-center mt-4">
-                      <BButton variant="primary" class="w-100" type="submit">Send Reset Link</BButton>
+                      <BButton variant="primary" class="w-100" type="submit">{{ $t('t-send-reset-link') }}</BButton>
                     </div>
                   </form>
                 </div>
@@ -86,7 +86,7 @@ export default {
         <BRow>
           <BCol lg="12">
             <div class="text-center">
-              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
             </div>
           </BCol>
         </BRow>

@@ -34,16 +34,16 @@ $sidebar-gradient-dark-mode:                      false;
 // Color system
 
 // scss-docs-start gray-color-variables
-$white:    #fff;
-$gray-100: #f3f6f9;
-$gray-200: #eff2f7;
-$gray-300: #e9ebec;
-$gray-400: #ced4da;
-$gray-500: #adb5bd;
-$gray-600: #878a99;
-$gray-700: #495057;
-$gray-800: #343a40;
-$gray-900: #272a3a;
+$white:    $chalk;
+$gray-100: $paper;
+$gray-200: mix($paper, $sand, 50%);
+$gray-300: $sand;
+$gray-400: mix($sand, $stone, 66.667%);
+$gray-500: mix($sand, $stone, 33.333%);
+$gray-600: $stone;
+$gray-700: $slate;
+$gray-800: mix($slate, $ink, 50%);
+$gray-900: $ink;
 $black:    #000;
 
 
@@ -64,16 +64,16 @@ $grays: (
 // fusv-enable
 
 // scss-docs-start color-variables
-$blue:       #3577f1;
-$indigo:     #405189;
-$purple:     #687cfe;
+$blue:       $signal;
+$indigo:     $midnight;
+$purple:     $signal;
 $pink:       #f672a7;
-$red:        #f7666e;
-$orange:     #ff7f5d;
-$yellow:     #efae4e;
-$green:      #3cd188;
+$red:        $danger;
+$orange:     $flare;
+$yellow:     $warning;
+$green:      $success;
 $teal:       #02a8b5;
-$cyan:       #0ac7fb;
+$cyan:       $jet;
 // scss-docs-end color-variables
 
 // scss-docs-start colors-map
@@ -325,10 +325,10 @@ $cyans: (
 // fusv-enable
 
 // scss-docs-start theme-color-variables
-$primary:       $purple;
+$primary:       $signal;
 $secondary:     $orange;
 $success:       $green;
-$info:          $cyan;
+$info:          $jet;
 $warning:       $yellow;
 $danger:        $red;
 $light:         $gray-100;
@@ -461,7 +461,7 @@ $position-values: (
 //
 // Settings for the `<body>` element.
 
-$body-bg:                   #f3f3f9;
+$body-bg:                   $paper;
 $body-color:                $gray-900;
 $body-text-align:           null;
 

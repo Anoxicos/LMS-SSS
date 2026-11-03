@@ -1,6 +1,9 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import i18n from '@/i18n'
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
 import airplaneHero from '@assets/images/airplane-hero.png'
 import maintenanceTraining from '@assets/images/home/maintenance-training.png'
@@ -13,7 +16,35 @@ defineOptions({
 })
 
 const pageRoot = ref(null)
-let revealObserver = null
+const headlinePhraseElement = ref(null)
+const activeHeadlineIndex = ref(0)
+let gsapContext = null
+let headlineTimer = null
+
+const headlineTerms = [
+  't-home-rotate-safety',
+  't-home-rotate-maintenance',
+  't-home-rotate-operations',
+  't-home-rotate-crews',
+]
+const headlinePhrase = computed(() => i18n.global.t(headlineTerms[activeHeadlineIndex.value]))
+const headlineWords = computed(() => headlinePhrase.value.split(' ').map((word, index) => {
+  const letters = Array.from(word)
+  if (index === 0 && letters.length) letters[0] = letters[0].toLocaleUpperCase()
+  return letters
+}))
+
+const marqueeItems = [
+  't-home-feature-ewis',
+  't-home-feature-fts',
+  't-home-feature-human-factors',
+  't-home-feature-flight-operations',
+  't-home-feature-safety',
+  't-home-feature-regulations',
+  't-home-feature-cabin-crew',
+  't-home-feature-ground-handling',
+  't-home-feature-dangerous-goods',
+]
 
 const handleImageError = event => {
   const image = event?.currentTarget
@@ -168,51 +199,98 @@ const journeySteps = [
   },
 ]
 
+const faqs = [
+  ['t-landing-faq-who-q', 't-landing-faq-who-a'],
+  ['t-landing-faq-schedule-q', 't-landing-faq-schedule-a'],
+  ['t-landing-faq-price-q', 't-landing-faq-price-a'],
+  ['t-landing-faq-certificate-q', 't-landing-faq-certificate-a'],
+]
+
 onMounted(() => {
   const root = pageRoot.value
 
-  if (!root) {
-    return
-  }
+  if (!root || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
 
-  const revealItems = Array.from(root.querySelectorAll('[data-reveal]'))
-  const prefersReducedMotion = window.matchMedia?.(
-    '(prefers-reduced-motion: reduce)',
-  )?.matches
+  gsap.registerPlugin(ScrollTrigger)
+  root.classList.add('gsap-ready')
 
-  if (
-    prefersReducedMotion ||
-    !('IntersectionObserver' in window)
-  ) {
-    revealItems.forEach(item => item.classList.add('is-visible'))
-    return
-  }
+  gsapContext = gsap.context(() => {
+    gsap.timeline({ defaults: { ease: 'power3.out' } })
+      .from('.hero-load-1', { y: 38, autoAlpha: 0, duration: 0.85 })
+      .from('.hero-load-2', { y: 24, autoAlpha: 0, duration: 0.7 }, '-=0.48')
+      .from('.hero-load-3', { y: 18, autoAlpha: 0, duration: 0.65 }, '-=0.34')
+      .from('.hero-load-4', { y: 12, autoAlpha: 0, duration: 0.55 }, '-=0.3')
+      .from('.hero-visual', { x: 64, y: 18, scale: 0.96, autoAlpha: 0, duration: 1.1 }, '-=1.1')
+      .from('.hero-visual-orbit', { scale: 0.76, autoAlpha: 0, duration: 1.25 }, '-=0.9')
 
-  root.classList.add('motion-enabled')
+    root.querySelectorAll('[data-reveal]').forEach(element => {
+      const delay = Number.parseFloat(element.style.getPropertyValue('--reveal-delay')) || 0
 
-  revealObserver = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) {
-          return
-        }
-
-        entry.target.classList.add('is-visible')
-        revealObserver?.unobserve(entry.target)
+      gsap.fromTo(element, {
+        y: 28,
+        autoAlpha: 0,
+      }, {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.8,
+        delay: delay / 1000,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: element,
+          start: 'top 88%',
+          once: true,
+        },
       })
-    },
-    {
-      threshold: 0.14,
-      rootMargin: '0px 0px -70px 0px',
-    },
-  )
+    })
 
-  revealItems.forEach(item => revealObserver.observe(item))
+    gsap.to('.hero-visual', {
+      yPercent: 5,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.hero-section',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 0.8,
+      },
+    })
+  }, root)
+
+  const rotateHeadline = () => {
+    const phrase = headlinePhraseElement.value
+    if (!phrase) return
+
+    gsap.to(phrase.querySelectorAll('.hero-rotate-char'), {
+      yPercent: -120,
+      autoAlpha: 0,
+      duration: 0.28,
+      stagger: 0.012,
+      ease: 'power2.in',
+      onComplete: () => {
+        activeHeadlineIndex.value = (activeHeadlineIndex.value + 1) % headlineTerms.length
+        nextTick(() => {
+          const chars = phrase.querySelectorAll('.hero-rotate-char')
+          gsap.fromTo(chars, { yPercent: 120, autoAlpha: 0 }, {
+            yPercent: 0,
+            autoAlpha: 1,
+            duration: 0.55,
+            stagger: 0.018,
+            ease: 'back.out(1.6)',
+          })
+        })
+      },
+    })
+  }
+
+  headlineTimer = window.setInterval(rotateHeadline, 2600)
 })
 
 onBeforeUnmount(() => {
-  revealObserver?.disconnect()
-  revealObserver = null
+  window.clearInterval(headlineTimer)
+  if (headlinePhraseElement.value) {
+    gsap.killTweensOf(headlinePhraseElement.value.querySelectorAll('.hero-rotate-char'))
+  }
+  gsapContext?.revert()
+  gsapContext = null
 })
 </script>
 
@@ -222,117 +300,69 @@ onBeforeUnmount(() => {
          HERO
          ===================================================== -->
     <section class="hero-section">
-      <div class="hero-line-field" aria-hidden="true"></div>
-
       <div class="page-container hero-container">
         <div class="hero-content">
-          <span class="hero-eyebrow hero-load hero-load-1">
-            <i class="ri-graduation-cap-line"></i>
-            {{ $t('t-aviation-learning-platform') }}
-          </span>
-
-          <h1 class="hero-title hero-load hero-load-2">
-            <span>{{ $t('t-take-your-aviation') }}</span>
-            <span>{{ $t('t-career-to-new') }}</span>
-            <span class="hero-title-accent">{{ $t('t-heights') }}</span>
+          <h1 class="hero-title hero-load hero-load-1">
+            <span class="hero-title-prefix">{{ $t('t-landing-headline-prefix') }}</span>{{ ' ' }}
+            <span class="hero-rotator" aria-hidden="true">
+              <span class="hero-rotator-sizer">{{ $t('t-home-rotate-maintenance') }}</span>
+              <span ref="headlinePhraseElement" class="hero-rotator-phrase">
+                <span
+                  v-for="(word, wordIndex) in headlineWords"
+                  :key="`${activeHeadlineIndex}-${wordIndex}`"
+                  class="hero-rotate-word"
+                >
+                  <span
+                    v-for="(character, charIndex) in word"
+                    :key="charIndex"
+                    class="hero-rotate-char"
+                  >{{ character }}</span>
+                </span>
+              </span>
+            </span>
+            <span class="visually-hidden">{{ headlinePhrase }}</span>
           </h1>
 
-          <p class="hero-description hero-load hero-load-3">
-            {{ $t('t-hero-description') }}
+          <p class="hero-description hero-load hero-load-2">
+            {{ $t('t-landing-subheadline') }}
           </p>
 
-          <div class="hero-actions hero-load hero-load-4">
+          <div class="hero-actions hero-load hero-load-3">
             <Link href="/courses" class="home-btn home-btn-primary">
-              <span>{{ $t('t-see-all-courses') }}</span>
+              <span>{{ $t('t-landing-cta') }}</span>
               <i class="ri-arrow-right-line"></i>
             </Link>
-
-            <a href="#learning-paths" class="home-btn home-btn-secondary">
-              <i class="ri-compass-3-line"></i>
-              <span>{{ $t('t-home-explore-paths') }}</span>
-            </a>
           </div>
 
-          <div class="hero-assurances hero-load hero-load-5">
-            <span>
-              <i class="ri-checkbox-circle-line"></i>
-              {{ $t('t-home-assurance-self-paced') }}
-            </span>
-            <span>
-              <i class="ri-checkbox-circle-line"></i>
-              {{ $t('t-home-assurance-career-focused') }}
-            </span>
-            <span>
-              <i class="ri-checkbox-circle-line"></i>
-              {{ $t('t-home-assurance-mobile-ready') }}
-            </span>
-          </div>
+          <p class="hero-note hero-load hero-load-4">{{ $t('t-landing-cta-note') }}</p>
         </div>
 
-        <div class="hero-visual hero-visual-load">
-          <div class="hero-dashboard">
-            <div class="dashboard-toolbar">
-              <div class="dashboard-toolbar-copy">
-                <span>{{ $t('t-home-learning-cockpit') }}</span>
-                <strong>{{ $t('t-home-personal-dashboard') }}</strong>
-              </div>
+        <Link
+          href="/courses"
+          class="hero-visual hero-visual-load"
+          :aria-label="$t('t-landing-visual-link')"
+        >
+          <div class="hero-visual-orbit"></div>
+          <img :src="airplaneHero" alt="" class="hero-aircraft" draggable="false" />
+          <span class="hero-visual-caption">{{ $t('t-landing-visual-caption') }}</span>
+        </Link>
+      </div>
+    </section>
 
-              <span class="dashboard-status">
-                <i class="ri-checkbox-circle-fill"></i>
-                {{ $t('t-home-status-ready') }}
+    <section class="topic-marquee" :aria-label="$t('t-home-categories-eyebrow')">
+      <div class="page-container marquee-layout">
+        <span class="marquee-label">
+          <i class="ri-radar-line" aria-hidden="true"></i>
+          {{ $t('t-home-categories-eyebrow') }}
+        </span>
+
+        <div class="marquee-window">
+          <div class="marquee-track">
+            <div v-for="copy in 2" :key="copy" class="marquee-group" :aria-hidden="copy === 2">
+              <span v-for="topic in marqueeItems" :key="`${copy}-${topic}`" class="marquee-topic">
+                <i class="ri-asterisk" aria-hidden="true"></i>
+                {{ $t(topic) }}
               </span>
-            </div>
-
-            <div class="dashboard-aircraft-stage">
-              <div class="dashboard-destination">
-                <span>{{ $t('t-home-next-destination') }}</span>
-                <strong>{{ $t('t-home-professional-growth') }}</strong>
-              </div>
-
-              <div class="airplane-entry">
-                <img
-                  :src="airplaneHero"
-                  alt="Airplane"
-                  class="airplane-image"
-                  draggable="false"
-                />
-              </div>
-
-              <div class="aircraft-guide-line" aria-hidden="true"></div>
-            </div>
-
-            <div class="dashboard-progress-card">
-              <div class="progress-course-row">
-                <div class="progress-course-icon">
-                  <i class="ri-flashlight-line"></i>
-                </div>
-
-                <div class="progress-course-copy">
-                  <span>{{ $t('t-home-course-in-progress') }}</span>
-                  <strong>{{ $t('t-home-demo-course') }}</strong>
-
-                  <div class="progress-track" aria-label="72%">
-                    <span></span>
-                  </div>
-                </div>
-
-                <b>72%</b>
-              </div>
-
-              <div class="dashboard-feature-strip">
-                <span>
-                  <i class="ri-book-open-line"></i>
-                  {{ $t('t-home-interactive-modules') }}
-                </span>
-                <span>
-                  <i class="ri-time-line"></i>
-                  {{ $t('t-home-assurance-self-paced') }}
-                </span>
-                <span>
-                  <i class="ri-award-line"></i>
-                  {{ $t('t-home-certificate-ready') }}
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -342,9 +372,12 @@ onBeforeUnmount(() => {
     <!-- =====================================================
          TRUST STRIP
          ===================================================== -->
-    <section class="trust-section" aria-label="Platform benefits">
+    <section class="trust-section" :aria-label="$t('ui-platform-benefits')">
       <div class="page-container trust-layout">
         <div class="trust-heading" data-reveal>
+          <span class="trust-heading-mark" aria-hidden="true">
+            <i class="ri-flight-takeoff-line"></i>
+          </span>
           <span>{{ $t('t-home-built-for') }}</span>
           <strong>{{ $t('t-home-aviation-professionals') }}</strong>
         </div>
@@ -490,8 +523,6 @@ onBeforeUnmount(() => {
          LEARNER EXPERIENCE
          ===================================================== -->
     <section class="home-section experience-section">
-      <div class="experience-line-field" aria-hidden="true"></div>
-
       <div class="page-container experience-layout">
         <div class="experience-main" data-reveal>
           <span class="section-eyebrow section-eyebrow-light">
@@ -587,6 +618,25 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
+    <section class="home-section landing-faq-section" id="faq">
+      <div class="page-container landing-faq-layout">
+        <div class="landing-faq-heading" data-reveal>
+          <span class="section-eyebrow">{{ $t('t-landing-faq-label') }}</span>
+          <h2>{{ $t('t-landing-faq-title') }}</h2>
+        </div>
+        <div class="landing-faq-list">
+          <details
+            v-for="([question, answer], index) in faqs"
+            :key="question"
+            :open="index === 0"
+          >
+            <summary>{{ $t(question) }}<span aria-hidden="true">+</span></summary>
+            <p>{{ $t(answer) }}</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
     <!-- =====================================================
          FINAL CTA
          ===================================================== -->
@@ -623,29 +673,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .aviation-home {
-  --home-cyan: #37cced;
-  --home-blue: #0d8fe9;
-  --home-blue-dark: #087bc9;
-  --home-navy: #071126;
-  --home-navy-hover: #132b4a;
-  --home-soft: #eaf7ff;
-  --home-page-soft: #f4fbff;
-  --home-border: #e4edf4;
-  --home-muted: #64748b;
-  --home-text: #334155;
-  --home-success: #0ab39c;
-  --shadow-card: 0 16px 38px rgba(15, 23, 42, 0.075);
-  --shadow-card-hover: 0 24px 52px rgba(15, 23, 42, 0.12);
-  --shadow-blue: 0 18px 38px rgba(13, 143, 233, 0.2);
+  --shadow-card: 0 10px 26px rgba(7, 11, 20, 0.055);
+  --shadow-card-hover: 0 16px 34px rgba(7, 11, 20, 0.1);
 
   overflow: hidden;
-  color: var(--home-navy);
-  background: linear-gradient(
-    180deg,
-    #f4fbff 0%,
-    #ffffff 44%,
-    #f8fafc 100%
-  );
+  color: var(--ink);
+  background: var(--paper);
 }
 
 .aviation-home,
@@ -654,8 +687,8 @@ onBeforeUnmount(() => {
 }
 
 .aviation-home a:focus-visible {
-  outline: 3px solid rgba(55, 204, 237, 0.46);
-  outline-offset: 4px;
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
 }
 
 .page-container {
@@ -664,21 +697,84 @@ onBeforeUnmount(() => {
 }
 
 .home-section {
-  padding: 108px 0;
+  padding: 96px 0;
+}
+
+.landing-faq-section {
+  background: var(--paper);
+}
+
+.landing-faq-layout {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 9vw;
+}
+
+.landing-faq-heading h2 {
+  max-width: 420px;
+  margin: 18px 0 0;
+  color: var(--ink);
+  font-size: clamp(36px, 4.4vw, 54px);
+  line-height: 1.03;
+  letter-spacing: -0.055em;
+}
+
+.landing-faq-list details {
+  border-top: 1px solid var(--sand);
+}
+
+.landing-faq-list details:last-child {
+  border-bottom: 1px solid var(--sand);
+}
+
+.landing-faq-list summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 19px 0;
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.landing-faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.landing-faq-list summary span {
+  color: var(--signal);
+  font-size: 22px;
+  font-weight: 400;
+  transition: transform 0.2s ease;
+}
+
+.landing-faq-list details[open] summary span {
+  transform: rotate(45deg);
+}
+
+.landing-faq-list details p {
+  max-width: 600px;
+  margin: 0;
+  padding: 0 36px 20px 0;
+  color: var(--slate);
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 /* =========================================================
    SHARED UI
    ========================================================= */
-.section-eyebrow,
-.hero-eyebrow {
+.section-eyebrow {
   width: fit-content;
   min-height: 36px;
   padding: 0 13px;
-  border: 1px solid rgba(13, 143, 233, 0.16);
+  border: 1px solid rgba(31, 92, 255, 0.16);
   border-radius: 10px;
-  color: var(--home-blue-dark);
-  background: var(--home-soft);
+  color: var(--signal-deep);
+  background: var(--paper);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.075em;
@@ -688,14 +784,13 @@ onBeforeUnmount(() => {
   gap: 8px;
 }
 
-.section-eyebrow i,
-.hero-eyebrow i {
+.section-eyebrow i {
   font-size: 16px;
 }
 
 .section-eyebrow-light {
   border-color: rgba(255, 255, 255, 0.34);
-  color: #ffffff;
+  color: var(--chalk);
   background: rgba(255, 255, 255, 0.1);
 }
 
@@ -718,7 +813,7 @@ onBeforeUnmount(() => {
 
 .section-heading h2,
 .categories-intro h2 {
-  color: var(--home-navy);
+  color: var(--ink);
   font-size: clamp(38px, 4.3vw, 60px);
   line-height: 1.05;
 }
@@ -727,7 +822,7 @@ onBeforeUnmount(() => {
 .categories-intro > p {
   max-width: 730px;
   margin: 0;
-  color: #526174;
+  color: var(--slate);
   font-size: 16px;
   line-height: 1.78;
 }
@@ -759,8 +854,8 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   min-height: 42px;
   padding: 0 2px;
-  border-bottom: 2px solid rgba(13, 143, 233, 0.2);
-  color: var(--home-navy);
+  border-bottom: 2px solid rgba(31, 92, 255, 0.2);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 900;
   text-decoration: none;
@@ -777,8 +872,8 @@ onBeforeUnmount(() => {
 }
 
 .section-text-link:hover {
-  color: var(--home-blue-dark);
-  border-color: var(--home-blue);
+  color: var(--signal-deep);
+  border-color: var(--signal);
 }
 
 .section-text-link:hover i {
@@ -820,28 +915,40 @@ onBeforeUnmount(() => {
 
 .home-btn-primary,
 .home-btn-dark {
-  color: #ffffff;
-  background: var(--home-navy);
+  color: var(--chalk);
+  background: var(--ink);
   box-shadow: 0 16px 34px rgba(7, 17, 38, 0.22);
+}
+
+.hero-actions .home-btn-primary {
+  color: var(--ink);
+  background: var(--jet);
+  box-shadow: none;
+}
+
+.hero-actions .home-btn-primary:hover {
+  color: var(--ink);
+  background: #74ebff;
+  box-shadow: none;
 }
 
 .home-btn-primary:hover,
 .home-btn-dark:hover {
-  color: #ffffff;
-  background: var(--home-navy-hover);
+  color: var(--chalk);
+  background: var(--midnight);
   box-shadow: 0 20px 40px rgba(7, 17, 38, 0.26);
 }
 
 .home-btn-secondary {
   border-color: rgba(255, 255, 255, 0.58);
-  color: #ffffff;
+  color: var(--chalk);
   background: rgba(7, 17, 38, 0.2);
   box-shadow: 0 12px 28px rgba(7, 17, 38, 0.12);
 }
 
 .home-btn-secondary:hover {
   border-color: rgba(255, 255, 255, 0.82);
-  color: #ffffff;
+  color: var(--chalk);
   background: rgba(7, 17, 38, 0.34);
 }
 
@@ -853,14 +960,14 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   min-width: 220px;
   border-color: rgba(255, 255, 255, 0.82);
-  color: var(--home-navy);
-  background: #ffffff;
+  color: var(--ink);
+  background: var(--chalk);
   box-shadow: 0 16px 34px rgba(7, 17, 38, 0.2);
 }
 
 .home-btn-white:hover {
-  color: var(--home-navy);
-  background: var(--home-soft);
+  color: var(--ink);
+  background: var(--paper);
 }
 
 /* =========================================================
@@ -868,68 +975,23 @@ onBeforeUnmount(() => {
    ========================================================= */
 .hero-section {
   position: relative;
-  min-height: 760px;
-  padding: 72px 0 92px;
+  height: 100vh;
+  height: 100svh;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(76px, 10vh, 104px) 0 clamp(24px, 4vh, 42px);
   overflow: hidden;
-  color: #ffffff;
-  background:
-    linear-gradient(
-      104deg,
-      rgba(7, 17, 38, 0.28) 0%,
-      rgba(7, 17, 38, 0.14) 42%,
-      rgba(7, 17, 38, 0.03) 74%,
-      transparent 100%
-    ),
-    linear-gradient(
-      90deg,
-      var(--home-cyan) 0%,
-      var(--home-blue) 100%
-    );
+  color: var(--chalk);
+  background: radial-gradient(ellipse at 73% 42%, rgba(56, 225, 255, 0.13), transparent 34%), var(--ink);
   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
 }
 
-.hero-line-field {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.16;
-  background-image:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      transparent 17%,
-      rgba(255, 255, 255, 0.22) 17.1%,
-      transparent 17.2%,
-      transparent 82%,
-      rgba(255, 255, 255, 0.16) 82.1%,
-      transparent 82.2%
-    ),
-    linear-gradient(
-      180deg,
-      transparent 0%,
-      transparent 72%,
-      rgba(255, 255, 255, 0.18) 72.1%,
-      transparent 72.2%
-    );
-}
-
-.hero-line-field::after {
-  content: '';
-  position: absolute;
-  right: -12%;
-  bottom: 18%;
-  width: 58%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(-10deg);
-  transform-origin: right center;
-}
-
 .hero-container {
   position: relative;
   z-index: 2;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(430px, 0.92fr) minmax(500px, 1.08fr);
   align-items: center;
@@ -937,363 +999,249 @@ onBeforeUnmount(() => {
 }
 
 .hero-content {
-  max-width: 710px;
-}
-
-.hero-eyebrow {
-  margin-bottom: 24px;
-  border-color: rgba(255, 255, 255, 0.66);
-  color: var(--home-navy);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 24px rgba(7, 17, 38, 0.1);
-}
-
-.hero-eyebrow i {
-  color: var(--home-blue);
+  max-width: 630px;
 }
 
 .hero-title {
   margin: 0;
-  color: #ffffff;
-  font-size: clamp(52px, 5.65vw, 82px);
-  line-height: 0.99;
-  letter-spacing: -0.058em;
+  color: var(--chalk);
+  font-size: clamp(46px, 5vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.055em;
   font-weight: 950;
-  text-shadow: 0 10px 26px rgba(7, 17, 38, 0.1);
 }
 
-.hero-title > span {
-  display: block;
+.hero-title > span { display: inline; }
+
+.hero-rotator {
+  display: inline;
+  max-width: 100%;
+  vertical-align: baseline;
+  overflow-wrap: anywhere;
 }
 
-.hero-title-accent {
-  position: relative;
-  width: fit-content;
-  margin-top: 5px;
-  padding-bottom: 10px;
+.hero-rotator-phrase {
+  max-width: 100%;
 }
 
-.hero-title-accent::after {
-  content: '';
+.hero-rotator-sizer { display: none; }
+.hero-rotator-phrase {
+  display: inline;
+  color: var(--jet);
+  text-shadow: 0 0 24px rgba(56, 225, 255, 0.2);
+}
+.hero-rotate-word { display: inline-flex; margin-right: 0.12em; white-space: nowrap; }
+.hero-rotate-char { display: inline-block; will-change: transform, opacity; }
+
+.visually-hidden {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 6px 18px rgba(7, 17, 38, 0.14);
-  transform-origin: left center;
-  animation: hero-line-draw 0.85s 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .hero-description {
-  max-width: 650px;
-  margin: 30px 0 0;
-  color: rgba(255, 255, 255, 0.96);
+  max-width: 520px;
+  margin: 22px 0 0;
+  color: var(--mist);
   font-size: 17px;
-  line-height: 1.75;
+  line-height: 1.65;
   font-weight: 550;
 }
 
 .hero-actions {
-  margin-top: 32px;
+  margin-top: 26px;
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
 }
 
-.hero-assurances {
-  margin-top: 28px;
-  color: rgba(255, 255, 255, 0.94);
+.hero-note {
+  margin: 14px 0 0;
+  color: var(--mist);
   font-size: 12px;
-  font-weight: 750;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-}
-
-.hero-assurances span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.hero-assurances i {
-  color: #ffffff;
-  font-size: 16px;
 }
 
 .hero-visual {
-  min-width: 0;
-}
-
-.hero-dashboard {
   position: relative;
-  min-height: 570px;
-  padding: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.76);
-  border-radius: 26px;
-  color: var(--home-navy);
-  background: rgba(255, 255, 255, 0.97);
-  box-shadow: 0 28px 62px rgba(7, 17, 38, 0.2);
+  min-width: 0;
+  height: min(62svh, 520px);
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.hero-dashboard::before,
-.hero-dashboard::after {
+.hero-visual:focus-visible {
+  outline: 3px solid var(--jet);
+  outline-offset: 6px;
+}
+
+@media (min-width: 992px) and (max-height: 700px) {
+  .hero-section { padding-block: 72px 22px; }
+  .hero-container { gap: clamp(24px, 4vw, 58px); }
+  .hero-title { font-size: clamp(42px, 4vw, 58px); }
+  .hero-description { margin-top: 16px; font-size: 15px; }
+  .hero-actions { margin-top: 18px; }
+  .hero-visual { height: min(54svh, 360px); }
+}
+
+.hero-visual-orbit {
+  --orbit-size: min(30vw, 360px, 52svh);
+  --orbit-radius: calc((var(--orbit-size) / 2) - 8px);
+  position: absolute;
+  width: var(--orbit-size);
+  aspect-ratio: 1;
+  border: 1px solid rgba(56, 225, 255, 0.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 42px rgba(56, 225, 255, 0.025);
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.hero-visual-orbit::after {
   content: '';
   position: absolute;
-  pointer-events: none;
-  background: rgba(255, 255, 255, 0.32);
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--jet);
+  box-shadow: 0 0 10px 2px rgba(56, 225, 255, 0.46);
+  transform: rotate(0deg) translateX(calc(var(--orbit-radius) - 4px));
+  transform-origin: 0 50%;
+  animation: radar-sweep 12s linear infinite;
 }
 
-.hero-dashboard::before {
-  top: 68px;
-  right: -56px;
-  width: 130px;
-  height: 1px;
+@keyframes radar-sweep {
+  to { transform: rotate(1turn) translateX(calc(var(--orbit-radius) - 4px)); }
 }
 
-.hero-dashboard::after {
-  right: 84px;
-  bottom: -42px;
-  width: 1px;
-  height: 98px;
+.hero-aircraft {
+  --aircraft-lift: 0px;
+  position: relative;
+  z-index: 1;
+  width: min(116%, 700px);
+  max-height: min(52vh, 480px);
+  object-fit: contain;
+  transform: translateY(var(--aircraft-lift));
+  filter: drop-shadow(0 26px 32px rgba(0, 0, 0, 0.32));
+  transition:
+    transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    filter 500ms ease;
 }
 
-.dashboard-toolbar {
-  min-height: 58px;
-  padding: 0 2px 18px;
-  border-bottom: 1px solid var(--home-border);
-  display: flex;
+.hero-visual-caption {
+  position: absolute;
+  right: 3%;
+  bottom: 8%;
+  z-index: 2;
+  padding: 10px 13px;
+  border: 1px solid rgba(56, 225, 255, 0.2);
+  border-radius: 8px;
+  color: #dce3ee;
+  background: rgba(14, 22, 38, 0.9);
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  transition: transform 350ms ease;
+}
+
+.hero-visual-caption::after {
+  content: '↗';
+  margin-left: 8px;
+  color: var(--jet);
+}
+
+.hero-visual:hover .hero-visual-orbit,
+.hero-visual:focus-visible .hero-visual-orbit {
+  transform: rotate(54deg) scale(1.02);
+}
+
+.hero-visual:hover .hero-aircraft,
+.hero-visual:focus-visible .hero-aircraft {
+  transform: translateY(calc(var(--aircraft-lift) - 8px)) rotate(-0.7deg) scale(1.02);
+  filter: drop-shadow(0 30px 34px rgba(0, 0, 0, 0.38));
+}
+
+.hero-visual:hover .hero-visual-caption,
+.hero-visual:focus-visible .hero-visual-caption {
+  transform: translateX(6px);
+}
+
+.topic-marquee {
+  overflow: hidden;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(56, 225, 255, 0.16);
+  color: var(--chalk);
+  background: var(--night);
+}
+
+.marquee-layout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  gap: clamp(22px, 4vw, 58px);
 }
 
-.dashboard-toolbar-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.dashboard-toolbar-copy span,
-.dashboard-destination span,
-.progress-course-copy > span {
-  color: #526174;
+.marquee-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--jet);
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-}
-
-.dashboard-toolbar-copy strong,
-.dashboard-destination strong {
-  color: var(--home-navy);
-  font-size: 15px;
-  font-weight: 900;
-}
-
-.dashboard-status {
-  min-height: 30px;
-  padding: 0 10px;
-  border: 1px solid rgba(13, 143, 233, 0.16);
-  border-radius: 9px;
-  color: var(--home-blue-dark);
-  background: var(--home-soft);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.035em;
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.dashboard-status i {
-  color: var(--home-success);
-}
-
-.dashboard-aircraft-stage {
-  position: relative;
-  min-height: 360px;
-  margin-top: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(13, 143, 233, 0.1);
-  border-radius: 18px;
-  background: linear-gradient(
-    145deg,
-    #f4fbff 0%,
-    #eaf7ff 58%,
-    #ffffff 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dashboard-destination {
-  position: absolute;
-  top: 25px;
-  left: 24px;
-  z-index: 3;
-  max-width: 220px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.dashboard-destination strong {
-  font-size: 18px;
-  line-height: 1.25;
-}
-
-.airplane-entry {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: plane-entry 1.05s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.airplane-image {
-  position: relative;
-  z-index: 2;
-  width: min(118%, 760px);
-  max-height: 360px;
-  margin-top: 34px;
-  object-fit: contain;
-  user-select: none;
-  pointer-events: none;
-  filter:
-    drop-shadow(0 28px 23px rgba(7, 17, 38, 0.25))
-    contrast(1.03)
-    saturate(1.04);
-  animation: plane-float 6s 1.4s ease-in-out infinite;
-}
-
-.aircraft-guide-line {
-  position: absolute;
-  right: 22px;
-  bottom: 68px;
-  left: 22px;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(13, 143, 233, 0.3) 50%,
-    transparent 100%
-  );
-}
-
-.dashboard-progress-card {
-  position: absolute;
-  right: 22px;
-  bottom: 22px;
-  left: 22px;
-  z-index: 4;
-  padding: 16px;
-  border: 1px solid var(--home-border);
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 18px 44px rgba(7, 17, 38, 0.15);
-}
-
-.progress-course-row {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-}
-
-.progress-course-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 11px;
-  color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  box-shadow: 0 10px 22px rgba(13, 143, 233, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.progress-course-icon i {
-  font-size: 20px;
-}
-
-.progress-course-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.progress-course-copy strong {
-  overflow: hidden;
-  color: var(--home-navy);
-  font-size: 14px;
-  font-weight: 900;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
-.progress-course-row > b {
-  color: var(--home-blue-dark);
-  font-size: 15px;
-  font-weight: 950;
-}
+.marquee-label i { font-size: 17px; }
 
-.progress-track {
-  height: 6px;
-  margin-top: 5px;
-  overflow: hidden;
-  border-radius: 3px;
-  background: #dfeaf2;
-}
-
-.progress-track span {
-  display: block;
-  width: 72%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  transform-origin: left center;
-  animation: progress-fill 1.1s 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.dashboard-feature-strip {
-  margin-top: 14px;
-  padding-top: 13px;
-  border-top: 1px solid #e3ebf2;
-  color: #526174;
-  font-size: 10.5px;
-  font-weight: 800;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.dashboard-feature-strip span {
+.marquee-window {
   min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+.marquee-track,
+.marquee-group {
+  display: flex;
+  width: max-content;
+  align-items: center;
+}
+
+.marquee-track {
+  animation: topic-marquee 42s linear infinite;
+}
+
+.topic-marquee:hover .marquee-track,
+.topic-marquee:focus-within .marquee-track { animation-play-state: paused; }
+
+.marquee-group { gap: 34px; padding-right: 34px; }
+
+.marquee-topic {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.dashboard-feature-strip i {
-  flex: 0 0 auto;
-  color: var(--home-blue);
-  font-size: 15px;
+.marquee-topic i { color: var(--jet); font-size: 13px; }
+
+@keyframes topic-marquee {
+  to { transform: translateX(-50%); }
 }
 
 /* =========================================================
@@ -1303,9 +1251,9 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 3;
   padding: 36px 0;
-  border-top: 1px solid rgba(13, 143, 233, 0.08);
-  border-bottom: 1px solid var(--home-border);
-  background: #ffffff;
+  border-top: 1px solid var(--sand);
+  border-bottom: 1px solid var(--sand);
+  background: var(--chalk);
 }
 
 .trust-layout {
@@ -1316,25 +1264,43 @@ onBeforeUnmount(() => {
 }
 
 .trust-heading {
-  padding-right: 28px;
-  border-right: 1px solid var(--home-border);
+  position: relative;
+  padding: 2px 28px 2px 18px;
+  border-left: 3px solid var(--jet);
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  align-items: flex-start;
+  gap: 9px;
 }
 
-.trust-heading span {
-  color: var(--home-blue-dark);
+.trust-heading-mark {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(56, 225, 255, 0.35);
+  border-radius: 10px;
+  color: var(--signal-deep);
+  background: rgba(56, 225, 255, 0.12);
+  display: grid;
+  place-items: center;
+}
+
+.trust-heading-mark i {
+  font-size: 18px;
+}
+
+.trust-heading > span:not(.trust-heading-mark) {
+  color: var(--signal-deep);
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .trust-heading strong {
-  color: var(--home-navy);
-  font-size: 18px;
-  line-height: 1.35;
+  color: var(--ink);
+  font-size: clamp(20px, 1.8vw, 25px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
   font-weight: 900;
 }
 
@@ -1355,15 +1321,10 @@ onBeforeUnmount(() => {
 .trust-icon {
   width: 46px;
   height: 46px;
-  border: 1px solid rgba(13, 143, 233, 0.18);
+  border: 1px solid var(--sand);
   border-radius: 12px;
-  color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  box-shadow: 0 9px 20px rgba(13, 143, 233, 0.16);
+  color: var(--signal-deep);
+  background: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1375,7 +1336,7 @@ onBeforeUnmount(() => {
 
 .trust-copy h3 {
   margin: 0 0 5px;
-  color: var(--home-navy);
+  color: var(--ink);
   font-size: 14px;
   line-height: 1.35;
   font-weight: 900;
@@ -1383,7 +1344,7 @@ onBeforeUnmount(() => {
 
 .trust-copy p {
   margin: 0;
-  color: #526174;
+  color: var(--slate);
   font-size: 12px;
   line-height: 1.58;
 }
@@ -1392,8 +1353,9 @@ onBeforeUnmount(() => {
    LEARNING PATHS
    ========================================================= */
 .paths-section {
-  border-bottom: 1px solid rgba(13, 143, 233, 0.08);
-  background: var(--home-page-soft);
+  padding-block: 104px 112px;
+  border-bottom: 1px solid var(--sand);
+  background: var(--paper);
 }
 
 .paths-grid {
@@ -1404,11 +1366,11 @@ onBeforeUnmount(() => {
 
 .path-card {
   position: relative;
-  min-height: 640px;
+  min-height: 590px;
   overflow: hidden;
-  border: 1px solid #dceaf3;
+  border: 1px solid var(--sand);
   border-radius: 20px;
-  background: #ffffff;
+  background: var(--chalk);
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
@@ -1418,32 +1380,10 @@ onBeforeUnmount(() => {
     box-shadow 0.25s ease;
 }
 
-.path-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 3;
-  height: 4px;
-  background: linear-gradient(
-    90deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  transform: scaleX(0.3);
-  transform-origin: left center;
-  transition: transform 0.25s ease;
-}
-
 .path-card:hover {
-  border-color: rgba(13, 143, 233, 0.32);
+  border-color: rgba(31, 92, 255, 0.28);
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-7px);
-}
-
-.path-card:hover::before {
-  transform: scaleX(1);
 }
 
 .path-media {
@@ -1455,8 +1395,8 @@ onBeforeUnmount(() => {
   border-radius: 15px;
   background: linear-gradient(
     135deg,
-    var(--home-cyan),
-    var(--home-blue)
+    var(--signal),
+    var(--signal)
   );
 }
 
@@ -1487,7 +1427,7 @@ onBeforeUnmount(() => {
   bottom: 16px;
   left: 16px;
   z-index: 2;
-  color: #ffffff;
+  color: var(--chalk);
   font-size: 12px;
   font-weight: 950;
   letter-spacing: 0.12em;
@@ -1500,15 +1440,10 @@ onBeforeUnmount(() => {
   z-index: 2;
   width: 46px;
   height: 46px;
-  border: 1px solid rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.86);
   border-radius: 12px;
-  color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  box-shadow: 0 10px 24px rgba(7, 17, 38, 0.2);
+  color: var(--ink);
+  background: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1526,7 +1461,7 @@ onBeforeUnmount(() => {
 }
 
 .path-label {
-  color: var(--home-blue-dark);
+  color: var(--signal-deep);
   font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.1em;
@@ -1535,7 +1470,7 @@ onBeforeUnmount(() => {
 
 .path-card h3 {
   margin: 11px 0 13px;
-  color: var(--home-navy);
+  color: var(--ink);
   font-size: 25px;
   line-height: 1.18;
   letter-spacing: -0.028em;
@@ -1544,7 +1479,7 @@ onBeforeUnmount(() => {
 
 .path-card-body > p {
   margin: 0;
-  color: #526174;
+  color: var(--slate);
   font-size: 14px;
   line-height: 1.72;
 }
@@ -1557,7 +1492,7 @@ onBeforeUnmount(() => {
 }
 
 .path-features span {
-  color: #334155;
+  color: var(--slate);
   font-size: 12.5px;
   line-height: 1.45;
   font-weight: 750;
@@ -1569,15 +1504,15 @@ onBeforeUnmount(() => {
 .path-features i {
   flex: 0 0 auto;
   margin-top: 1px;
-  color: var(--home-blue);
+  color: var(--signal);
   font-size: 16px;
 }
 
 .path-link {
   margin-top: auto;
   padding-top: 18px;
-  border-top: 1px solid #e3ebf2;
-  color: var(--home-navy);
+  border-top: 1px solid var(--sand);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 900;
   text-decoration: none;
@@ -1593,7 +1528,7 @@ onBeforeUnmount(() => {
 }
 
 .path-link:hover {
-  color: var(--home-blue-dark);
+  color: var(--signal-deep);
 }
 
 .path-link:hover i {
@@ -1604,8 +1539,9 @@ onBeforeUnmount(() => {
    CATEGORIES
    ========================================================= */
 .categories-section {
-  border-bottom: 1px solid rgba(13, 143, 233, 0.08);
-  background: #ffffff;
+  padding-block: 112px 120px;
+  border-bottom: 1px solid var(--sand);
+  background: var(--chalk);
 }
 
 .categories-layout {
@@ -1616,8 +1552,7 @@ onBeforeUnmount(() => {
 }
 
 .categories-intro {
-  position: sticky;
-  top: 110px;
+  position: relative;
 }
 
 .categories-grid {
@@ -1631,11 +1566,11 @@ onBeforeUnmount(() => {
   min-height: 166px;
   padding: 22px;
   overflow: hidden;
-  border: 1px solid #dfeaf2;
+  border: 1px solid var(--sand);
   border-radius: 17px;
   color: inherit;
-  background: #ffffff;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.065);
+  background: var(--chalk);
+  box-shadow: var(--shadow-card);
   text-decoration: none;
   display: grid;
   grid-template-columns: 50px minmax(0, 1fr) auto;
@@ -1648,47 +1583,21 @@ onBeforeUnmount(() => {
     background-color 0.22s ease;
 }
 
-.category-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 0.22s ease;
-}
-
 .category-card:hover {
-  border-color: rgba(13, 143, 233, 0.36);
+  border-color: rgba(31, 92, 255, 0.3);
   color: inherit;
-  background: #f8fcff;
+  background: var(--paper);
   box-shadow: 0 18px 38px rgba(15, 23, 42, 0.1);
   transform: translateY(-4px);
-}
-
-.category-card:hover::after {
-  transform: scaleX(1);
 }
 
 .category-icon {
   width: 50px;
   height: 50px;
-  border: 1px solid rgba(13, 143, 233, 0.16);
+  border: 1px solid var(--sand);
   border-radius: 13px;
-  color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  box-shadow: 0 9px 20px rgba(13, 143, 233, 0.16);
+  color: var(--signal-deep);
+  background: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1705,7 +1614,7 @@ onBeforeUnmount(() => {
 
 .category-copy h3 {
   margin: 3px 0 8px;
-  color: var(--home-navy);
+  color: var(--ink);
   font-size: 16px;
   line-height: 1.35;
   font-weight: 900;
@@ -1713,14 +1622,14 @@ onBeforeUnmount(() => {
 
 .category-copy p {
   margin: 0;
-  color: #526174;
+  color: var(--slate);
   font-size: 12.5px;
   line-height: 1.62;
 }
 
 .category-arrow {
   margin-top: 5px;
-  color: var(--home-blue-dark);
+  color: var(--signal-deep);
   font-size: 18px;
   transition: transform 0.2s ease;
 }
@@ -1733,57 +1642,27 @@ onBeforeUnmount(() => {
    EXPERIENCE
    ========================================================= */
 .experience-section {
+  padding-block: 108px;
   position: relative;
   overflow: hidden;
-  color: #ffffff;
-  background:
-    linear-gradient(
-      112deg,
-      rgba(255, 255, 255, 0.055) 0%,
-      rgba(255, 255, 255, 0) 42%
-    ),
-    linear-gradient(
-      108deg,
-      var(--home-navy) 0%,
-      var(--home-navy-hover) 48%,
-      var(--home-blue) 100%
-    );
+  color: var(--chalk);
+  background: radial-gradient(ellipse at 92% 10%, rgba(56, 225, 255, 0.09), transparent 28%), var(--ink);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     inset 0 -1px 0 rgba(255, 255, 255, 0.12);
-}
-
-.experience-line-field {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.08;
-  background-image:
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      transparent 49.8%,
-      rgba(255, 255, 255, 0.28) 50%,
-      transparent 50.2%
-    ),
-    linear-gradient(
-      rgba(255, 255, 255, 0.14) 1px,
-      transparent 1px
-    );
-  background-size: 100% 100%, 100% 70px;
 }
 
 .experience-layout {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(340px, 0.82fr) minmax(600px, 1.18fr);
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
   align-items: center;
   gap: clamp(56px, 8vw, 118px);
 }
 
 .experience-main h2 {
-  color: #ffffff;
+  color: var(--chalk);
   font-size: clamp(38px, 4.4vw, 58px);
   line-height: 1.05;
 }
@@ -1800,11 +1679,9 @@ onBeforeUnmount(() => {
   margin-top: 28px;
   padding: 16px 17px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-left: 4px solid var(--home-cyan);
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.94);
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 14px 30px rgba(7, 17, 38, 0.14);
+  color: var(--mist);
+  background: rgba(255, 255, 255, 0.06);
   font-size: 13px;
   line-height: 1.65;
   display: flex;
@@ -1815,7 +1692,7 @@ onBeforeUnmount(() => {
 .experience-note i {
   flex: 0 0 auto;
   margin-top: 1px;
-  color: var(--home-cyan);
+  color: var(--jet);
   font-size: 18px;
 }
 
@@ -1858,7 +1735,7 @@ onBeforeUnmount(() => {
   bottom: 16px;
   left: 18px;
   z-index: 2;
-  color: #ffffff;
+  color: var(--chalk);
   font-size: 13px;
   font-weight: 900;
   display: flex;
@@ -1867,7 +1744,7 @@ onBeforeUnmount(() => {
 }
 
 .experience-image-caption i {
-  color: var(--home-cyan);
+  color: var(--signal);
   font-size: 22px;
 }
 
@@ -1879,14 +1756,14 @@ onBeforeUnmount(() => {
 
 .benefit-card {
   position: relative;
-  min-height: 228px;
+  min-height: 210px;
   padding: 24px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--sand);
   border-radius: 16px;
-  color: var(--home-navy);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 16px 34px rgba(7, 17, 38, 0.16);
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 10px 26px rgba(7, 11, 20, 0.12);
   transition:
     transform 0.22s ease,
     border-color 0.22s ease,
@@ -1894,38 +1771,19 @@ onBeforeUnmount(() => {
 }
 
 .benefit-card:hover {
-  border-color: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 22px 44px rgba(7, 17, 38, 0.22);
+  border-color: rgba(56, 225, 255, 0.42);
+  box-shadow: 0 16px 32px rgba(7, 11, 20, 0.2);
   transform: translateY(-5px);
-}
-
-.benefit-card::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
 }
 
 .benefit-icon {
   width: 48px;
   height: 48px;
-  margin-bottom: 26px;
-  border: 1px solid rgba(13, 143, 233, 0.16);
+  margin-bottom: 20px;
+  border: 1px solid var(--sand);
   border-radius: 12px;
-  color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  box-shadow: 0 10px 22px rgba(13, 143, 233, 0.18);
+  color: var(--signal-deep);
+  background: var(--chalk);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1937,7 +1795,7 @@ onBeforeUnmount(() => {
 
 .benefit-copy h3 {
   margin: 0 0 10px;
-  color: var(--home-navy);
+  color: var(--ink);
   font-size: 18px;
   line-height: 1.3;
   font-weight: 900;
@@ -1945,7 +1803,7 @@ onBeforeUnmount(() => {
 
 .benefit-copy p {
   margin: 0;
-  color: #526174;
+  color: var(--slate);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -1954,7 +1812,7 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 22px;
   right: 22px;
-  color: #b8c8d5;
+  color: var(--mist);
   font-size: 11px;
   font-weight: 950;
   letter-spacing: 0.1em;
@@ -1964,8 +1822,9 @@ onBeforeUnmount(() => {
    JOURNEY
    ========================================================= */
 .journey-section {
-  border-bottom: 1px solid rgba(13, 143, 233, 0.08);
-  background: var(--home-page-soft);
+  padding-block: 92px 112px;
+  border-bottom: 1px solid var(--sand);
+  background: var(--paper);
 }
 
 .journey-grid {
@@ -1979,10 +1838,10 @@ onBeforeUnmount(() => {
   position: relative;
   min-height: 260px;
   padding: 28px;
-  border: 1px solid #dce8f1;
+  border: 1px solid var(--sand);
   border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.085);
+  background: var(--chalk);
+  box-shadow: var(--shadow-card);
   transition:
     transform 0.22s ease,
     border-color 0.22s ease,
@@ -1990,7 +1849,7 @@ onBeforeUnmount(() => {
 }
 
 .journey-card:hover {
-  border-color: rgba(13, 143, 233, 0.32);
+  border-color: rgba(31, 92, 255, 0.28);
   box-shadow: 0 22px 44px rgba(15, 23, 42, 0.11);
   transform: translateY(-4px);
 }
@@ -2005,8 +1864,8 @@ onBeforeUnmount(() => {
 .journey-number {
   min-width: 44px;
   padding-bottom: 9px;
-  border-bottom: 3px solid var(--home-cyan);
-  color: var(--home-blue-dark);
+  border-bottom: 3px solid var(--signal);
+  color: var(--signal-deep);
   font-size: 12px;
   font-weight: 950;
   letter-spacing: 0.12em;
@@ -2015,15 +1874,10 @@ onBeforeUnmount(() => {
 .journey-icon {
   width: 46px;
   height: 46px;
-  border: 1px solid rgba(13, 143, 233, 0.16);
+  border: 1px solid var(--sand);
   border-radius: 12px;
-  color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--home-cyan),
-    var(--home-blue)
-  );
-  box-shadow: 0 10px 22px rgba(13, 143, 233, 0.18);
+  color: var(--signal-deep);
+  background: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2035,7 +1889,7 @@ onBeforeUnmount(() => {
 
 .journey-card h3 {
   margin: 34px 0 11px;
-  color: var(--home-navy);
+  color: var(--ink);
   font-size: 22px;
   line-height: 1.25;
   font-weight: 900;
@@ -2043,7 +1897,7 @@ onBeforeUnmount(() => {
 
 .journey-card p {
   margin: 0;
-  color: #526174;
+  color: var(--slate);
   font-size: 13.5px;
   line-height: 1.72;
 }
@@ -2055,7 +1909,7 @@ onBeforeUnmount(() => {
    ========================================================= */
 .final-cta-section {
   padding: 0 0 100px;
-  background: var(--home-page-soft);
+  background: var(--paper);
 }
 
 .final-cta-card {
@@ -2064,10 +1918,10 @@ onBeforeUnmount(() => {
   min-height: 360px;
   padding: clamp(42px, 6vw, 76px);
   overflow: hidden;
-  border: 1px solid rgba(13, 143, 233, 0.24);
+  border: 1px solid rgba(56, 225, 255, 0.24);
   border-radius: 22px;
-  color: #ffffff;
-  background: var(--home-navy);
+  color: var(--chalk);
+  background: var(--ink);
   box-shadow: 0 26px 58px rgba(7, 17, 38, 0.22);
   display: flex;
   align-items: center;
@@ -2170,11 +2024,11 @@ onBeforeUnmount(() => {
 .final-cta-copy {
   max-width: 690px;
   padding-left: 22px;
-  border-left: 3px solid var(--home-cyan);
+  border-left: 3px solid var(--signal);
 }
 
 .final-cta-label {
-  color: #8be4f6;
+  color: var(--jet);
   font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.12em;
@@ -2189,7 +2043,7 @@ onBeforeUnmount(() => {
 }
 
 .final-cta-copy h2 {
-  color: #ffffff;
+  color: var(--chalk);
   font-size: clamp(38px, 4.8vw, 64px);
   line-height: 1.04;
   text-shadow: 0 12px 30px rgba(7, 17, 38, 0.42);
@@ -2207,118 +2061,7 @@ onBeforeUnmount(() => {
 /* =========================================================
    MOTION
    ========================================================= */
-.motion-enabled [data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: var(--reveal-delay, 0ms);
-}
-
-.motion-enabled [data-reveal].is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.hero-load {
-  opacity: 0;
-  animation: hero-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.hero-load-1 {
-  animation-delay: 0.08s;
-}
-
-.hero-load-2 {
-  animation-delay: 0.18s;
-}
-
-.hero-load-3 {
-  animation-delay: 0.32s;
-}
-
-.hero-load-4 {
-  animation-delay: 0.44s;
-}
-
-.hero-load-5 {
-  animation-delay: 0.56s;
-}
-
-.hero-visual-load {
-  opacity: 0;
-  animation: hero-visual-in 1s 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes hero-visual-in {
-  from {
-    opacity: 0;
-    transform: translateX(58px) translateY(16px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0) translateY(0) scale(1);
-  }
-}
-
-@keyframes hero-line-draw {
-  from {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-
-  to {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
-
-@keyframes plane-entry {
-  from {
-    opacity: 0;
-    transform: translateX(75px) translateY(18px) scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0) translateY(0) scale(1);
-  }
-}
-
-@keyframes plane-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-0.6deg);
-  }
-
-  50% {
-    transform: translateY(-9px) rotate(0deg);
-  }
-}
-
-@keyframes progress-fill {
-  from {
-    transform: scaleX(0);
-  }
-
-  to {
-    transform: scaleX(1);
-  }
-}
+.gsap-ready [data-reveal] { visibility: hidden; }
 
 /* =========================================================
    RESPONSIVE
@@ -2329,9 +2072,7 @@ onBeforeUnmount(() => {
     gap: 46px;
   }
 
-  .hero-dashboard {
-    min-height: 545px;
-  }
+  .hero-visual { height: min(56svh, 430px); }
 
   .trust-layout {
     grid-template-columns: 210px minmax(0, 1fr);
@@ -2357,8 +2098,20 @@ onBeforeUnmount(() => {
     padding: 84px 0;
   }
 
+  .marquee-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .landing-faq-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
   .hero-section {
-    min-height: auto;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100svh;
     padding: 62px 0 78px;
   }
 
@@ -2368,11 +2121,15 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
   }
 
+  .hero-container { height: auto; }
+
   .hero-content {
     max-width: 780px;
   }
 
   .hero-visual {
+    height: auto;
+    min-height: 230px;
     max-width: 780px;
   }
 
@@ -2381,9 +2138,8 @@ onBeforeUnmount(() => {
   }
 
   .trust-heading {
-    padding: 0 0 20px;
-    border-right: 0;
-    border-bottom: 1px solid var(--home-border);
+    padding: 0 0 20px 16px;
+    border-bottom: 1px solid var(--sand);
   }
 
   .paths-grid {
@@ -2407,9 +2163,9 @@ onBeforeUnmount(() => {
   .experience-section {
     background: linear-gradient(
       145deg,
-      var(--home-navy) 0%,
-      var(--home-navy-hover) 58%,
-      var(--home-blue) 100%
+      var(--ink) 0%,
+      var(--midnight) 58%,
+      var(--signal) 100%
     );
   }
 
@@ -2425,7 +2181,11 @@ onBeforeUnmount(() => {
   }
 
   .hero-section {
-    padding: 48px 0 64px;
+    padding: 96px 0 32px;
+  }
+
+  .hero-container {
+    gap: 22px;
   }
 
   .hero-title {
@@ -2437,53 +2197,35 @@ onBeforeUnmount(() => {
   }
 
   .hero-actions {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: flex-start;
+    flex-direction: row;
   }
 
   .hero-actions .home-btn {
-    width: 100%;
+    width: auto;
   }
 
-  .hero-assurances {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
+  .hero-visual {
+    height: clamp(180px, 52vw, 240px);
+    min-height: 180px;
   }
 
-  .hero-dashboard {
-    min-height: 510px;
-    padding: 16px;
-    border-radius: 20px;
+  .hero-aircraft {
+    --aircraft-lift: -2cm;
+    width: 115%;
+    max-height: 100%;
   }
 
-  .dashboard-toolbar {
-    align-items: flex-start;
+  .hero-visual-orbit {
+    --orbit-size: clamp(180px, min(64vw, 58svh), 260px);
+    box-shadow:
+      0 0 0 28px rgba(56, 225, 255, 0.035),
+      0 0 0 48px rgba(56, 225, 255, 0.025);
   }
 
-  .dashboard-aircraft-stage {
-    min-height: 315px;
-  }
-
-  .dashboard-destination {
-    top: 22px;
-    left: 18px;
-  }
-
-  .airplane-image {
-    width: 126%;
-    max-width: none;
-  }
-
-  .dashboard-progress-card {
-    right: 16px;
-    bottom: 16px;
-    left: 16px;
-  }
-
-  .dashboard-feature-strip {
-    grid-template-columns: 1fr;
-    gap: 7px;
+  .hero-visual-caption {
+    right: 0;
+    bottom: 0;
   }
 
   .trust-grid,
@@ -2553,49 +2295,14 @@ onBeforeUnmount(() => {
     width: calc(100% - 24px);
   }
 
-  .section-eyebrow,
-  .hero-eyebrow {
+  .section-eyebrow {
     min-height: 34px;
     padding-inline: 11px;
     font-size: 9.5px;
   }
 
   .hero-title {
-    font-size: 41px;
-  }
-
-  .hero-title-accent {
-    padding-bottom: 8px;
-  }
-
-  .hero-dashboard {
-    min-height: 490px;
-  }
-
-  .dashboard-status {
-    padding-inline: 8px;
-    font-size: 8px;
-  }
-
-  .dashboard-aircraft-stage {
-    min-height: 295px;
-  }
-
-  .dashboard-destination {
-    max-width: 170px;
-  }
-
-  .dashboard-destination strong {
-    font-size: 15px;
-  }
-
-  .progress-course-row {
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-  }
-
-  .progress-course-icon {
-    width: 40px;
-    height: 40px;
+    font-size: clamp(42px, 12vw, 48px);
   }
 
   .section-heading h2,
@@ -2647,16 +2354,79 @@ onBeforeUnmount(() => {
   }
 }
 
+@media (max-width: 767.98px) and (max-height: 720px) {
+  .hero-section {
+    padding: 88px 0 20px;
+  }
+
+  .hero-container {
+    gap: 14px;
+  }
+
+  .hero-title {
+    font-size: clamp(39px, 11vw, 44px);
+  }
+
+  .hero-description {
+    margin-top: 16px;
+    font-size: 14.5px;
+    line-height: 1.5;
+  }
+
+  .hero-actions {
+    margin-top: 18px;
+  }
+
+  .hero-note {
+    margin-top: 10px;
+  }
+
+  .hero-visual {
+    height: clamp(168px, 47vw, 190px);
+    min-height: 168px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    width: 100%;
+    flex-wrap: wrap;
+    animation: none !important;
+  }
+
+  .marquee-group {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+    padding: 0;
+  }
+
+  .marquee-group[aria-hidden="true"] { display: none; }
+
   .hero-load,
   .hero-visual-load,
-  .airplane-entry,
-  .airplane-image,
-  .progress-track span,
-  .hero-title-accent::after {
+  .hero-aircraft {
     opacity: 1 !important;
     animation: none !important;
     transform: none !important;
+  }
+
+  .hero-visual-orbit,
+  .hero-aircraft,
+  .hero-visual-caption {
+    transition: none;
+  }
+
+  .hero-visual-orbit::after {
+    animation: none;
+    transform: rotate(0deg) translateX(calc(var(--orbit-radius) - 4px));
+  }
+
+  .hero-visual:hover .hero-visual-orbit,
+  .hero-visual:focus-visible .hero-visual-orbit,
+  .hero-visual:hover .hero-aircraft,
+  .hero-visual:focus-visible .hero-aircraft {
+    transform: none;
   }
 
   .home-btn,

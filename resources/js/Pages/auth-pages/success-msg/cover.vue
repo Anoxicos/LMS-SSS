@@ -31,7 +31,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Success Message" />
+    <Head :title="$t('t-success-message')" />
 
     <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-overlay"></div>
@@ -118,8 +118,8 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0">&copy; {{new Date().getFullYear()}} Velzon. Crafted with <i
-                                    class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0">&copy; {{new Date().getFullYear()}} {{ $t('ui-velzon-crafted-with') }} <i
+                                    class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

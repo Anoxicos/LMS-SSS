@@ -35,7 +35,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Logout" />
+    <Head :title="$t('t-logout')" />
     <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-overlay"></div>
         <div class="auth-page-content overflow-hidden pt-lg-5">
@@ -100,8 +100,7 @@ export default {
                                             <p class="text-muted">Thank you for using <span
                                                     class="fw-semibold">velzon</span> admin template</p>
                                             <div class="mt-4">
-                                                <Link href="/auth/signin-basic" class="btn btn-primary w-100">Sign
-                                                    In</Link>
+                                                <Link href="/auth/signin-basic" class="btn btn-primary w-100">{{ $t('t-sign-in') }}</Link>
                                             </div>
                                         </div>
                                     </div>
@@ -119,8 +118,8 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i
-                                    class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i
+                                    class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

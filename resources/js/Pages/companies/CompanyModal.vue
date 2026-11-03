@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -102,8 +106,8 @@ const addData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Company added successfully',
+        title: t('ui-success'),
+        text: t('ui-company-added-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -116,8 +120,8 @@ const addData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'An error occurred while adding the company',
+        title: t('t-error'),
+        text: t('ui-an-error-occurred-while-adding-the-company'),
       })
     },
   })
@@ -131,8 +135,8 @@ const updateData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Company updated successfully',
+        title: t('ui-success'),
+        text: t('ui-company-updated-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -145,8 +149,8 @@ const updateData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'An error occurred while updating the company',
+        title: t('t-error'),
+        text: t('ui-an-error-occurred-while-updating-the-company'),
       })
     },
   })
@@ -189,7 +193,7 @@ defineExpose({
           <div class="position-relative d-inline-block">
             <img
               :src="logoPreview"
-              alt="Company logo"
+              :alt="$t('ui-company-logo')"
               class="company-logo-img"
               @click="openLogoInput"
             />
@@ -215,9 +219,9 @@ defineExpose({
           </div>
 
           <div class="mt-3">
-            <h6 class="mb-1">Company Logo</h6>
+            <h6 class="mb-1">{{ $t('ui-company-logo') }}</h6>
             <p class="text-muted mb-0 small">
-              Click the image to upload or change the logo
+              {{ $t('ui-click-the-image-to-upload-or-change-the-logo') }}
             </p>
           </div>
 
@@ -238,7 +242,7 @@ defineExpose({
       <BRow class="g-3">
         <BCol lg="6">
           <div>
-            <label for="name-field" class="form-label">Name</label>
+            <label for="name-field" class="form-label">{{ $t('ui-name') }}</label>
             <input
               type="text"
               id="name-field"
@@ -247,7 +251,7 @@ defineExpose({
               v-model="form.name"
               :class="{ 'is-invalid': submitted && !form.name }"
             />
-            <div class="invalid-feedback">Please enter the company name.</div>
+            <div class="invalid-feedback">{{ $t('ui-please-enter-the-company-name') }}</div>
             <div v-if="form.errors.name" class="text-danger small mt-1">
               {{ form.errors.name }}
             </div>
@@ -256,7 +260,7 @@ defineExpose({
 
         <BCol lg="6">
           <div>
-            <label for="email-field" class="form-label">Email</label>
+            <label for="email-field" class="form-label">{{ $t('ui-email') }}</label>
             <input
               type="email"
               id="email-field"
@@ -265,7 +269,7 @@ defineExpose({
               v-model="form.email"
               :class="{ 'is-invalid': submitted && !form.email }"
             />
-            <div class="invalid-feedback">Please enter the email address.</div>
+            <div class="invalid-feedback">{{ $t('ui-please-enter-the-email-address') }}</div>
             <div v-if="form.errors.email" class="text-danger small mt-1">
               {{ form.errors.email }}
             </div>
@@ -274,7 +278,7 @@ defineExpose({
 
         <BCol lg="6">
           <div>
-            <label for="phone-field" class="form-label">Phone</label>
+            <label for="phone-field" class="form-label">{{ $t('ui-phone') }}</label>
             <input
               type="text"
               id="phone-field"
@@ -283,7 +287,7 @@ defineExpose({
               v-model="form.phone"
               :class="{ 'is-invalid': submitted && !form.phone }"
             />
-            <div class="invalid-feedback">Please enter the phone number.</div>
+            <div class="invalid-feedback">{{ $t('ui-please-enter-the-phone-number') }}</div>
             <div v-if="form.errors.phone" class="text-danger small mt-1">
               {{ form.errors.phone }}
             </div>
@@ -292,17 +296,17 @@ defineExpose({
 
         <BCol lg="6">
           <div>
-            <label for="status-field" class="form-label">Status</label>
+            <label for="status-field" class="form-label">{{ $t('ui-status') }}</label>
             <select
               id="status-field"
               class="form-select"
               v-model="form.status"
               :class="{ 'is-invalid': submitted && !form.status }"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="active">{{ $t('ui-active') }}</option>
+              <option value="inactive">{{ $t('ui-inactive') }}</option>
             </select>
-            <div class="invalid-feedback">Please select a status.</div>
+            <div class="invalid-feedback">{{ $t('ui-please-select-a-status') }}</div>
             <div v-if="form.errors.status" class="text-danger small mt-1">
               {{ form.errors.status }}
             </div>
@@ -311,7 +315,7 @@ defineExpose({
 
         <BCol lg="12">
           <div>
-            <label for="address-field" class="form-label">Address</label>
+            <label for="address-field" class="form-label">{{ $t('ui-address') }}</label>
             <textarea
               id="address-field"
               class="form-control"
@@ -320,7 +324,7 @@ defineExpose({
               v-model="form.address"
               :class="{ 'is-invalid': submitted && !form.address }"
             ></textarea>
-            <div class="invalid-feedback">Please enter the address.</div>
+            <div class="invalid-feedback">{{ $t('ui-please-enter-the-address') }}</div>
             <div v-if="form.errors.address" class="text-danger small mt-1">
               {{ form.errors.address }}
             </div>
@@ -336,7 +340,7 @@ defineExpose({
             id="closemodal"
             @click="addModal = false"
           >
-            Close
+            {{ $t('ui-close') }}
           </BButton>
 
           <BButton

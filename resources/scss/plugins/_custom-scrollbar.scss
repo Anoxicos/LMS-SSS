@@ -225,3 +225,15 @@
     }
   }
 }
+
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+.simplebar-track {
+  display: none;
+}

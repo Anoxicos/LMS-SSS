@@ -74,14 +74,14 @@ const closeModal = () => {
             <slot />
         </span>
 
-        <BModal v-model="confirmingPassword" :title="title" hide-footer header-class="bg-success-subtle p-3">
+        <BModal v-model="confirmingPassword" :title="$t('t-title')" hide-footer header-class="bg-success-subtle p-3">
             <p class="text-muted fs-14 mb-3">{{ content }}</p>
             <div class="mb-3">
                 <TextInput
                     ref="passwordInput"
                     v-model="form.password"
                     type="password"
-                    placeholder="Password"
+                    :placeholder="$t('ui-password')"
                     autocomplete="current-password"
                     @keyup.enter="confirmPassword"
                     :class="{ 'is-invalid': form.error }"
@@ -91,7 +91,7 @@ const closeModal = () => {
             </div>
 
             <div class="text-end">
-                <BButton variant="danger" @click="closeModal">Cancel</BButton>
+                <BButton variant="danger" @click="closeModal">{{ $t('ui-cancel') }}</BButton>
                 <BButton variant="primary" class="ms-1" :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
                 @click="confirmPassword">{{ button }}</BButton>

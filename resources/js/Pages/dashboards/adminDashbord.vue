@@ -3,6 +3,9 @@ import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 const props = defineProps({
@@ -89,7 +92,7 @@ const formatDate = value => {
 
   if (Number.isNaN(date.getTime())) return '-'
 
-  return date.toLocaleDateString('en-GB', {
+  return date.toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -103,7 +106,7 @@ const formatDateTime = value => {
 
   if (Number.isNaN(date.getTime())) return '-'
 
-  return date.toLocaleString('en-GB', {
+  return date.toLocaleString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -131,15 +134,15 @@ const getEnrollmentStatusClass = status => {
 
 const getStatusLabel = status => {
   const labels = {
-    approved: 'Approved',
-    rejected: 'Rejected',
-    pending: 'Pending',
-    completed: 'Completed',
-    in_progress: 'In progress',
-    not_started: 'Not started',
-    expired: 'Expired',
-    active: 'Active',
-    inactive: 'Inactive',
+    approved: t('ui-approved'),
+    rejected: t('ui-rejected'),
+    pending: t('ui-pending'),
+    completed: t('ui-completed'),
+    in_progress: t('ui-in-progress'),
+    not_started: t('ui-not-started'),
+    expired: t('t-expired'),
+    active: t('t-active'),
+    inactive: t('ui-inactive'),
   }
 
   return labels[status] || status || '-'
@@ -174,11 +177,11 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
 
 <template>
   <Layout>
-    <Head title="Company Dashboard" />
+    <Head :title="$t('ui-company-dashboard')" />
 
     <PageHeader
-      title="Company Dashboard"
-      pageTitle="Dashboard"
+      :title="$t('ui-company-dashboard')"
+      :page-title="$t('ui-dashboard')"
     />
 
     <section class="company-dashboard-page">
@@ -190,11 +193,10 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
           <i class="ri-building-4-line"></i>
         </div>
 
-        <h3>No company linked</h3>
+        <h3>{{ $t('ui-no-company-linked') }}</h3>
 
         <p>
-          Your administrator account is not linked to a company. Contact the
-          Super-admin before using the company dashboard.
+          {{ $t('ui-your-administrator-account-is-not-linked-to-a-company-') }}
         </p>
       </BCard>
 
@@ -219,7 +221,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 <div class="hero-badges">
                   <span class="company-mode-badge">
                     <i class="ri-building-4-line"></i>
-                    Company administration
+                    {{ $t('ui-company-administration') }}
                   </span>
 
                   <span
@@ -238,8 +240,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 <h1>{{ company?.name || '-' }}</h1>
 
                 <p>
-                  Manage learners, training requests, course assignments and
-                  learning progress for your company.
+                  {{ $t('ui-manage-learners-training-requests-course-assignments-a') }}
                 </p>
 
                 <div class="company-contact-list">
@@ -272,8 +273,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 </span>
 
                 <span>
-                  <small>Company users</small>
-                  Manage learners
+                  <small>{{ $t('ui-company-users') }}</small>
+                  {{ $t('ui-manage-learners') }}
                 </span>
               </Link>
 
@@ -287,8 +288,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 </span>
 
                 <span>
-                  <small>Training access</small>
-                  View requests
+                  <small>{{ $t('ui-training-access') }}</small>
+                  {{ $t('ui-view-requests') }}
                 </span>
               </Link>
 
@@ -302,8 +303,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 </span>
 
                 <span>
-                  <small>New assignment</small>
-                  Create request
+                  <small>{{ $t('ui-new-assignment') }}</small>
+                  {{ $t('ui-create-request') }}
                 </span>
               </Link>
             </div>
@@ -318,9 +319,9 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div class="stat-content">
-              <span>Total learners</span>
+              <span>{{ $t('ui-total-learners') }}</span>
               <strong>{{ learnerStats.total || 0 }}</strong>
-              <small>{{ learnerStats.active || 0 }} active learner(s)</small>
+              <small>{{ learnerStats.active || 0 }} {{ $t('ui-active-learner-s') }}</small>
             </div>
 
             <Link
@@ -338,9 +339,9 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div class="stat-content">
-              <span>Training requests</span>
+              <span>{{ $t('ui-training-requests') }}</span>
               <strong>{{ requestStats.total || 0 }}</strong>
-              <small>{{ requestStats.pending || 0 }} pending request(s)</small>
+              <small>{{ requestStats.pending || 0 }} {{ $t('ui-pending-request-s') }}</small>
             </div>
 
             <Link
@@ -358,10 +359,10 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div class="stat-content">
-              <span>Course enrollments</span>
+              <span>{{ $t('ui-course-enrollments') }}</span>
               <strong>{{ enrollmentStats.total || 0 }}</strong>
               <small>
-                {{ enrollmentStats.assigned_courses || 0 }} assigned course(s)
+                {{ enrollmentStats.assigned_courses || 0 }} {{ $t('ui-assigned-course-s') }}
               </small>
             </div>
 
@@ -376,10 +377,10 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div class="stat-content">
-              <span>Completed training</span>
+              <span>{{ $t('ui-completed-training') }}</span>
               <strong>{{ enrollmentStats.completed || 0 }}</strong>
               <small>
-                Average progress:
+                {{ $t('ui-average-progress-label') }}
                 {{ formatPercent(enrollmentStats.average_progress) }}%
               </small>
             </div>
@@ -401,8 +402,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   </div>
 
                   <div>
-                    <h3>Request overview</h3>
-                    <p>Current status of company training requests.</p>
+                    <h3>{{ $t('ui-request-overview') }}</h3>
+                    <p>{{ $t('ui-current-status-of-company-training-requests') }}</p>
                   </div>
                 </div>
 
@@ -411,7 +412,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   :href="links.requests"
                   class="view-link"
                 >
-                  View all
+                  {{ $t('ui-view-all') }}
                   <i class="ri-arrow-right-line"></i>
                 </Link>
               </div>
@@ -421,7 +422,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <div class="overview-heading">
                     <span>
                       <i class="ri-time-line pending"></i>
-                      Pending
+                      {{ $t('t-pending') }}
                     </span>
                     <strong>{{ requestStats.pending || 0 }}</strong>
                   </div>
@@ -434,7 +435,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   </div>
 
                   <small>
-                    {{ requestPercent(requestStats.pending) }}% of requests
+                    {{ requestPercent(requestStats.pending) }}{{ $t('ui-of-requests') }}
                   </small>
                 </div>
 
@@ -442,7 +443,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <div class="overview-heading">
                     <span>
                       <i class="ri-checkbox-circle-line approved"></i>
-                      Approved
+                      {{ $t('ui-approved') }}
                     </span>
                     <strong>{{ requestStats.approved || 0 }}</strong>
                   </div>
@@ -455,7 +456,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   </div>
 
                   <small>
-                    {{ requestPercent(requestStats.approved) }}% of requests
+                    {{ requestPercent(requestStats.approved) }}{{ $t('ui-of-requests') }}
                   </small>
                 </div>
 
@@ -463,7 +464,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <div class="overview-heading">
                     <span>
                       <i class="ri-close-circle-line rejected"></i>
-                      Rejected
+                      {{ $t('ui-rejected') }}
                     </span>
                     <strong>{{ requestStats.rejected || 0 }}</strong>
                   </div>
@@ -476,7 +477,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   </div>
 
                   <small>
-                    {{ requestPercent(requestStats.rejected) }}% of requests
+                    {{ requestPercent(requestStats.rejected) }}{{ $t('ui-of-requests') }}
                   </small>
                 </div>
               </div>
@@ -492,13 +493,13 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   </div>
 
                   <div>
-                    <h3>Training progress</h3>
-                    <p>Course progress across company enrollments.</p>
+                    <h3>{{ $t('ui-training-progress') }}</h3>
+                    <p>{{ $t('ui-course-progress-across-company-enrollments') }}</p>
                   </div>
                 </div>
 
                 <span class="total-badge">
-                  {{ enrollmentStats.total || 0 }} enrollment(s)
+                  {{ enrollmentStats.total || 0 }} {{ $t('ui-enrollment-s') }}
                 </span>
               </div>
 
@@ -507,7 +508,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <div class="overview-heading">
                     <span>
                       <i class="ri-time-line pending"></i>
-                      Not started
+                      {{ $t('ui-not-started') }}
                     </span>
                     <strong>{{ enrollmentStats.not_started || 0 }}</strong>
                   </div>
@@ -526,7 +527,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <div class="overview-heading">
                     <span>
                       <i class="ri-loader-2-line in-progress"></i>
-                      In progress
+                      {{ $t('ui-in-progress') }}
                     </span>
                     <strong>{{ enrollmentStats.in_progress || 0 }}</strong>
                   </div>
@@ -545,7 +546,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <div class="overview-heading">
                     <span>
                       <i class="ri-award-line approved"></i>
-                      Completed
+                      {{ $t('ui-completed') }}
                     </span>
                     <strong>{{ enrollmentStats.completed || 0 }}</strong>
                   </div>
@@ -575,8 +576,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   </div>
 
                   <div>
-                    <h3>Recent requests</h3>
-                    <p>Latest training requests submitted by your company.</p>
+                    <h3>{{ $t('ui-recent-requests') }}</h3>
+                    <p>{{ $t('ui-latest-training-requests-submitted-by-your-company') }}</p>
                   </div>
                 </div>
 
@@ -586,7 +587,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   class="primary-section-btn"
                 >
                   <i class="ri-add-line"></i>
-                  New request
+                  {{ $t('ui-new-request') }}
                 </Link>
               </div>
 
@@ -597,12 +598,12 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 <table class="table dashboard-table align-middle mb-0">
                   <thead>
                     <tr>
-                      <th>Request</th>
-                      <th>Course</th>
-                      <th>Learners</th>
-                      <th>Status</th>
-                      <th>Date</th>
-                      <th class="text-center">Action</th>
+                      <th>{{ $t('ui-request') }}</th>
+                      <th>{{ $t('ui-course') }}</th>
+                      <th>{{ $t('ui-learners') }}</th>
+                      <th>{{ $t('ui-status') }}</th>
+                      <th>{{ $t('ui-date') }}</th>
+                      <th class="text-center">{{ $t('ui-action') }}</th>
                     </tr>
                   </thead>
 
@@ -670,7 +671,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                         <Link
                           :href="route('company-requests.show', item.hashid)"
                           class="table-action-btn"
-                          title="View request"
+                          :title="$t('ui-view-request')"
                         >
                           <i class="ri-eye-line"></i>
                         </Link>
@@ -691,7 +692,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 >
                   <div class="request-mobile-header">
                     <div>
-                      <span>Request</span>
+                      <span>{{ $t('ui-request') }}</span>
                       <strong>{{ item.reference }}</strong>
                     </div>
 
@@ -715,7 +716,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
 
                     <div class="min-width-0">
                       <strong>{{ item.course?.title || '-' }}</strong>
-                      <span>{{ item.learners_count || 0 }} learner(s)</span>
+                      <span>{{ item.learners_count || 0 }} {{ $t('ui-learner-s') }}</span>
                       <span>{{ formatValidityMonths(item.duree_validite_formation) }}</span>
                     </div>
                   </div>
@@ -729,7 +730,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                     <Link
                       :href="route('company-requests.show', item.hashid)"
                     >
-                      View details
+                      {{ $t('ui-view-details') }}
                       <i class="ri-arrow-right-line"></i>
                     </Link>
                   </div>
@@ -744,8 +745,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <i class="ri-file-list-3-line"></i>
                 </div>
 
-                <h4>No requests found</h4>
-                <p>No training request has been created for this company.</p>
+                <h4>{{ $t('ui-no-requests-found') }}</h4>
+                <p>{{ $t('ui-no-training-request-has-been-created-for-this-company') }}</p>
 
                 <Link
                   v-if="canCreateRequest && links.create_request !== '#'"
@@ -753,7 +754,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   class="primary-section-btn"
                 >
                   <i class="ri-add-line"></i>
-                  Create first request
+                  {{ $t('ui-create-first-request') }}
                 </Link>
               </div>
             </BCard>
@@ -768,8 +769,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   </div>
 
                   <div>
-                    <h3>Recent learners</h3>
-                    <p>Newest learners linked to the company.</p>
+                    <h3>{{ $t('ui-recent-learners') }}</h3>
+                    <p>{{ $t('ui-newest-learners-linked-to-the-company') }}</p>
                   </div>
                 </div>
 
@@ -817,7 +818,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
 
                     <div class="learner-progress-heading">
                       <span>
-                        {{ learner.enrollments_count || 0 }} course(s)
+                        {{ learner.enrollments_count || 0 }} {{ $t('ui-course-s') }}
                       </span>
 
                       <strong>
@@ -844,8 +845,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                   <i class="ri-user-add-line"></i>
                 </div>
 
-                <h4>No learners found</h4>
-                <p>No learner is linked to this company.</p>
+                <h4>{{ $t('ui-no-learners-found') }}</h4>
+                <p>{{ $t('ui-no-learner-is-linked-to-this-company') }}</p>
               </div>
             </BCard>
           </BCol>
@@ -860,13 +861,13 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
               </div>
 
               <div>
-                <h3>Recent course assignments</h3>
-                <p>Latest enrollments for company learners.</p>
+                <h3>{{ $t('ui-recent-course-assignments') }}</h3>
+                <p>{{ $t('ui-latest-enrollments-for-company-learners') }}</p>
               </div>
             </div>
 
             <span class="total-badge">
-              {{ enrollmentStats.total || 0 }} total
+              {{ enrollmentStats.total || 0 }} {{ $t('ui-total') }}
             </span>
           </div>
 
@@ -924,7 +925,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 </div>
 
                 <div class="enrollment-progress-heading">
-                  <span>Course progress</span>
+                  <span>{{ $t('ui-course-progress') }}</span>
                   <strong>{{ formatPercent(enrollment.progress_percent) }}%</strong>
                 </div>
 
@@ -939,7 +940,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
                 <div class="enrollment-meta">
                   <span>
                     <i class="ri-repeat-line"></i>
-                    Attempts: {{ enrollment.attempts_rest || 0 }}
+                    {{ $t('ui-attempts') }} {{ enrollment.attempts_rest || 0 }}
                   </span>
 
                   <span>
@@ -954,7 +955,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
 
                   <span v-if="enrollment.expired_at">
                     <i class="ri-calendar-event-line"></i>
-                    Expires {{ formatDate(enrollment.expired_at) }}
+                    {{ $t('ui-expires') }} {{ formatDate(enrollment.expired_at) }}
                   </span>
                 </div>
               </div>
@@ -969,8 +970,8 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
               <i class="ri-book-open-line"></i>
             </div>
 
-            <h4>No enrollments found</h4>
-            <p>No course has been assigned to company learners yet.</p>
+            <h4>{{ $t('ui-no-enrollments-found') }}</h4>
+            <p>{{ $t('ui-no-course-has-been-assigned-to-company-learners-yet') }}</p>
           </div>
         </BCard>
 
@@ -982,7 +983,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div>
-              <span>Total exams</span>
+              <span>{{ $t('ui-total-exams') }}</span>
               <strong>{{ examStats.total || 0 }}</strong>
             </div>
           </BCard>
@@ -993,7 +994,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div>
-              <span>Passed exams</span>
+              <span>{{ $t('ui-passed-exams') }}</span>
               <strong>{{ examStats.passed || 0 }}</strong>
             </div>
           </BCard>
@@ -1004,7 +1005,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div>
-              <span>Failed exams</span>
+              <span>{{ $t('ui-failed-exams') }}</span>
               <strong>{{ examStats.failed || 0 }}</strong>
             </div>
           </BCard>
@@ -1015,7 +1016,7 @@ const canCreateRequest = computed(() => Boolean(props.permissions?.create_reques
             </div>
 
             <div>
-              <span>Certificates</span>
+              <span>{{ $t('ui-certificates') }}</span>
               <strong>{{ stats.certificates || 0 }}</strong>
             </div>
           </BCard>

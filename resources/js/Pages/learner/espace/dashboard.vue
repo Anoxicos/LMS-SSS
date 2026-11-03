@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
+import i18n from '@/i18n'
 
 defineOptions({
   layout: LayoutAnonyme,
@@ -16,6 +17,8 @@ defineProps({
     default: () => [],
   },
 })
+
+const t = (...args) => i18n.global.t(...args)
 
 const getCourseImage = (course) => {
   if (!course) return null
@@ -51,13 +54,13 @@ const getStatusClass = (status) => {
 const getStatusLabel = (status) => {
   switch (status) {
     case 'completed':
-      return 'Completed'
+      return t('t-completed')
     case 'in_progress':
-      return 'In progress'
+      return t('t-in-progress')
     case 'not_started':
-      return 'Not started'
+      return t('t-not-started')
     case 'expired':
-      return 'Expired'
+      return t('t-expired')
     default:
       return status || '-'
   }
@@ -114,7 +117,8 @@ const isTrainingUnavailable = (item) => {
 const formatTrainingDate = (value) => {
   if (!value) return '-'
 
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', {
+  const locale = i18n.global.locale?.value || i18n.global.locale || 'en'
+  return new Date(`${value}T00:00:00`).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -132,10 +136,10 @@ const getTrainingPeriodLabel = (item) => {
 const getTrainingStateLabel = (item) => {
   const state = getTrainingAccessState(item)
 
-  if (state === 'expired') return 'Expired'
-  if (state === 'upcoming') return 'Upcoming'
-  if (state === 'ended') return 'Ended'
-  if (state === 'active') return 'Active'
+  if (state === 'expired') return t('t-expired')
+  if (state === 'upcoming') return t('t-upcoming')
+  if (state === 'ended') return t('t-ended')
+  if (state === 'active') return t('t-active')
 
   return null
 }
@@ -171,16 +175,16 @@ const getCourseDestination = (item) => {
 }
 
 const getButtonLabel = (item) => {
-  if (isEnrollmentExpired(item)) return 'View expired training'
-  if (hasPassedExam(item)) return 'View exam result'
-  if (getTrainingAccessState(item) === 'upcoming') return 'View availability'
-  if (getTrainingAccessState(item) === 'ended') return 'View summary'
-  if (hasNoExamAttempts(item)) return 'View course summary'
-  if (isScormCourse(item)) return 'Open course'
-  if (item?.status === 'completed') return 'Review course'
-  if (item?.status === 'not_started') return 'Start course'
+  if (isEnrollmentExpired(item)) return t('t-view-expired-training')
+  if (hasPassedExam(item)) return t('t-view-exam-result')
+  if (getTrainingAccessState(item) === 'upcoming') return t('t-view-availability')
+  if (getTrainingAccessState(item) === 'ended') return t('t-view-summary')
+  if (hasNoExamAttempts(item)) return t('t-view-course-summary')
+  if (isScormCourse(item)) return t('t-open-course')
+  if (item?.status === 'completed') return t('t-review-course')
+  if (item?.status === 'not_started') return t('t-start-course')
 
-  return 'Continue course'
+  return t('t-continue-course')
 }
 
 const getButtonIcon = (item) => {
@@ -288,7 +292,7 @@ const formatDuration = (value) => {
     ? hours.toFixed(0)
     : hours.toFixed(2).replace(/\.?0+$/, '')
 
-  return `${formatted} hour${hours === 1 ? '' : 's'}`
+  return t(hours === 1 ? 't-hour-singular' : 't-hour-plural', { count: formatted })
 }
 
 const formatPassingScore = (value) => {
@@ -309,33 +313,19 @@ const getSyllabusUrl = (course) => {
   return null
 }
 
-const getStatusPercent = (count, total) => {
-  const totalCourses = Number(total || 0)
-  const value = Number(count || 0)
-
-  if (!totalCourses) return 0
-
-  return Math.round((value / totalCourses) * 100)
-}
 </script>
 
 <template>
-  <Head title="Learner Dashboard" />
+  <Head :title="$t('t-learner-dashboard')" />
 
   <section class="learner-dashboard-page">
     <div class="dashboard-hero">
       <div class="dashboard-shell hero-grid">
         <div class="dashboard-hero-content">
-          <span class="hero-eyebrow">
-            <i class="ri-graduation-cap-line"></i>
-            Learner Space
-          </span>
-
-          <h1>Welcome back to your learning dashboard</h1>
+          <h1>{{ $t('t-training-pickup-headline') }}</h1>
 
           <p>
-            Continue your aviation training, follow your progress, and access
-            every assigned course from one clear workspace.
+            {{ $t('t-training-pickup-description') }}
           </p>
 
           <div class="hero-actions">
@@ -344,12 +334,12 @@ const getStatusPercent = (count, total) => {
               class="hero-primary-btn"
             >
               <i class="ri-book-open-line"></i>
-              Browse my courses
+              {{ $t('t-open-my-courses') }}
             </Link>
 
             <span class="hero-course-count">
               <i class="ri-stack-line"></i>
-              {{ stats.total_courses || 0 }} assigned course(s)
+              {{ $t('t-assigned-courses-count', stats.total_courses || 0) }}
             </span>
           </div>
         </div>
@@ -357,9 +347,9 @@ const getStatusPercent = (count, total) => {
         <div class="hero-overview-card">
           <div class="overview-card-top">
             <div>
-              <span class="overview-kicker">Learning overview</span>
+              <span class="overview-kicker">{{ $t('t-learning-overview') }}</span>
               <strong>{{ stats.total_courses || 0 }}</strong>
-              <small>Total assigned courses</small>
+              <small>{{ $t('t-total-assigned-courses') }}</small>
             </div>
 
             <div class="overview-main-icon">
@@ -367,83 +357,6 @@ const getStatusPercent = (count, total) => {
             </div>
           </div>
 
-          <div class="overview-list">
-            <div class="overview-row">
-              <div class="overview-row-heading">
-                <span>
-                  <i class="ri-time-line warning"></i>
-                  Not started
-                </span>
-                <strong>{{ stats.not_started || 0 }}</strong>
-              </div>
-
-              <div class="overview-track">
-                <div
-                  class="overview-bar warning"
-                  :style="{
-                    width: `${getStatusPercent(stats.not_started, stats.total_courses)}%`,
-                  }"
-                ></div>
-              </div>
-            </div>
-
-            <div class="overview-row">
-              <div class="overview-row-heading">
-                <span>
-                  <i class="ri-loader-4-line info"></i>
-                  In progress
-                </span>
-                <strong>{{ stats.in_progress || 0 }}</strong>
-              </div>
-
-              <div class="overview-track">
-                <div
-                  class="overview-bar info"
-                  :style="{
-                    width: `${getStatusPercent(stats.in_progress, stats.total_courses)}%`,
-                  }"
-                ></div>
-              </div>
-            </div>
-
-            <div class="overview-row">
-              <div class="overview-row-heading">
-                <span>
-                  <i class="ri-checkbox-circle-line success"></i>
-                  Completed
-                </span>
-                <strong>{{ stats.completed || 0 }}</strong>
-              </div>
-
-              <div class="overview-track">
-                <div
-                  class="overview-bar success"
-                  :style="{
-                    width: `${getStatusPercent(stats.completed, stats.total_courses)}%`,
-                  }"
-                ></div>
-              </div>
-            </div>
-
-            <div class="overview-row">
-              <div class="overview-row-heading">
-                <span>
-                  <i class="ri-calendar-close-line danger"></i>
-                  Expired
-                </span>
-                <strong>{{ stats.expired || 0 }}</strong>
-              </div>
-
-              <div class="overview-track">
-                <div
-                  class="overview-bar danger"
-                  :style="{
-                    width: `${getStatusPercent(stats.expired, stats.total_courses)}%`,
-                  }"
-                ></div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -451,25 +364,12 @@ const getStatusPercent = (count, total) => {
     <div class="dashboard-shell dashboard-content">
       <div class="stats-grid">
         <article class="stat-card">
-          <div class="stat-icon primary">
-            <i class="ri-book-open-line"></i>
-          </div>
-
-          <div class="stat-content">
-            <span>Total courses</span>
-            <strong>{{ stats.total_courses || 0 }}</strong>
-          </div>
-
-          <i class="ri-arrow-right-up-line stat-arrow"></i>
-        </article>
-
-        <article class="stat-card">
           <div class="stat-icon warning">
             <i class="ri-time-line"></i>
           </div>
 
           <div class="stat-content">
-            <span>Not started</span>
+            <span>{{ $t('t-not-started') }}</span>
             <strong>{{ stats.not_started || 0 }}</strong>
           </div>
 
@@ -482,7 +382,7 @@ const getStatusPercent = (count, total) => {
           </div>
 
           <div class="stat-content">
-            <span>In progress</span>
+            <span>{{ $t('t-in-progress') }}</span>
             <strong>{{ stats.in_progress || 0 }}</strong>
           </div>
 
@@ -495,7 +395,7 @@ const getStatusPercent = (count, total) => {
           </div>
 
           <div class="stat-content">
-            <span>Completed</span>
+            <span>{{ $t('t-completed') }}</span>
             <strong>{{ stats.completed || 0 }}</strong>
           </div>
 
@@ -508,7 +408,7 @@ const getStatusPercent = (count, total) => {
           </div>
 
           <div class="stat-content">
-            <span>Expired</span>
+            <span>{{ $t('t-expired') }}</span>
             <strong>{{ stats.expired || 0 }}</strong>
           </div>
 
@@ -524,9 +424,9 @@ const getStatusPercent = (count, total) => {
             </div>
 
             <div>
-              <span class="section-eyebrow">Continue learning</span>
-              <h2>Recent courses</h2>
-              <p>Resume your latest assigned training courses.</p>
+              <span class="section-eyebrow">{{ $t('t-your-training') }}</span>
+              <h2>{{ $t('t-continue-a-course') }}</h2>
+              <p>{{ $t('t-pick-up-latest-courses') }}</p>
             </div>
           </div>
 
@@ -534,16 +434,17 @@ const getStatusPercent = (count, total) => {
             :href="route('learner-space.my-courses')"
             class="recent-all-btn"
           >
-            View all courses
+            {{ $t('t-view-all-courses') }}
             <i class="ri-arrow-right-line"></i>
           </Link>
         </div>
 
         <div v-if="recentCourses.length" class="recent-courses-list">
           <article
-            v-for="item in recentCourses"
+            v-for="(item, index) in recentCourses"
             :key="item.id"
             class="recent-course-card"
+            :class="{ 'featured-course-card': index === 0 }"
           >
             <div class="recent-course-cover">
               <img
@@ -567,7 +468,7 @@ const getStatusPercent = (count, total) => {
                 <div class="course-title-copy">
                   <span class="course-category">
                     <i class="ri-folder-line"></i>
-                    {{ item.course?.category?.name || 'Course' }}
+                    {{ item.course?.category?.name || $t('t-course') }}
                   </span>
 
                   <h3>{{ item.course?.title || '-' }}</h3>
@@ -575,14 +476,14 @@ const getStatusPercent = (count, total) => {
 
                 <span v-if="isScormCourse(item)" class="content-type-badge">
                   <i class="ri-file-zip-line"></i>
-                  SCORM
+                  {{ $t('ui-scorm') }}
                 </span>
               </div>
 
               <div class="course-meta-grid">
                 <span>
                   <i class="ri-global-line"></i>
-                  {{ item.course?.language || 'Not specified' }}
+                  {{ item.course?.language || $t('t-not-specified') }}
                 </span>
 
                 <span>
@@ -607,7 +508,7 @@ const getStatusPercent = (count, total) => {
 
                 <span v-if="formatPassingScore(item.course?.passing_score)">
                   <i class="ri-medal-line"></i>
-                  Pass {{ formatPassingScore(item.course.passing_score) }}
+                  {{ $t('ui-pass') }} {{ formatPassingScore(item.course.passing_score) }}
                 </span>
               </div>
 
@@ -620,7 +521,7 @@ const getStatusPercent = (count, total) => {
                   <i :class="getTrainingStateIcon(item)"></i>
 
                   <div>
-                    <span>Training period</span>
+                    <span>{{ $t('t-training-period') }}</span>
                     <strong>{{ getTrainingPeriodLabel(item) }}</strong>
                   </div>
 
@@ -646,14 +547,14 @@ const getStatusPercent = (count, total) => {
               <div class="course-bottom-tags">
                 <span>
                   <i class="ri-repeat-line"></i>
-                  {{ item.attempts_rest ?? 0 }} attempt(s) left
+                  {{ $t('t-attempts-left', item.attempts_rest ?? 0) }}
                 </span>
 
                 <span v-if="item.expired_at || item.duree_validite_formation">
                   <i class="ri-calendar-check-line"></i>
                   {{ item.expired_at
-                    ? `Valid until ${formatTrainingDate(String(item.expired_at).slice(0, 10))}`
-                    : `${item.duree_validite_formation} month(s) validity` }}
+                    ? $t('t-valid-until', { date: formatTrainingDate(String(item.expired_at).slice(0, 10)) })
+                    : $t('t-validity-months', item.duree_validite_formation) }}
                 </span>
 
                 <a
@@ -664,7 +565,7 @@ const getStatusPercent = (count, total) => {
                   class="syllabus-link"
                 >
                   <i class="ri-file-pdf-2-line"></i>
-                  Syllabus
+                  {{ $t('ui-syllabus') }}
                 </a>
               </div>
             </div>
@@ -688,7 +589,7 @@ const getStatusPercent = (count, total) => {
                 </div>
 
                 <small>
-                  {{ isScormCourse(item) ? 'SCORM completion' : 'Course progress' }}
+                  {{ isScormCourse(item) ? $t('t-scorm-completion') : $t('t-course-progress') }}
                 </small>
               </div>
 
@@ -717,7 +618,7 @@ const getStatusPercent = (count, total) => {
               >
                 <span>
                   <i class="ri-error-warning-line"></i>
-                  Enrollment unavailable
+                  {{ $t('t-enrollment-unavailable') }}
                 </span>
               </button>
             </aside>
@@ -729,8 +630,8 @@ const getStatusPercent = (count, total) => {
             <i class="ri-book-open-line"></i>
           </div>
 
-          <h3>No assigned courses yet</h3>
-          <p>Your assigned training courses will appear here.</p>
+          <h3>{{ $t('t-no-assigned-courses') }}</h3>
+          <p>{{ $t('t-assigned-courses-empty-description') }}</p>
         </div>
       </section>
     </div>
@@ -2055,6 +1956,242 @@ const getStatusPercent = (count, total) => {
   .recent-course-card:hover,
   .continue-btn:hover {
     transform: none !important;
+  }
+}
+
+/* Use the shared homepage palette throughout the learner dashboard. */
+.learner-dashboard-page {
+  --home-cyan: var(--jet);
+  --home-blue: var(--signal);
+  --home-blue-dark: var(--signal-deep);
+  --home-navy: var(--ink);
+  --home-soft: #eafaff;
+  --home-border: var(--sand);
+  background: var(--paper);
+}
+
+.dashboard-hero {
+  padding: 112px 0 92px;
+  background: radial-gradient(ellipse at 73% 42%, rgba(56, 225, 255, 0.13), transparent 34%), var(--ink);
+}
+
+.dashboard-hero::before {
+  content: none;
+}
+
+.dashboard-hero::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  display: block;
+  background: var(--jet);
+}
+
+.hero-grid {
+  gap: clamp(32px, 6vw, 88px);
+}
+
+.dashboard-hero h1 {
+  max-width: 640px;
+  font-size: clamp(38px, 5vw, 68px);
+  font-weight: 760;
+  letter-spacing: -0.045em;
+}
+
+.dashboard-hero p {
+  max-width: 510px;
+  color: #dce3ee;
+}
+
+.hero-primary-btn {
+  border-radius: 8px;
+  background: var(--jet);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.hero-primary-btn:hover {
+  background: #74ebff;
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.hero-course-count {
+  color: #dce3ee;
+}
+
+.hero-overview-card {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  box-shadow: 0 18px 42px rgba(5, 20, 24, 0.2);
+}
+
+.overview-main-icon,
+.recent-header-icon {
+  border-radius: 10px;
+  background: var(--home-soft);
+  color: var(--signal-deep);
+  box-shadow: none;
+}
+
+.dashboard-content {
+  margin-top: -42px;
+}
+
+.stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat-card,
+.recent-section-card {
+  border-color: var(--sand);
+  border-radius: 20px;
+  box-shadow: 0 5px 18px rgba(7, 11, 20, 0.055);
+}
+
+.stat-card {
+  min-height: 88px;
+  padding: 14px 16px;
+}
+
+.stat-card::before {
+  display: none;
+}
+
+.stat-card:hover {
+  border-color: rgba(31, 92, 255, 0.35);
+  box-shadow: 0 8px 22px rgba(7, 11, 20, 0.1);
+  transform: translateY(-1px);
+}
+
+.stat-card:nth-child(2) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--chalk);
+}
+
+.stat-card:nth-child(2) .stat-content span,
+.stat-card:nth-child(2) .stat-content strong,
+.stat-card:nth-child(2) .stat-arrow {
+  color: var(--chalk);
+}
+
+.stat-card:nth-child(2) .stat-icon {
+  background: rgba(56, 225, 255, 0.14);
+  color: var(--jet);
+}
+
+.stat-icon {
+  border-radius: 10px;
+}
+
+.stat-icon.warning {
+  background: #fff7e6;
+  color: var(--warning-deep);
+}
+
+.stat-icon.info,
+.stat-icon.primary {
+  background: var(--home-soft);
+  color: var(--signal-deep);
+}
+
+.stat-icon.success {
+  background: #e8f7f4;
+  color: var(--success-deep);
+}
+
+.stat-icon.danger {
+  background: #fff0ed;
+  color: var(--danger-deep);
+}
+
+.recent-section-card {
+  padding: clamp(20px, 3vw, 34px);
+}
+
+.recent-header-icon {
+  width: 46px;
+  height: 46px;
+  font-size: 20px;
+}
+
+.recent-course-card {
+  border-color: var(--sand);
+  border-radius: 20px;
+  box-shadow: 0 3px 12px rgba(7, 11, 20, 0.055);
+}
+
+.recent-course-card:hover {
+  border-color: rgba(31, 92, 255, 0.35);
+  box-shadow: 0 8px 22px rgba(7, 11, 20, 0.1);
+}
+
+.recent-course-card.featured-course-card {
+  border-color: rgba(31, 92, 255, 0.3);
+  box-shadow: 0 8px 26px rgba(7, 11, 20, 0.08);
+}
+
+.recent-course-cover {
+  background: var(--paper);
+}
+
+.recent-course-fallback {
+  background: linear-gradient(145deg, var(--signal), var(--ink));
+}
+
+.continue-btn {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.continue-btn:hover {
+  background: var(--midnight);
+}
+
+.recent-all-btn {
+  border-radius: 8px;
+}
+
+.hero-primary-btn:focus-visible,
+.recent-all-btn:focus-visible,
+.continue-btn:focus-visible,
+.syllabus-link:focus-visible {
+  outline: 3px solid var(--jet);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-hero {
+    padding: 104px 0 68px;
+  }
+
+  .dashboard-content {
+    margin-top: -28px;
+  }
+
+  .stats-grid {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-card {
+    min-height: 82px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .stat-content span {
+    font-size: 11px;
   }
 }
 

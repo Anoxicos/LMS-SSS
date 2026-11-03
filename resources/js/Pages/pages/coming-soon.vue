@@ -88,7 +88,7 @@ export default {
                 <img src="@assets/images/comingsoon.png" alt="" height="120" class="move-animation" />
               </div>
               <div class="mb-5">
-                <h1 class="display-2 coming-soon-text">Coming Soon</h1>
+                <h1 class="display-2 coming-soon-text">{{ $t('t-coming-soon') }}</h1>
               </div>
               <div>
                 <BRow class="justify-content-center mt-5">
@@ -122,8 +122,8 @@ export default {
           <BCol lg="12">
             <div class="text-center">
               <p class="mb-0 text-muted">
-                &copy; {{ new Date().getFullYear() }} Velzon. Crafted with
-                <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+                &copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }}
+                <i class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}
               </p>
             </div>
           </BCol>

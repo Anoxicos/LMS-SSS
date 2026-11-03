@@ -233,28 +233,28 @@ onBeforeUnmount(() => {
         <li class="nav-item"  v-if="hasRole('Super-admin')">
             <Link class="nav-link menu-link" :href="route('roles.index')" data-key="roles">
             <i class="ri-shield-user-line"></i>
-            <span data-key="t-widgets">Roles</span>
+            <span>{{ $t('t-roles') }}</span>
             </Link>
         </li>
 
         <li class="nav-item"  v-if="hasRole('Super-admin')">
             <Link class="nav-link menu-link" :href="route('companies.index')" data-key="companies">
             <i class="ri-building-4-line"></i>
-            <span data-key="t-widgets">Companies</span>
+            <span>{{ $t('t-companies') }}</span>
             </Link>
         </li>
 
         <li class="nav-item"  v-if="hasPermission('read user')">
             <Link class="nav-link menu-link" :href="route('users.index')" data-key="users">
             <i class="ri-team-line"></i>
-            <span data-key="t-widgets">Users</span>
+            <span>{{ $t('t-users') }}</span>
             </Link>
         </li>
 
         <li class="nav-item"  v-if="hasPermission('read learner')">
             <Link class="nav-link menu-link" :href="route('learners.index')" data-key="learners">
             <i class="ri-team-line"></i>
-            <span data-key="t-widgets">Learner</span>
+            <span>{{ $t('t-learners') }}</span>
             </Link>
         </li>
 
@@ -265,7 +265,7 @@ onBeforeUnmount(() => {
               data-key="categories"
             >
               <i class="ri-folder-3-line"></i>
-              <span>Categories</span>
+              <span>{{ $t('t-categories') }}</span>
             </Link>
         </li>
 
@@ -276,7 +276,7 @@ onBeforeUnmount(() => {
             data-key="courses"
           >
             <i class="ri-book-open-line"></i>
-            <span>Courses</span>
+            <span>{{ $t('t-courses') }}</span>
           </Link>
         </li>
 
@@ -288,7 +288,7 @@ onBeforeUnmount(() => {
             data-key="SCORM courses"
           >
             <i class="ri-code-box-line me-1"></i>
-            <span>SCORM Courses</span>
+            <span>{{ $t('t-scorm-courses') }}</span>
           </Link>
 
           
@@ -301,7 +301,7 @@ onBeforeUnmount(() => {
             data-key="banks"
           >
            <i class="ri-bank-line"></i>
-            <span>Question Banks</span>
+            <span>{{ $t('t-question-banks') }}</span>
           </Link>
         </li>
       
@@ -313,7 +313,7 @@ onBeforeUnmount(() => {
           <a class="nav-link menu-link" href="#exames" data-bs-toggle="collapse" role="button" aria-expanded="false"
             aria-controls="exames">
             <i class="ri-file-list-3-line"></i>
-            <span data-key="t-pages">Requests</span>
+            <span>{{ $t('t-requests') }}</span>
           </a>
           <div class="collapse menu-dropdown" id="exames">
             <ul class="nav nav-sm flex-column">
@@ -329,7 +329,7 @@ onBeforeUnmount(() => {
                     <i class="ri-building-4-line"></i>
 
                     <span>
-                      Company 
+                      {{ $t('t-company') }}
                     </span>
                   </Link>
               </li>
@@ -346,7 +346,7 @@ onBeforeUnmount(() => {
                     <i class="ri-user-received-2-line"></i>
 
                     <span>
-                      Individual
+                      {{ $t('t-individual') }}
                     </span>
                   </Link>
               </li>
@@ -363,7 +363,7 @@ onBeforeUnmount(() => {
             data-key="learner-my-courses"
           >
             <i class="ri-file-list-3-line"></i>
-            <span>My Courses</span>
+            <span>{{ $t('t-my-courses') }}</span>
           </Link>
         </li>
 

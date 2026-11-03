@@ -10,7 +10,7 @@ defineProps({
 </script>
 
 <template>
-    <Layout title="API Tokens">
+    <Layout :title="$t('ui-api-tokens')">
         <BRow class="justify-content-center">
             <BCol lg="6">
                 <ApiTokenManager :tokens="tokens" :available-permissions="availablePermissions" :default-permissions="defaultPermissions" />

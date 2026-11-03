@@ -22,7 +22,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Secure Area" />
+    <Head :title="$t('t-secure-area')" />
 
     <div class="auth-page-wrapper pt-5">
         <div class="auth-page-content">
@@ -35,7 +35,7 @@ const submit = () => {
                                 <img src="@assets/images/logo_safesky blue.webp" alt="" height="20">
                                 </Link>
                             </div>
-                            <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
+                            <p class="mt-3 fs-15 fw-medium">{{ $t('t-safesky-learning-management-system') }}</p>
                         </div>
                     </BCol>
                 </BRow>
@@ -46,12 +46,11 @@ const submit = () => {
 
                             <BCardBody class="p-4">
                                 <div class="text-center mt-2">
-                                    <h5 class="text-primary">Lock Screen</h5>
-                                    <p class="text-muted"> This is a secure area of the application. Please confirm your password before continuing.</p>
+                                    <h5 class="text-primary">{{ $t('t-confirm-password') }}</h5>
+                                    <p class="text-muted">{{ $t('t-confirm-password-description') }}</p>
                                 </div>
                                 <div class="user-thumb text-center">
                                     <img src="@assets/images/users/avatar-1.jpg" class="rounded-circle img-thumbnail avatar-lg" alt="thumbnail">
-                                    <h5 class="font-size-15 mt-3">Anna Adame</h5>
                                 </div>
                                 <div class="p-2 mt-4">
                                     <form @submit.prevent="submit">
@@ -59,11 +58,11 @@ const submit = () => {
                                         <TextInput id="username" type="text" class="" style="display: none;" autocomplete="username"  />
                                         <!-- end -->
                                         <div class="mb-3">
-                                            <InputLabel for="password" value="Password" />
-                                            <TextInput id="password" ref="passwordInput" v-model="form.password" type="password" required placeholder="Enter your password" autocomplete="current-password" autofocus />
+                                            <InputLabel for="password" :value="$t('t-password')" />
+                                            <TextInput id="password" ref="passwordInput" v-model="form.password" type="password" required :placeholder="$t('t-enter-your-password')" autocomplete="current-password" autofocus />
                                         </div>
                                         <div class="mb-2 mt-4">
-                                            <BButton variant="success" class="w-100" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">Unlock</BButton>
+                                            <BButton variant="success" class="w-100" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">{{ $t('t-unlock') }}</BButton>
                                         </div>
                                     </form>
 
@@ -72,8 +71,8 @@ const submit = () => {
                         </BCard>
 
                         <div class="mt-4 text-center">
-                            <p class="mb-0">Not you ? return
-                                <Link :href="route('login')" class="fw-semibold text-primary text-decoration-underline"> Signin </Link>
+                            <p class="mb-0">{{ $t('t-not-you-return') }}
+                                <Link :href="route('login')" class="fw-semibold text-primary text-decoration-underline">{{ $t('t-sign-in') }}</Link>
                             </p>
                         </div>
 
@@ -87,7 +86,7 @@ const submit = () => {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} SafeSky Solution. {{ $t('t-all-rights-reserved') }}</p>
                         </div>
                     </BCol>
                 </BRow>

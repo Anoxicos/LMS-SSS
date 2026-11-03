@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -40,7 +44,7 @@ const resetChapterForm = () => {
 const showSuccess = (message) => {
   Swal.fire({
     icon: 'success',
-    title: 'Success',
+    title: t('ui-success'),
     text: message,
     timer: 1600,
     showConfirmButton: false,
@@ -50,7 +54,7 @@ const showSuccess = (message) => {
 const showError = (message = 'Please check the form and try again.') => {
   Swal.fire({
     icon: 'error',
-    title: 'Error',
+    title: t('t-error'),
     text: message,
     timer: 2200,
     showConfirmButton: false,
@@ -99,12 +103,12 @@ const submitChapter = () => {
 
 const deleteChapter = (chapter) => {
   Swal.fire({
-    title: 'Delete chapter?',
+    title: t('ui-delete-chapter'),
     text: `Are you sure you want to delete "${chapter.title}"? All slides inside this chapter may also be removed.`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, delete',
-    cancelButtonText: 'Cancel',
+    confirmButtonText: t('ui-yes-delete'),
+    cancelButtonText: t('ui-cancel'),
     confirmButtonColor: '#f06548',
   }).then((result) => {
     if (!result.isConfirmed) return
@@ -165,8 +169,8 @@ const moveChapter = (index, direction) => {
 <template>
   <div class="builder-section">
     <div class="section-heading">
-      <h5>Course Chapters</h5>
-      <p>Create and organize the chapters of this course.</p>
+      <h5>{{ $t('ui-course-chapters') }}</h5>
+      <p>{{ $t('ui-create-and-organize-the-chapters-of-this-course') }}</p>
     </div>
 
     <BRow class="g-4">
@@ -188,7 +192,7 @@ const moveChapter = (index, direction) => {
                 </h6>
 
                 <span class="mini-badge">
-                  {{ chapter.slides?.length || 0 }} slides
+                  {{ chapter.slides?.length || 0 }} {{ $t('ui-slides-label') }}
                 </span>
               </div>
 
@@ -204,7 +208,7 @@ const moveChapter = (index, direction) => {
                 size="sm"
                 class="action-btn"
                 :disabled="index === 0"
-                title="Move up"
+                :title="$t('ui-move-up')"
                 @click="moveChapter(index, -1)"
               >
                 <i class="ri-arrow-up-line"></i>
@@ -216,7 +220,7 @@ const moveChapter = (index, direction) => {
                 size="sm"
                 class="action-btn"
                 :disabled="index === chapters.length - 1"
-                title="Move down"
+                :title="$t('ui-move-down')"
                 @click="moveChapter(index, 1)"
               >
                 <i class="ri-arrow-down-line"></i>
@@ -227,7 +231,7 @@ const moveChapter = (index, direction) => {
                 variant="soft-primary"
                 size="sm"
                 class="action-btn"
-                title="Edit"
+                :title="$t('ui-edit')"
                 @click="editChapter(chapter)"
               >
                 <i class="ri-edit-2-line"></i>
@@ -238,7 +242,7 @@ const moveChapter = (index, direction) => {
                 variant="soft-danger"
                 size="sm"
                 class="action-btn"
-                title="Delete"
+                :title="$t('ui-delete')"
                 @click="deleteChapter(chapter)"
               >
                 <i class="ri-delete-bin-6-line"></i>
@@ -249,8 +253,8 @@ const moveChapter = (index, direction) => {
 
         <div v-else class="empty-box">
           <i class="ri-list-check-2"></i>
-          <h6>No chapters yet</h6>
-          <p>Add the first chapter using the form on the right.</p>
+          <h6>{{ $t('ui-no-chapters-yet') }}</h6>
+          <p>{{ $t('ui-add-the-first-chapter-using-the-form-on-the-right') }}</p>
         </div>
       </BCol>
 
@@ -264,7 +268,7 @@ const moveChapter = (index, direction) => {
           <form @submit.prevent="submitChapter">
             <div class="mb-3">
               <label class="form-label">
-                Title <span class="text-danger">*</span>
+                {{ $t('ui-title') }} <span class="text-danger">*</span>
               </label>
 
               <div class="input-icon-box">
@@ -275,7 +279,7 @@ const moveChapter = (index, direction) => {
                   type="text"
                   class="form-control modern-input"
                   :class="{ 'is-invalid': chapterForm.errors.title }"
-                  placeholder="Chapter title"
+                  :placeholder="$t('ui-chapter-title')"
                 />
               </div>
 
@@ -285,14 +289,14 @@ const moveChapter = (index, direction) => {
             </div>
 
             <div class="mb-3">
-              <label class="form-label">Description</label>
+              <label class="form-label">{{ $t('ui-description') }}</label>
 
               <textarea
                 v-model="chapterForm.description"
                 rows="4"
                 class="form-control modern-textarea"
                 :class="{ 'is-invalid': chapterForm.errors.description }"
-                placeholder="Short chapter description"
+                :placeholder="$t('ui-short-chapter-description')"
               ></textarea>
 
               <div
@@ -325,7 +329,7 @@ const moveChapter = (index, direction) => {
                 class="builder-action-btn"
                 @click="resetChapterForm"
               >
-                Cancel
+                {{ $t('ui-cancel') }}
               </BButton>
             </div>
           </form>

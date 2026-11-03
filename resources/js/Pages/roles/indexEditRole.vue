@@ -1,6 +1,9 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3'
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 import { computed, ref } from 'vue'
 import Swal from 'sweetalert2'
@@ -72,8 +75,8 @@ function UpdateRole() {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Role updated successfully.',
+        title: t('ui-success'),
+        text: t('ui-role-updated-successfully'),
         timer: 2000,
         showConfirmButton: false
       })
@@ -81,8 +84,8 @@ function UpdateRole() {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please try again.',
+        title: t('t-error'),
+        text: t('t-try-again'),
         timer: 3000,
         showConfirmButton: false
       })
@@ -99,11 +102,11 @@ function handleClickReadOnly(event) {
 
 <template>
   <Layout>
-    <Head title="Role" />
+    <Head :title="$t('ui-role')" />
 
     <PageHeader
-      :title="editAction ? 'Update Role' : 'Show Role'"
-      pageTitle="Admin"
+      :title="editAction ? $t('ui-update-role') : $t('ui-show-role')"
+      :page-title="$t('ui-admin')"
     />
 
     <BRow>
@@ -132,7 +135,7 @@ function handleClickReadOnly(event) {
                   </div>
 
                   <p class="text-muted mb-0 mt-1">
-                    Manage role permissions and access control.
+                    {{ $t('ui-manage-role-permissions-and-access-control') }}
                   </p>
                 </div>
               </div>
@@ -143,7 +146,7 @@ function handleClickReadOnly(event) {
                     {{ selectedCount }}
                   </span>
                   <span class="role-stat-label">
-                    Selected
+                    {{ $t('ui-selected') }}
                   </span>
                 </div>
 
@@ -152,7 +155,7 @@ function handleClickReadOnly(event) {
                     {{ totalPermissions }}
                   </span>
                   <span class="role-stat-label">
-                    Total
+                    {{ $t('ui-total') }}
                   </span>
                 </div>
               </div>
@@ -163,10 +166,10 @@ function handleClickReadOnly(event) {
               <div class="permissions-toolbar">
                 <div>
                   <h5 class="fw-bold mb-1">
-                    Permissions
+                    {{ $t('ui-permissions') }}
                   </h5>
                   <p class="text-muted mb-0">
-                    Select the permissions assigned to this role.
+                    {{ $t('ui-select-the-permissions-assigned-to-this-role') }}
                   </p>
                 </div>
 
@@ -176,7 +179,7 @@ function handleClickReadOnly(event) {
                       v-model="searchQuery"
                       type="text"
                       class="form-control"
-                      placeholder="Search permission..."
+                      :placeholder="$t('ui-search-permission')"
                       :disabled="!permissions?.length"
                     />
                     <i class="ri-search-line search-icon"></i>
@@ -207,10 +210,10 @@ function handleClickReadOnly(event) {
                   <i class="ri-search-eye-line"></i>
                 </div>
                 <h5 class="mb-1">
-                  No permissions found
+                  {{ $t('ui-no-permissions-found') }}
                 </h5>
                 <p class="text-muted mb-0">
-                  Try changing your search keywords.
+                  {{ $t('ui-try-changing-your-search-keywords') }}
                 </p>
               </div>
 
@@ -242,7 +245,7 @@ function handleClickReadOnly(event) {
                         {{ permission.name }}
                       </span>
                       <span class="permission-subtitle">
-                        Permission access
+                        {{ $t('ui-permission-access') }}
                       </span>
                     </div>
 
@@ -268,7 +271,7 @@ function handleClickReadOnly(event) {
                 class="permissions-footer"
               >
                 <div class="text-muted small">
-                  {{ selectedCount }} permission(s) selected from {{ totalPermissions }}.
+                  {{ selectedCount }} {{ $t('ui-permission-s-selected-from') }} {{ totalPermissions }}.
                 </div>
 
                 <button

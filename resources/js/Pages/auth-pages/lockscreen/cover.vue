@@ -30,7 +30,7 @@ export default {
 </script>
 
 <template>
-    <Head title="Lock Screen" />
+    <Head :title="$t('t-lock-screen')" />
     <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-overlay"></div>
         <div class="auth-page-content overflow-hidden pt-lg-5">
@@ -88,7 +88,7 @@ export default {
                                 <BCol lg="6">
                                     <div class="p-lg-5 p-4">
                                         <div>
-                                            <h5 class="text-primary">Lock Screen</h5>
+                                            <h5 class="text-primary">{{ $t('t-lock-screen') }}</h5>
                                             <p class="text-muted">Enter your password to unlock the screen!</p>
                                         </div>
                                         <div class="user-thumb text-center">
@@ -100,19 +100,19 @@ export default {
                                         <div class="mt-4">
                                             <form>
                                                 <div class="mb-3">
-                                                    <label class="form-label" for="userpassword">Password</label>
+                                                    <label class="form-label" for="userpassword">{{ $t('ui-password') }}</label>
                                                     <input type="password" class="form-control" id="userpassword"
-                                                        placeholder="Enter password" required>
+                                                        :placeholder="$t('ui-enter-password')" required>
                                                 </div>
                                                 <div class="mb-2 mt-4">
-                                                    <BButton variant="primary" class="w-100" type="submit">Unlock</BButton>
+                                                    <BButton variant="primary" class="w-100" type="submit">{{ $t('t-unlock') }}</BButton>
                                                 </div>
                                             </form>
                                         </div>
 
                                         <div class="mt-5 text-center">
                                             <p class="mb-0">Not you ? return <Link href="/auth/signin-cover"
-                                                    class="fw-semibold text-primary text-decoration-underline"> Signin
+                                                    class="fw-semibold text-primary text-decoration-underline"> {{ $t('ui-signin') }}
                                                 </Link>
                                             </p>
                                         </div>
@@ -130,8 +130,8 @@ export default {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i
-                                    class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i
+                                    class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
                         </div>
                     </BCol>
                 </BRow>

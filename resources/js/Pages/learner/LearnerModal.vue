@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { computed, ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -272,8 +276,8 @@ const validateRequiredFields = () => {
   ) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required fields',
-      text: 'Please fill in all required fields.',
+      title: t('ui-required-fields'),
+      text: t('ui-please-fill-in-all-required-fields'),
       timer: 2000,
       showConfirmButton: false,
     })
@@ -284,8 +288,8 @@ const validateRequiredFields = () => {
   if (isSuperAdmin.value && !form.company_id) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required fields',
-      text: 'Please select a company.',
+      title: t('ui-required-fields'),
+      text: t('ui-please-select-a-company'),
       timer: 2000,
       showConfirmButton: false,
     })
@@ -314,8 +318,8 @@ const addData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Learner added successfully.',
+        title: t('ui-success'),
+        text: t('ui-learner-added-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -325,8 +329,8 @@ const addData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please check the entered information.',
+        title: t('t-error'),
+        text: t('ui-please-check-the-entered-information'),
       })
     },
   })
@@ -344,8 +348,8 @@ const updateData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Success',
-        text: 'Learner updated successfully.',
+        title: t('ui-success'),
+        text: t('ui-learner-updated-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -355,8 +359,8 @@ const updateData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please check the entered information.',
+        title: t('t-error'),
+        text: t('ui-please-check-the-entered-information'),
       })
     },
   })
@@ -394,7 +398,7 @@ defineExpose({
           <div class="upload-panel">
             <div class="upload-panel-title">
               <i class="ri-user-3-line"></i>
-              Profile photo
+              {{ $t('ui-profile-photo') }}
             </div>
 
             <div class="user-photo-wrapper">
@@ -411,7 +415,7 @@ defineExpose({
                   v-if="photoPreview !== defaultImage"
                   type="button"
                   class="photo-delete-btn"
-                  title="Remove photo"
+                  :title="$t('ui-remove-photo')"
                   @click.stop="removePhoto"
                 >
                   <i class="ri-delete-bin-line"></i>
@@ -428,7 +432,7 @@ defineExpose({
               </div>
 
               <p class="text-muted mb-0 mt-3 small">
-                JPG, JPEG, PNG or WEBP. Maximum 2 MB.
+                {{ $t('ui-jpg-jpeg-png-or-webp-maximum-2-mb') }}
               </p>
 
               <input
@@ -448,7 +452,7 @@ defineExpose({
           <div class="upload-panel mt-3">
             <div class="upload-panel-title">
               <i class="ri-passport-line"></i>
-              Passport document
+              {{ $t('ui-passport-document') }}
             </div>
 
             <input
@@ -465,8 +469,8 @@ defineExpose({
               @click="openPassportInput"
             >
               <i class="ri-upload-cloud-2-line"></i>
-              <span>Passport attachment</span>
-              <small>PDF or image. Maximum 5 MB.</small>
+              <span>{{ $t('ui-passport-attachment') }}</span>
+              <small>{{ $t('ui-pdf-or-image-maximum-5-mb') }}</small>
             </button>
 
             <div
@@ -481,7 +485,7 @@ defineExpose({
                 class="btn btn-soft-info btn-sm"
               >
                 <i class="ri-external-link-line me-1"></i>
-                View current file
+                {{ $t('ui-view-current-file') }}
               </a>
 
               <button
@@ -490,7 +494,7 @@ defineExpose({
                 @click="removePassport"
               >
                 <i class="ri-delete-bin-line me-1"></i>
-                Remove
+                {{ $t('ui-remove') }}
               </button>
             </div>
 
@@ -507,13 +511,13 @@ defineExpose({
           <div class="form-section">
             <div class="form-section-title">
               <i class="ri-user-settings-line"></i>
-              Identity information
+              {{ $t('ui-identity-information') }}
             </div>
 
             <BRow class="g-3">
               <BCol md="4">
                 <label for="first-name-field" class="form-label">
-                  First name (as a passport) <span class="text-danger">*</span>
+                  {{ $t('ui-first-name-as-a-passport') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   id="first-name-field"
@@ -523,7 +527,7 @@ defineExpose({
                   placeholder="Enter first name"
                   :class="{ 'is-invalid': submitted && !form.first_name }"
                 />
-                <div class="invalid-feedback">Please enter the first name.</div>
+                <div class="invalid-feedback">{{ $t('ui-please-enter-the-first-name') }}</div>
                 <div v-if="form.errors.first_name" class="text-danger small mt-1">
                   {{ form.errors.first_name }}
                 </div>
@@ -531,7 +535,7 @@ defineExpose({
 
               <BCol md="4">
                 <label for="middle-name-field" class="form-label">
-                  Middle name (as a passport)
+                  {{ $t('ui-middle-name-as-a-passport') }}
                 </label>
                 <input
                   id="middle-name-field"
@@ -547,7 +551,7 @@ defineExpose({
 
               <BCol md="4">
                 <label for="last-name-field" class="form-label">
-                  Last name (as a passport)<span class="text-danger">*</span>
+                  {{ $t('ui-last-name-as-a-passport') }}<span class="text-danger">*</span>
                 </label>
                 <input
                   id="last-name-field"
@@ -557,7 +561,7 @@ defineExpose({
                   placeholder="Enter last name"
                   :class="{ 'is-invalid': submitted && !form.last_name }"
                 />
-                <div class="invalid-feedback">Please enter the last name.</div>
+                <div class="invalid-feedback">{{ $t('ui-please-enter-the-last-name') }}</div>
                 <div v-if="form.errors.last_name" class="text-danger small mt-1">
                   {{ form.errors.last_name }}
                 </div>
@@ -565,19 +569,19 @@ defineExpose({
 
               <BCol md="6">
                 <label for="passport-number-field" class="form-label">
-                  Passport number / ID <span class="text-danger">*</span>
+                  {{ $t('ui-passport-number-id') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   id="passport-number-field"
                   v-model="form.passport_number"
                   type="text"
                   class="form-control"
-                  placeholder="Enter passport number"
+                  :placeholder="$t('t-enter-passport-number')"
                   required
                   :class="{ 'is-invalid': submitted && !form.passport_number?.trim() }"
                 />
                 <div class="invalid-feedback">
-                  Please enter the passport number.
+                  {{ $t('ui-please-enter-the-passport-number') }}
                 </div>
                 <div v-if="form.errors.passport_number" class="text-danger small mt-1">
                   {{ form.errors.passport_number }}
@@ -586,7 +590,7 @@ defineExpose({
 
               <BCol md="6">
                 <label for="date-of-birth-field" class="form-label">
-                  Date of birth (as a passport) <span class="text-danger">*</span>
+                  {{ $t('ui-date-of-birth-as-a-passport') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   id="date-of-birth-field"
@@ -598,7 +602,7 @@ defineExpose({
                   :class="{ 'is-invalid': submitted && !form.date_of_birth }"
                 />
                 <div class="invalid-feedback">
-                  Please select the date of birth.
+                  {{ $t('ui-please-select-the-date-of-birth') }}
                 </div>
                 <div v-if="form.errors.date_of_birth" class="text-danger small mt-1">
                   {{ form.errors.date_of_birth }}
@@ -607,7 +611,7 @@ defineExpose({
 
               <BCol md="6">
                 <label for="place-of-birth-field" class="form-label">
-                  Place of birth (as a passport)<span class="text-danger">*</span>
+                  {{ $t('ui-place-of-birth-as-a-passport') }}<span class="text-danger">*</span>
                 </label>
                 <input
                   id="place-of-birth-field"
@@ -619,7 +623,7 @@ defineExpose({
                   :class="{ 'is-invalid': submitted && !form.place_of_birth?.trim() }"
                 />
                 <div class="invalid-feedback">
-                  Please enter the place of birth.
+                  {{ $t('ui-please-enter-the-place-of-birth') }}
                 </div>
                 <div v-if="form.errors.place_of_birth" class="text-danger small mt-1">
                   {{ form.errors.place_of_birth }}
@@ -627,7 +631,7 @@ defineExpose({
               </BCol>
 
               <BCol md="6">
-                <label for="country-field" class="form-label">Country</label>
+                <label for="country-field" class="form-label">{{ $t('ui-country') }}</label>
                 <input
                   id="country-field"
                   v-model="form.country"
@@ -646,13 +650,13 @@ defineExpose({
           <div class="form-section mt-3">
             <div class="form-section-title">
               <i class="ri-shield-user-line"></i>
-              Account information
+              {{ $t('ui-account-information') }}
             </div>
 
             <BRow class="g-3">
               <BCol md="6">
                 <label for="email-field" class="form-label">
-                  Email <span class="text-danger">*</span>
+                  {{ $t('ui-email') }} <span class="text-danger">*</span>
                 </label>
                 <input
                   id="email-field"
@@ -662,7 +666,7 @@ defineExpose({
                   placeholder="Enter email address"
                   :class="{ 'is-invalid': submitted && !form.email }"
                 />
-                <div class="invalid-feedback">Please enter the email address.</div>
+                <div class="invalid-feedback">{{ $t('ui-please-enter-the-email-address') }}</div>
                 <div v-if="form.errors.email" class="text-danger small mt-1">
                   {{ form.errors.email }}
                 </div>
@@ -670,9 +674,9 @@ defineExpose({
 
               <BCol md="6">
                 <label for="password-field" class="form-label">
-                  Password
+                  {{ $t('ui-password') }}
                   <span v-if="!dataEdit" class="text-danger">*</span>
-                  <span v-else class="text-muted small">(optional)</span>
+                  <span v-else class="text-muted small">{{ $t('ui-optional') }}</span>
                 </label>
                 <input
                   id="password-field"
@@ -682,7 +686,7 @@ defineExpose({
                   :placeholder="dataEdit ? 'Leave empty to keep current password' : 'Enter password'"
                   :class="{ 'is-invalid': submitted && !dataEdit && !form.password }"
                 />
-                <div class="invalid-feedback">Please enter the password.</div>
+                <div class="invalid-feedback">{{ $t('ui-please-enter-the-password') }}</div>
                 <div v-if="form.errors.password" class="text-danger small mt-1">
                   {{ form.errors.password }}
                 </div>
@@ -690,7 +694,7 @@ defineExpose({
 
               <BCol v-if="isSuperAdmin" md="6">
                 <label class="form-label">
-                  Company <span class="text-danger">*</span>
+                  {{ $t('ui-company') }} <span class="text-danger">*</span>
                 </label>
                 <Multiselect
                   v-model="form.company_id"
@@ -701,7 +705,7 @@ defineExpose({
                   :class="{ 'is-invalid-multiselect': submitted && !form.company_id }"
                 />
                 <div v-if="submitted && !form.company_id" class="text-danger small mt-1">
-                  Please select a company.
+                  {{ $t('ui-please-select-a-company') }}
                 </div>
                 <div v-if="form.errors.company_id" class="text-danger small mt-1">
                   {{ form.errors.company_id }}
@@ -710,7 +714,7 @@ defineExpose({
 
               <BCol md="6">
                 <label for="status-field" class="form-label">
-                  Status <span class="text-danger">*</span>
+                  {{ $t('ui-status') }} <span class="text-danger">*</span>
                 </label>
                 <select
                   id="status-field"
@@ -718,10 +722,10 @@ defineExpose({
                   class="form-select"
                   :class="{ 'is-invalid': submitted && !form.status }"
                 >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="active">{{ $t('ui-active') }}</option>
+                  <option value="inactive">{{ $t('ui-inactive') }}</option>
                 </select>
-                <div class="invalid-feedback">Please select a status.</div>
+                <div class="invalid-feedback">{{ $t('ui-please-select-a-status') }}</div>
                 <div v-if="form.errors.status" class="text-danger small mt-1">
                   {{ form.errors.status }}
                 </div>
@@ -734,7 +738,7 @@ defineExpose({
       <div class="modal-footer v-modal-footer mt-4">
         <div class="hstack gap-2 justify-content-end">
           <BButton type="button" variant="light" @click="addModal = false">
-            Close
+            {{ $t('ui-close') }}
           </BButton>
 
           <BButton

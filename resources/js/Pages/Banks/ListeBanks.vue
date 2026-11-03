@@ -1,4 +1,8 @@
 <script setup>
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
+
 import { ref, computed, watch } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
@@ -66,7 +70,7 @@ const getCourseImage = (course) => {
 const formatDate = (date) => {
   if (!date) return '-'
 
-  return new Date(date).toLocaleDateString('en-GB', {
+  return new Date(date).toLocaleDateString(i18n.global.locale?.value === 'fr' ? 'fr-FR' : 'en-GB', {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -124,8 +128,8 @@ const handleDeleteData = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Deleted',
-        text: 'Bank deleted successfully.',
+        title: t('ui-deleted'),
+        text: t('ui-bank-deleted-successfully'),
         timer: 2000,
         showConfirmButton: false,
       })
@@ -133,8 +137,8 @@ const handleDeleteData = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: 'Please try again.',
+        title: t('t-error'),
+        text: t('t-try-again'),
         timer: 3000,
         showConfirmButton: false,
       })
@@ -196,9 +200,9 @@ const onSort = (column) => {
               </div>
 
               <div>
-                <h5 class="mb-1 fw-semibold">Question Banks</h5>
+                <h5 class="mb-1 fw-semibold">{{ $t('ui-question-banks') }}</h5>
                 <p class="text-muted mb-0">
-                  Manage global banks and assign them to courses.
+                  {{ $t('ui-manage-global-banks-and-assign-them-to-courses') }}
                 </p>
               </div>
             </div>
@@ -211,7 +215,7 @@ const onSort = (column) => {
                   v-model="searchQuery"
                   type="text"
                   class="form-control"
-                  placeholder="Search bank..."
+                  :placeholder="$t('ui-search-bank')"
                 />
                 <i class="ri-search-line search-icon"></i>
               </div>
@@ -224,7 +228,7 @@ const onSort = (column) => {
                 @click="toggleModals"
               >
                 <i class="ri-add-line align-bottom me-1"></i>
-                Add Bank
+                {{ $t('ui-add-bank') }}
               </BButton>
             </div>
           </BCol>
@@ -238,37 +242,37 @@ const onSort = (column) => {
               <thead>
                 <tr>
                   <th class="sort" @click="onSort('title')">
-                    Bank
+                    {{ $t('ui-bank') }}
                     <i class="ri-arrow-up-down-line ms-1"></i>
                   </th>
 
                   <th class="sort" @click="onSort('ref')">
-                    Ref
+                    {{ $t('ui-ref') }}
                     <i class="ri-arrow-up-down-line ms-1"></i>
                   </th>
 
                   <th class="sort" @click="onSort('course')">
-                    Course
+                    {{ $t('ui-course') }}
                     <i class="ri-arrow-up-down-line ms-1"></i>
                   </th>
 
                   <th class="sort" @click="onSort('category')">
-                    Category
+                    {{ $t('ui-category') }}
                     <i class="ri-arrow-up-down-line ms-1"></i>
                   </th>
 
                   <th class="sort text-center" @click="onSort('questions_count')">
-                    Questions
+                    {{ $t('ui-questions') }}
                     <i class="ri-arrow-up-down-line ms-1"></i>
                   </th>
 
                   <th class="sort" @click="onSort('created_at')">
-                    Created
+                    {{ $t('ui-created') }}
                     <i class="ri-arrow-up-down-line ms-1"></i>
                   </th>
 
                   <th class="text-center">
-                    Actions
+                    {{ $t('ui-actions') }}
                   </th>
                 </tr>
               </thead>
@@ -308,7 +312,7 @@ const onSort = (column) => {
                         <img
                           v-if="getCourseImage(data.course)"
                           :src="getCourseImage(data.course)"
-                          alt="Course"
+                          :alt="$t('ui-course')"
                         />
 
                         <span v-else>
@@ -348,7 +352,7 @@ const onSort = (column) => {
                         v-if="hasPermission('read question')"
                         :href="route('banks.questions', data.id)"
                         class="btn btn-sm btn-soft-info action-btn"
-                        title="Questions"
+                        :title="$t('ui-questions')"
                       >
                         <i class="ri-questionnaire-line"></i>
                       </Link>
@@ -358,7 +362,7 @@ const onSort = (column) => {
                         variant="soft-primary"
                         size="sm"
                         class="action-btn"
-                        title="Edit"
+                        :title="$t('ui-edit')"
                         @click="triggershowEdit(data)"
                       >
                         <i class="ri-pencil-fill"></i>
@@ -369,7 +373,7 @@ const onSort = (column) => {
                         variant="soft-danger"
                         size="sm"
                         class="action-btn"
-                        title="Delete"
+                        :title="$t('ui-delete')"
                         @click="deleteData(data)"
                       >
                         <i class="ri-delete-bin-fill"></i>
@@ -405,7 +409,7 @@ const onSort = (column) => {
                     </span>
 
                     <span class="questions-badge">
-                      {{ data.questions_count || 0 }} questions
+                      {{ data.questions_count || 0 }} {{ $t('ui-questions') }}
                     </span>
                   </div>
                 </div>
@@ -417,7 +421,7 @@ const onSort = (column) => {
                     v-if="hasPermission('read question')"
                     :href="route('banks.questions', data.id)"
                     class="btn btn-sm btn-soft-info action-btn"
-                    title="Questions"
+                    :title="$t('ui-questions')"
                     >
                     <i class="ri-questionnaire-line"></i>
                     </Link>
@@ -427,7 +431,7 @@ const onSort = (column) => {
                   variant="soft-primary"
                   size="sm"
                   class="action-btn"
-                  title="Edit"
+                  :title="$t('ui-edit')"
                   @click="triggershowEdit(data)"
                 >
                   <i class="ri-pencil-fill"></i>
@@ -438,7 +442,7 @@ const onSort = (column) => {
                   variant="soft-danger"
                   size="sm"
                   class="action-btn"
-                  title="Delete"
+                  :title="$t('ui-delete')"
                   @click="deleteData(data)"
                 >
                   <i class="ri-delete-bin-fill"></i>
@@ -450,7 +454,7 @@ const onSort = (column) => {
               <div class="company-mobile-item">
                 <span class="company-mobile-label">
                   <i class="ri-book-open-line me-1"></i>
-                  Course
+                  {{ $t('ui-course') }}
                 </span>
                 <span class="company-mobile-value">
                   {{ data.course?.title || '-' }}
@@ -460,7 +464,7 @@ const onSort = (column) => {
               <div class="company-mobile-item">
                 <span class="company-mobile-label">
                   <i class="ri-price-tag-3-line me-1"></i>
-                  Category
+                  {{ $t('ui-category') }}
                 </span>
                 <span class="category-badge">
                   {{ data.course?.category?.name || '-' }}
@@ -470,7 +474,7 @@ const onSort = (column) => {
               <div class="company-mobile-item">
                 <span class="company-mobile-label">
                   <i class="ri-calendar-line me-1"></i>
-                  Created
+                  {{ $t('ui-created') }}
                 </span>
                 <span class="company-mobile-value">
                   {{ formatDate(data.created_at) }}
@@ -492,9 +496,9 @@ const onSort = (column) => {
             :width="85"
           />
 
-          <h5 class="mt-3 mb-1">No banks found</h5>
+          <h5 class="mt-3 mb-1">{{ $t('ui-no-banks-found') }}</h5>
           <p class="text-muted mb-0">
-            Try changing your search keywords.
+            {{ $t('ui-try-changing-your-search-keywords') }}
           </p>
         </div>
 
@@ -503,11 +507,11 @@ const onSort = (column) => {
           class="company-pagination"
         >
           <div class="text-muted company-pagination-text">
-            Showing
+            {{ $t('ui-showing') }}
             <span class="fw-semibold">{{ paginatedData.length }}</span>
-            of
+            {{ $t('ui-of') }}
             <span class="fw-semibold">{{ filtereData.length }}</span>
-            result(s)
+            {{ $t('ui-result-s') }}
           </div>
 
           <ul class="pagination listjs-pagination mb-0">
@@ -578,9 +582,9 @@ const onSort = (column) => {
         />
 
         <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-          <h4>Are you sure?</h4>
+          <h4>{{ $t('ui-are-you-sure') }}</h4>
           <p class="text-muted mx-4 mb-0">
-            This bank and all related questions will be deleted.
+            {{ $t('ui-this-bank-and-all-related-questions-will-be-deleted') }}
           </p>
         </div>
       </div>
@@ -591,7 +595,7 @@ const onSort = (column) => {
           class="btn w-sm btn-light"
           @click="deleteModal = false"
         >
-          Cancel
+          {{ $t('ui-cancel') }}
         </button>
 
         <button
@@ -599,7 +603,7 @@ const onSort = (column) => {
           class="btn w-sm btn-danger"
           @click="handleDeleteData"
         >
-          Yes, delete
+          {{ $t('ui-yes-delete') }}
         </button>
       </div>
     </BModal>

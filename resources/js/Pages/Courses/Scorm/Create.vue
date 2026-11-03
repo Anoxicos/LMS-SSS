@@ -3,6 +3,9 @@ import { Head, Link, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 import '../course-builder.css'
@@ -79,8 +82,8 @@ const validateForm = () => {
   ) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required fields',
-      text: 'Please fill in all required SCORM course information.',
+      title: t('ui-required-fields'),
+      text: t('ui-please-fill-in-all-required-scorm-course-information'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -94,8 +97,8 @@ const validateForm = () => {
   if (Number.isNaN(durationHours) || durationHours <= 0) {
     Swal.fire({
       icon: 'warning',
-      title: 'Invalid duration',
-      text: 'Duration must be greater than 0 hour.',
+      title: t('ui-invalid-duration'),
+      text: t('ui-duration-must-be-greater-than-0-hour'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -106,8 +109,8 @@ const validateForm = () => {
   if (Number.isNaN(passingScore) || passingScore < 0 || passingScore > 100) {
     Swal.fire({
       icon: 'warning',
-      title: 'Invalid passing score',
-      text: 'Passing score must be between 0 and 100.',
+      title: t('ui-invalid-passing-score'),
+      text: t('ui-passing-score-must-be-between-0-and-100'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -118,8 +121,8 @@ const validateForm = () => {
   if (!form.scorm_file) {
     Swal.fire({
       icon: 'warning',
-      title: 'SCORM package required',
-      text: 'Please select a valid SCORM ZIP package.',
+      title: t('ui-scorm-package-required'),
+      text: t('ui-please-select-a-valid-scorm-zip-package'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -139,8 +142,8 @@ const submit = () => {
     onSuccess: () => {
       Swal.fire({
         icon: 'success',
-        title: 'Created!',
-        text: 'SCORM course has been created. You can now configure its plan.',
+        title: t('ui-created-label-label'),
+        text: t('ui-scorm-course-has-been-created-you-can-now-configure-it'),
         timer: 1800,
         showConfirmButton: false,
       })
@@ -148,7 +151,7 @@ const submit = () => {
     onError: () => {
       Swal.fire({
         icon: 'error',
-        title: 'Error!',
+        title: t('ui-error-label'),
         text: form.errors.error || 'Please check the SCORM course information.',
         timer: 2800,
         showConfirmButton: false,
@@ -160,8 +163,8 @@ const submit = () => {
 
 <template>
   <Layout>
-    <Head title="Create SCORM Course" />
-    <PageHeader title="Create SCORM Course" pageTitle="Courses" />
+    <Head :title="$t('ui-create-scorm-course')" />
+    <PageHeader :title="$t('ui-create-scorm-course')" :page-title="$t('ui-courses')" />
 
     <div class="course-builder-page">
       <BCard class="course-builder-card border-0 shadow-sm">
@@ -173,16 +176,16 @@ const submit = () => {
               </div>
 
               <div>
-                <h4 class="mb-1 fw-bold">Create SCORM Course</h4>
+                <h4 class="mb-1 fw-bold">{{ $t('ui-create-scorm-course') }}</h4>
                 <p class="text-muted mb-0">
-                  Start with the course information and SCORM package. The plan is configured next.
+                  {{ $t('ui-start-with-the-course-information-and-scorm-package-th') }}
                 </p>
               </div>
             </div>
 
             <Link :href="route('courses.scorm.index')" class="btn btn-light back-btn">
               <i class="ri-arrow-left-line me-1"></i>
-              Back to SCORM Courses
+              {{ $t('ui-back-to-scorm-courses') }}
             </Link>
           </div>
         </BCardHeader>
@@ -198,7 +201,7 @@ const submit = () => {
           <div class="builder-footer">
             <Link :href="route('courses.scorm.index')" class="btn btn-light footer-btn">
               <i class="ri-arrow-left-line me-1"></i>
-              Cancel
+              {{ $t('ui-cancel') }}
             </Link>
 
             <BButton
@@ -213,7 +216,7 @@ const submit = () => {
                 class="spinner-border spinner-border-sm me-1"
               ></span>
               <i v-else class="ri-save-line me-1"></i>
-              Save & Continue
+              {{ $t('ui-save-continue') }}
             </BButton>
           </div>
         </BCardBody>

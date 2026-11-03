@@ -67,7 +67,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Reset Password" />
+    <Head :title="$t('t-reset-password')" />
 
     <div class="auth-page-wrapper pt-5">
 
@@ -98,7 +98,7 @@ const submit = () => {
                             >
                                 <img
                                     src="@assets/images/logo_safesky blue.webp"
-                                    alt="SafeSky LMS"
+                                    :alt="$t('t-safesky-lms')"
                                     height="45"
                                 >
                             </Link>
@@ -111,7 +111,7 @@ const submit = () => {
                                     text-muted
                                 "
                             >
-                                SafeSky Learning Management System
+                                {{ $t('t-safesky-learning-management-system') }}
                             </p>
                         </div>
 
@@ -191,7 +191,7 @@ const submit = () => {
                                             reset-title
                                         "
                                     >
-                                        Create New Password
+                                        {{ $t('t-create-new-password') }}
                                     </h4>
 
                                     <p
@@ -201,8 +201,7 @@ const submit = () => {
                                             reset-description
                                         "
                                     >
-                                        Create a new secure password
-                                        for your SafeSky LMS account.
+                                        {{ $t('t-create-secure-password-description') }}
                                     </p>
                                 </div>
 
@@ -220,7 +219,7 @@ const submit = () => {
 
                                         <InputLabel
                                             for="email"
-                                            value="Email Address"
+                                            :value="$t('t-email-address')"
                                         />
 
                                         <div
@@ -279,7 +278,7 @@ const submit = () => {
 
                                         <InputLabel
                                             for="password"
-                                            value="New Password"
+                                            :value="$t('t-new-password')"
                                         />
 
                                         <div
@@ -307,7 +306,7 @@ const submit = () => {
                                                     'is-invalid':
                                                         form.errors.password
                                                 }"
-                                                placeholder="Enter your new password"
+                                                :placeholder="$t('t-enter-new-password')"
                                                 required
                                                 autofocus
                                                 autocomplete="new-password"
@@ -363,8 +362,7 @@ const submit = () => {
                                                 "
                                             ></i>
 
-                                            Use a strong password that
-                                            you don't use elsewhere.
+                                            {{ $t('t-strong-password-hint') }}
                                         </div>
 
                                     </div>
@@ -375,7 +373,7 @@ const submit = () => {
 
                                         <InputLabel
                                             for="password_confirmation"
-                                            value="Confirm New Password"
+                                            :value="$t('t-confirm-new-password')"
                                         />
 
                                         <div
@@ -406,7 +404,7 @@ const submit = () => {
                                                         form.errors
                                                             .password_confirmation
                                                 }"
-                                                placeholder="Confirm your new password"
+                                                :placeholder="$t('t-confirm-new-password')"
                                                 required
                                                 autocomplete="new-password"
                                             >
@@ -485,8 +483,8 @@ const submit = () => {
 
                                             {{
                                                 form.processing
-                                                    ? 'Resetting Password...'
-                                                    : 'Reset Password'
+                                                    ? $t('t-resetting-password')
+                                                    : $t('t-reset-password')
                                             }}
 
                                         </BButton>
@@ -516,7 +514,7 @@ const submit = () => {
                                     text-muted
                                 "
                             >
-                                Remember your password?
+                                {{ $t('t-remember-password') }}
 
                                 <Link
                                     :href="route('login')"
@@ -527,7 +525,7 @@ const submit = () => {
                                         ms-1
                                     "
                                 >
-                                    Sign In
+                                    {{ $t('t-sign-in') }}
                                 </Link>
                             </p>
 
@@ -564,7 +562,7 @@ const submit = () => {
                                 &copy;
                                 {{ new Date().getFullYear() }}
                                 SafeSky Solution.
-                                All rights reserved.
+                                {{ $t('t-all-rights-reserved') }}
                             </p>
 
                         </div>

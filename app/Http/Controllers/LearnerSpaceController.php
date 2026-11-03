@@ -124,7 +124,7 @@ class LearnerSpaceController extends Controller
             ->firstOrFail();
 
         if (!$enrollment->course) {
-            abort(404, 'Course not found.');
+            abort(404, __('Course not found.'));
         }
 
         $expiration = $this->getEnrollmentExpirationState($enrollment);
@@ -314,7 +314,7 @@ class LearnerSpaceController extends Controller
             $this->recalculateCourseProgress($enrollment, $slide);
         });
 
-        return back()->with('success', 'Progress updated successfully.');
+        return back()->with('success', __('Progress updated successfully.'));
     }
 
     private function recalculateChapterProgress(Enrollment $enrollment, Slide $slide): void
@@ -1035,7 +1035,24 @@ class LearnerSpaceController extends Controller
         $course = $enrollment->course;
         $launchUrl = $this->getScormLaunchUrl($course);
         $tracking = $enrollment->scormTracking;
-        $courseCompleted = (bool) $tracking?->is_completed;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Effective real-time SCORM completion
+        |--------------------------------------------------------------------------
+        |
+        | Some SCORM packages report progress_measure = 1 (100%) before sending
+        | completion_status = completed. The LMS rule is that 100% progress is
+        | sufficient to unlock the final exam, so the viewer and backend must use
+        | the same completion state.
+        |
+        */
+        $effectiveProgress = $this->resolveEnrollmentProgressPercent($enrollment);
+
+        $courseCompleted = (
+            (bool) $tracking?->is_completed ||
+            $effectiveProgress >= 100
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -1060,7 +1077,8 @@ class LearnerSpaceController extends Controller
             'user_id' => $enrollment->user_id,
             'course_id' => $enrollment->course_id,
             'status' => $enrollment->status,
-            'progress_percent' => (float) $enrollment->progress_percent,
+            'progress_percent' => $effectiveProgress,
+            'scorm_progress_percent' => $effectiveProgress,
             'started_at' => $enrollment->started_at,
             'completed_at' => $enrollment->completed_at,
             'expired_at' => $enrollment->expired_at,
@@ -1516,31 +1534,62 @@ class LearnerSpaceController extends Controller
         | SCORM completion
         |--------------------------------------------------------------------------
         |
-        | The final exam is available only after the SCORM package reports a
-        | completed state through the LMS SCORM API.
+        | The final exam is available when the SCORM package explicitly reports
+        | completion or when its effective synchronized progress reaches 100%.
         |
         */
         if ($this->isScormCourse($enrollment->course)) {
             $enrollment->loadMissing('scormTracking');
 
+            $tracking = $enrollment->scormTracking;
+            $effectiveProgress = $this->resolveEnrollmentProgressPercent($enrollment);
+
             $isCompleted = (bool) (
-                $enrollment->scormTracking?->is_completed
+                $tracking?->is_completed ||
+                $effectiveProgress >= 100
             );
+
+            /*
+            |------------------------------------------------------------------
+            | Normalize the persisted completion flag
+            |------------------------------------------------------------------
+            |
+            | When a package reaches 100% but delays its explicit completed
+            | status, persist is_completed so every later access path uses the
+            | same state without requiring the learner to reload the course.
+            |
+            */
+            if (
+                $tracking &&
+                $isCompleted &&
+                !$tracking->is_completed
+            ) {
+                $tracking->forceFill([
+                    'is_completed' => true,
+                    'completed_at' => $tracking->completed_at ?: now(),
+                ])->save();
+
+                $enrollment->setRelation('scormTracking', $tracking);
+            }
+
+            if (
+                $isCompleted &&
+                (float) ($enrollment->progress_percent ?? 0) < 100
+            ) {
+                $enrollment->forceFill([
+                    'progress_percent' => 100,
+                ])->save();
+            }
 
             return [
                 'total_slides' => 1,
                 'completed_slides' => $isCompleted ? 1 : 0,
                 'course_completed' => $isCompleted,
                 'completion_mode' => 'scorm_tracking',
-                'lesson_status' => (
-                    $enrollment->scormTracking?->lesson_status
-                ),
-                'completion_status' => (
-                    $enrollment->scormTracking?->completion_status
-                ),
-                'success_status' => (
-                    $enrollment->scormTracking?->success_status
-                ),
+                'progress_percent' => $effectiveProgress,
+                'lesson_status' => $tracking?->lesson_status,
+                'completion_status' => $tracking?->completion_status,
+                'success_status' => $tracking?->success_status,
             ];
         }
 
@@ -1721,6 +1770,17 @@ class LearnerSpaceController extends Controller
 
         $hasPassedExam = (bool) $passedExam;
 
+        /*
+        |--------------------------------------------------------------------------
+        | Certificate visibility for learner
+        |--------------------------------------------------------------------------
+        |
+        | Individual enrollments always return true through the Enrollment helper.
+        | Company enrollments respect certificate_visible_to_learner.
+        |
+        */
+        $canAccessCertificates = $enrollment->canLearnerAccessCertificate();
+
         if ($passedExam) {
             $expirationReference = $passedExam->submitted_at
                 ?? $passedExam->completed_at
@@ -1750,10 +1810,17 @@ class LearnerSpaceController extends Controller
 
         if ($hasPassedExam) {
             /*
-             * Generate and expose only the certificates that correspond to the
-             * accreditations selected on this exact company request.
+             * Certificates are still generated even when learner diffusion is
+             * disabled because the company/admin may still need them.
+             * Only the learner-facing payload is hidden.
              */
-            $certificates = $this->createCertificatesForPassedExam($passedExam);
+            $generatedCertificates = $this->createCertificatesForPassedExam(
+                $passedExam
+            );
+
+            if ($canAccessCertificates) {
+                $certificates = $generatedCertificates;
+            }
         }
 
         $inProgressExam = $hasPassedExam
@@ -1796,15 +1863,15 @@ class LearnerSpaceController extends Controller
         $examBlockedReason = null;
 
         if ($hasPassedExam) {
-            $examBlockedReason = 'The final exam has already been passed.';
+            $examBlockedReason = __('The final exam has already been passed.');
         } elseif ($hasInProgressExam) {
             $examBlockedReason = null;
         } elseif ($attemptsRest <= 0) {
-            $examBlockedReason = 'No exam attempts remaining.';
+            $examBlockedReason = __('No exam attempts remaining.');
         } elseif (!$trainingAccess['can_start_exam']) {
             $examBlockedReason = $trainingAccess['blocked_reason'];
         } elseif (!$completion['course_completed']) {
-            $examBlockedReason = 'You must complete the entire course before starting the exam.';
+            $examBlockedReason = __('You must complete the entire course before starting the exam.');
         }
 
         $exams = $enrollment->exams
@@ -1856,6 +1923,10 @@ class LearnerSpaceController extends Controller
                     : null,
 
                 'training_request' => $this->formatTrainingRequest($enrollment),
+
+                'certificate_visible_to_learner' => (bool)
+                    $enrollment->certificate_visible_to_learner,
+                'can_access_certificates' => $canAccessCertificates,
 
                 'certificate' => $certificates->first() ? [
                     'id' => $certificates->first()->id,
@@ -1974,6 +2045,22 @@ class LearnerSpaceController extends Controller
             ->where('id', $enrollmentId)
             ->where('user_id', $user->id)
             ->firstOrFail();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Certificate diffusion permission
+        |--------------------------------------------------------------------------
+        |
+        | Hiding the button in Vue is not a security boundary. A learner without
+        | permission must also be blocked when calling the download URL directly.
+        |
+        */
+        if (!$enrollment->canLearnerAccessCertificate()) {
+            abort(
+                403,
+                'Certificate access is not available for this enrollment.'
+            );
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -2337,7 +2424,7 @@ class LearnerSpaceController extends Controller
 
                 if ($hasPassedExam) {
                     throw ValidationException::withMessages([
-                        'exam' => 'The final exam has already been passed.',
+                        'exam' => __('The final exam has already been passed.'),
                     ]);
                 }
 
@@ -2371,13 +2458,13 @@ class LearnerSpaceController extends Controller
 
                 if ((int) $enrollment->attempts_rest <= 0) {
                     throw ValidationException::withMessages([
-                        'attempts_rest' => 'No exam attempts remaining.',
+                        'attempts_rest' => __('No exam attempts remaining.'),
                     ]);
                 }
 
                 if (!$enrollment->course) {
                     throw ValidationException::withMessages([
-                        'course' => 'Course not found.',
+                        'course' => __('Course not found.'),
                     ]);
                 }
 
@@ -2385,7 +2472,7 @@ class LearnerSpaceController extends Controller
 
                 if (!$completion['course_completed']) {
                     throw ValidationException::withMessages([
-                        'course_progress' => 'You must complete the entire course before starting the exam.',
+                        'course_progress' => __('You must complete the entire course before starting the exam.'),
                     ]);
                 }
 
@@ -2394,7 +2481,7 @@ class LearnerSpaceController extends Controller
                     !$enrollment->course->plan->is_active
                 ) {
                     throw ValidationException::withMessages([
-                        'plan' => 'No active exam plan found for this course.',
+                        'plan' => __('No active exam plan found for this course.'),
                     ]);
                 }
 
@@ -2402,7 +2489,7 @@ class LearnerSpaceController extends Controller
 
                 if ($questions->isEmpty()) {
                     throw ValidationException::withMessages([
-                        'questions' => 'No questions available to generate exam.',
+                        'questions' => __('No questions available to generate exam.'),
                     ]);
                 }
 
@@ -2502,7 +2589,7 @@ class LearnerSpaceController extends Controller
 
         if ($planDetails->isEmpty()) {
             throw ValidationException::withMessages([
-                'plan' => 'The exam plan does not contain question quantities.',
+                'plan' => __('The exam plan does not contain question quantities.'),
             ]);
         }
 
@@ -2527,7 +2614,7 @@ class LearnerSpaceController extends Controller
 
             if ($questions->count() < $neededQuestions) {
                 throw ValidationException::withMessages([
-                    'questions' => 'Not enough questions in bank for section: ' . $detail->name,
+                    'questions' => __('Not enough questions in bank for section:') . ' ' . $detail->name,
                 ]);
             }
 
@@ -2807,7 +2894,7 @@ class LearnerSpaceController extends Controller
                 return [
                     'saved' => false,
                     'expired' => true,
-                    'message' => 'This exam is already closed.',
+                    'message' => __('This exam is already closed.'),
                 ];
             }
 
@@ -2819,7 +2906,7 @@ class LearnerSpaceController extends Controller
                 return [
                     'saved' => false,
                     'expired' => true,
-                    'message' => 'Exam time has expired.',
+                    'message' => __('Exam time has expired.'),
                 ];
             }
 
@@ -3016,7 +3103,7 @@ class LearnerSpaceController extends Controller
 
         if ($missingQuestionIds->isNotEmpty()) {
             throw ValidationException::withMessages([
-                'answers' => 'Answer every question before submitting the exam.',
+                'answers' => __('Answer every question before submitting the exam.'),
             ]);
         }
     }
@@ -3233,7 +3320,7 @@ class LearnerSpaceController extends Controller
 
         if (!(bool) $exam->passed && $exam->status !== 'passed') {
             throw ValidationException::withMessages([
-                'certificate' => 'Certificates can be created only for a passed exam.',
+                'certificate' => __('Certificates can be created only for a passed exam.'),
             ]);
         }
 
@@ -3241,7 +3328,7 @@ class LearnerSpaceController extends Controller
 
         if (!$enrollment) {
             throw ValidationException::withMessages([
-                'certificate' => 'Enrollment not found for this exam.',
+                'certificate' => __('Enrollment not found for this exam.'),
             ]);
         }
 
@@ -3352,8 +3439,10 @@ class LearnerSpaceController extends Controller
             | - send one generic completion certificate to the learner only.
             |
             | Company request:
-            | - send accreditation certificate(s) to the learner;
-            | - send the same certificate(s) to the company email when available.
+            | - send accreditation certificate(s) to the learner only when the
+            |   enrollment allows certificate diffusion;
+            | - always send the same certificate(s) to the company email when
+            |   available.
             |
             */
             $exam = Exam::with([
@@ -3513,8 +3602,15 @@ class LearnerSpaceController extends Controller
 
                 /*
                 | Learner email
+                |
+                | Company enrollments can disable certificate diffusion. When the
+                | flag is false, the learner must not receive the certificate by
+                | email either.
                 */
-                if ($learner->email) {
+                if (
+                    $enrollment->canLearnerAccessCertificate() &&
+                    $learner->email
+                ) {
                     try {
                         $mailer->sendPassedExamCertificatesToLearner(
                             $learner,

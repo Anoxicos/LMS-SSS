@@ -31,7 +31,7 @@ defineProps({
 </script>
 
 <template>
-  <Head title="Training request submitted" />
+  <Head :title="$t('ui-training-request-submitted')" />
 
   <main class="success-page">
     <article class="success-card">
@@ -39,35 +39,34 @@ defineProps({
         <i class="ri-check-line"></i>
       </span>
 
-      <span class="success-badge">Request received</span>
+      <span class="success-badge">{{ $t('ui-request-received') }}</span>
 
-      <h1>Your training request was submitted</h1>
+      <h1>{{ $t('ui-your-training-request-was-submitted') }}</h1>
 
       <p>
-        The request is linked to your learner account and contains
-        {{ coursesCount }} selected course(s). The Super Admin will review each
-        course separately.
+        {{ $t('ui-the-request-is-linked-to-your-learner-account-and-cont') }}
+        {{ coursesCount }} {{ $t('ui-selected-course-s-the-super-admin-will-review-each-cou') }}
       </p>
 
       <div class="reference-box">
-        <span>Request reference</span>
+        <span>{{ $t('ui-request-reference') }}</span>
         <strong>{{ requestReference }}</strong>
       </div>
 
       <div class="status-line">
         <i class="ri-time-line"></i>
-        Current status: <strong>{{ status }}</strong>
+        {{ $t('ui-current-status') }} <strong>{{ status }}</strong>
       </div>
 
       <div class="actions">
         <a :href="dashboardUrl" class="primary-action">
           <i class="ri-dashboard-line"></i>
-          Learner dashboard
+          {{ $t('t-learner-dashboard') }}
         </a>
 
         <a :href="coursesUrl" class="secondary-action">
           <i class="ri-book-open-line"></i>
-          Browse courses
+          {{ $t('ui-browse-courses') }}
         </a>
       </div>
     </article>
@@ -78,7 +77,7 @@ defineProps({
 .success-page {
   min-height: calc(100vh - 70px);
   padding: 70px 20px;
-  background: linear-gradient(180deg, #eaf7ff 0%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--paper) 0%, var(--chalk) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,9 +86,9 @@ defineProps({
 .success-card {
   width: min(650px, 100%);
   padding: 44px;
-  border: 1px solid #e4edf4;
+  border: 1px solid var(--sand);
   border-radius: 26px;
-  background: #ffffff;
+  background: var(--chalk);
   box-shadow: 0 22px 60px rgba(15, 23, 42, 0.11);
   text-align: center;
 }
@@ -99,8 +98,8 @@ defineProps({
   height: 78px;
   margin: 0 auto 16px;
   border-radius: 22px;
-  color: #ffffff;
-  background: #0ab39c;
+  color: var(--chalk);
+  background: var(--success);
   font-size: 39px;
   display: flex;
   align-items: center;
@@ -110,21 +109,21 @@ defineProps({
 .success-badge {
   padding: 7px 11px;
   border-radius: 999px;
-  color: #087bc9;
-  background: #eaf7ff;
+  color: var(--signal-deep);
+  background: var(--paper);
   font-size: 11px;
   font-weight: 900;
 }
 
 .success-card h1 {
   margin: 18px 0 12px;
-  color: #071126;
+  color: var(--ink);
   font-size: 31px;
   font-weight: 900;
 }
 
 .success-card > p {
-  color: #64748b;
+  color: var(--slate);
   line-height: 1.7;
 }
 
@@ -133,11 +132,11 @@ defineProps({
   padding: 17px;
   border: 1px solid rgba(13, 143, 233, 0.22);
   border-radius: 14px;
-  background: #eaf7ff;
+  background: var(--paper);
 }
 
 .reference-box span {
-  color: #64748b;
+  color: var(--slate);
   font-size: 10px;
   font-weight: 850;
   text-transform: uppercase;
@@ -146,18 +145,18 @@ defineProps({
 
 .reference-box strong {
   margin-top: 5px;
-  color: #087bc9;
+  color: var(--signal-deep);
   font-size: 21px;
   display: block;
 }
 
 .status-line {
-  color: #64748b;
+  color: var(--slate);
   font-size: 12px;
 }
 
 .status-line strong {
-  color: #071126;
+  color: var(--ink);
   text-transform: capitalize;
 }
 
@@ -181,14 +180,14 @@ defineProps({
 }
 
 .primary-action {
-  color: #ffffff;
-  background: #071126;
+  color: var(--chalk);
+  background: var(--ink);
 }
 
 .secondary-action {
-  border: 1px solid #dce5ef;
-  color: #071126;
-  background: #ffffff;
+  border: 1px solid var(--sand);
+  color: var(--ink);
+  background: var(--chalk);
 }
 
 @media (max-width: 575.98px) {

@@ -23,7 +23,7 @@ class CompanyController extends Controller
         ]);
     }
 
-    public function show(string $hashid)
+    public function show(Request $request, string $hashid)
     {
         $decoded = Hashids::decode($hashid);
         abort_if(empty($decoded), 404);
@@ -95,6 +95,19 @@ class CompanyController extends Controller
             ->where('expired_at', '<', now())
             ->count();
 
+        $expiringSoonEnrollmentsCount = (clone $enrollmentsQuery)
+            ->whereNotNull('expired_at')
+            ->whereBetween('expired_at', [
+                now(),
+                now()->copy()->addDays(30),
+            ])
+            ->count();
+
+        $lowProgressEnrollmentsCount = (clone $enrollmentsQuery)
+            ->where('status', 'in_progress')
+            ->whereRaw('COALESCE(progress_percent, 0) < 50')
+            ->count();
+
         $averageProgress = round(
             (float) ((clone $enrollmentsQuery)->avg('progress_percent') ?? 0),
             2
@@ -132,6 +145,234 @@ class CompanyController extends Controller
         $examPassRate = $finishedExamAttempts > 0
             ? round(($passedExamAttempts / $finishedExamAttempts) * 100, 2)
             : 0;
+
+        $trainingCoverageRate = $usersCount > 0
+            ? round(($learnersEnrolledCount / $usersCount) * 100, 2)
+            : 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Training activity period
+        |--------------------------------------------------------------------------
+        |
+        | Default: Last 12 months
+        | Optional: ?year=2026 -> January to December 2026
+        |
+        */
+
+        $currentYear = (int) now()->year;
+
+        $firstAvailableYear = $company->created_at
+            ? min((int) $company->created_at->year, $currentYear)
+            : $currentYear;
+
+        $selectedYear = $request->filled('year')
+            ? (int) $request->query('year')
+            : null;
+
+        if (
+            $selectedYear !== null &&
+            (
+                $selectedYear < $firstAvailableYear ||
+                $selectedYear > $currentYear
+            )
+        ) {
+            $selectedYear = null;
+        }
+
+        $availableYears = range(
+            $currentYear,
+            $firstAvailableYear
+        );
+
+        if ($selectedYear !== null) {
+            $periodStart = now()
+                ->copy()
+                ->setYear($selectedYear)
+                ->startOfYear();
+
+            $periodEnd = now()
+                ->copy()
+                ->setYear($selectedYear)
+                ->endOfYear();
+
+            $trainingPeriodLabel = (string) $selectedYear;
+        } else {
+            $periodStart = now()
+                ->copy()
+                ->startOfMonth()
+                ->subMonths(11);
+
+            $periodEnd = now()
+                ->copy()
+                ->endOfMonth();
+
+            $trainingPeriodLabel = 'Last 12 months';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Training activity - enrollments
+        |--------------------------------------------------------------------------
+        */
+
+        $monthlyEnrollmentsRaw = DB::table('enrollments')
+            ->where('company_id', $company->id)
+            ->whereBetween('created_at', [
+                $periodStart,
+                $periodEnd,
+            ])
+            ->selectRaw("
+                DATE_FORMAT(created_at, '%Y-%m') as month,
+                COUNT(*) as enrollments,
+                COUNT(DISTINCT user_id) as learners
+            ")
+            ->groupBy('month')
+            ->get()
+            ->keyBy('month');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Training activity - completions
+        |--------------------------------------------------------------------------
+        */
+
+        $monthlyCompletionsRaw = DB::table('enrollments')
+            ->where('company_id', $company->id)
+            ->whereNotNull('completed_at')
+            ->whereBetween('completed_at', [
+                $periodStart,
+                $periodEnd,
+            ])
+            ->selectRaw("
+                DATE_FORMAT(completed_at, '%Y-%m') as month,
+                COUNT(*) as total
+            ")
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Training activity - certificates
+        |--------------------------------------------------------------------------
+        */
+
+        $monthlyCertificatesRaw = DB::table('certificates as cert')
+            ->join(
+                'enrollments as e',
+                'e.id',
+                '=',
+                'cert.enrollment_id'
+            )
+            ->where('e.company_id', $company->id)
+            ->whereNull('cert.deleted_at')
+            ->whereNotNull('cert.issued_at')
+            ->whereBetween('cert.issued_at', [
+                $periodStart,
+                $periodEnd,
+            ])
+            ->selectRaw("
+                DATE_FORMAT(cert.issued_at, '%Y-%m') as month,
+                COUNT(cert.id) as total
+            ")
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Build complete 12-month training timeline
+        |--------------------------------------------------------------------------
+        */
+
+        $monthlyActivity = collect(range(0, 11))
+            ->map(function ($offset) use (
+                $periodStart,
+                $monthlyEnrollmentsRaw,
+                $monthlyCompletionsRaw,
+                $monthlyCertificatesRaw
+            ) {
+                $date = $periodStart
+                    ->copy()
+                    ->addMonths($offset);
+
+                $key = $date->format('Y-m');
+
+                $enrollmentRow = $monthlyEnrollmentsRaw
+                    ->get($key);
+
+                return [
+                    'month' => $key,
+                    'label' => $date->format('M'),
+                    'full_label' => $date->format('M Y'),
+
+                    'enrollments' => (int) (
+                        $enrollmentRow->enrollments ?? 0
+                    ),
+
+                    'learners' => (int) (
+                        $enrollmentRow->learners ?? 0
+                    ),
+
+                    'completed' => (int) (
+                        $monthlyCompletionsRaw[$key] ?? 0
+                    ),
+
+                    'certificates' => (int) (
+                        $monthlyCertificatesRaw[$key] ?? 0
+                    ),
+                ];
+            })
+            ->values();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Company requests - always last 12 months
+        |--------------------------------------------------------------------------
+        */
+
+        $requestsPeriodStart = now()
+            ->copy()
+            ->startOfMonth()
+            ->subMonths(11);
+
+        $monthlyRequestsRaw = DB::table('company_requests')
+            ->where('company_id', $company->id)
+            ->whereNull('deleted_at')
+            ->where('created_at', '>=', $requestsPeriodStart)
+            ->selectRaw("
+                DATE_FORMAT(created_at, '%Y-%m') as month,
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+            ")
+            ->groupBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyRequests = collect(range(0, 11))
+            ->map(function ($offset) use (
+                $requestsPeriodStart,
+                $monthlyRequestsRaw
+            ) {
+                $date = $requestsPeriodStart
+                    ->copy()
+                    ->addMonths($offset);
+
+                $key = $date->format('Y-m');
+
+                $row = $monthlyRequestsRaw->get($key);
+
+                return [
+                    'month' => $key,
+                    'label' => $date->format('M Y'),
+                    'total' => (int) ($row->total ?? 0),
+                    'pending' => (int) ($row->pending ?? 0),
+                    'approved' => (int) ($row->approved ?? 0),
+                    'rejected' => (int) ($row->rejected ?? 0),
+                ];
+            })
+            ->values();
 
         $recentRequests = DB::table('company_requests as cr')
             ->leftJoin('courses as c', 'c.id', '=', 'cr.course_id')
@@ -209,6 +450,7 @@ class CompanyController extends Controller
             $course->certificates_count = (int) ($certificatesByCourse[$course->id] ?? 0);
             $course->requests_count = (int) ($requestsByCourse[$course->id] ?? 0);
             $course->approved_requests_count = (int) ($approvedRequestsByCourse[$course->id] ?? 0);
+
             $course->completion_rate = $course->enrollments_count > 0
                 ? round(($course->completed_count / $course->enrollments_count) * 100, 2)
                 : 0;
@@ -268,33 +510,58 @@ class CompanyController extends Controller
 
         $stats = [
             'users_count' => $usersCount,
+
             'requests_count' => $requestsCount,
             'pending_requests_count' => $pendingRequestsCount,
             'approved_requests_count' => $approvedRequestsCount,
             'rejected_requests_count' => $rejectedRequestsCount,
             'requested_courses_count' => $requestedCoursesCount,
             'approved_courses_count' => $approvedCoursesCount,
+
             'assigned_courses_count' => $assignedCoursesCount,
             'enrollments_count' => $enrollmentsCount,
             'learners_enrolled_count' => $learnersEnrolledCount,
             'not_started_enrollments_count' => $notStartedEnrollmentsCount,
             'in_progress_enrollments_count' => $inProgressEnrollmentsCount,
             'completed_enrollments_count' => $completedEnrollmentsCount,
+
             'expired_enrollments_count' => $expiredEnrollmentsCount,
+            'expiring_soon_enrollments_count' => $expiringSoonEnrollmentsCount,
+            'low_progress_enrollments_count' => $lowProgressEnrollmentsCount,
+
             'average_progress' => $averageProgress,
+            'completion_rate' => $completionRate,
+            'training_coverage_rate' => $trainingCoverageRate,
+
             'certificates_issued_count' => $certificatesIssuedCount,
             'accreditations_used_count' => $accreditationsUsedCount,
+
             'exam_attempts_count' => $finishedExamAttempts,
             'passed_exam_attempts_count' => $passedExamAttempts,
             'failed_exam_attempts_count' => $failedExamAttempts,
-            'request_approval_rate' => $requestApprovalRate,
-            'completion_rate' => $completionRate,
             'exam_pass_rate' => $examPassRate,
+
+            'request_approval_rate' => $requestApprovalRate,
         ];
 
         return Inertia::render('companies/showCompany', [
             'company' => $companyData,
             'stats' => $stats,
+            'monthlyActivity' => $monthlyActivity,
+
+            'availableYears' => $availableYears,
+
+            'trainingPeriod' => [
+                'mode' => $selectedYear !== null
+                    ? 'year'
+                    : 'last_12_months',
+
+                'selected_year' => $selectedYear,
+
+                'label' => $trainingPeriodLabel,
+            ],
+
+            'monthlyRequests' => $monthlyRequests,
             'recentRequests' => $recentRequests,
             'courseStats' => $courseStats,
             'recentCertificates' => $recentCertificates,
@@ -305,7 +572,13 @@ class CompanyController extends Controller
     {
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('companies', 'email')],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('companies', 'email'),
+            ],
             'phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:500'],
             'status' => ['required', 'string', 'in:active,inactive'],
@@ -332,13 +605,13 @@ class CompanyController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Company added successfully.');
+            return back()->with('success', __('Company added successfully.'));
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
 
             return back()->withErrors([
-                'error' => 'An error occurred while adding the company.',
+                'error' => __('An error occurred while adding the company.'),
             ]);
         }
     }
@@ -395,13 +668,13 @@ class CompanyController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Company updated successfully.');
+            return back()->with('success', __('Company updated successfully.'));
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
 
             return back()->withErrors([
-                'error' => 'An error occurred while updating the company.',
+                'error' => __('An error occurred while updating the company.'),
             ]);
         }
     }
@@ -420,14 +693,14 @@ class CompanyController extends Controller
             DB::commit();
 
             return back()->with([
-                'success' => 'Company deleted successfully.',
+                'success' => __('Company deleted successfully.'),
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
 
             return back()->withErrors([
-                'error' => 'An error occurred while deleting the company.',
+                'error' => __('An error occurred while deleting the company.'),
             ]);
         }
     }

@@ -9,11 +9,13 @@ const messages = {
   fr,
 }
 
-const locale = sessionStorage.getItem("locale");
+const locale = typeof window !== 'undefined'
+  ? window.localStorage.getItem('lms_language') || 'en'
+  : 'en'
 
 const i18n = createI18n({
-  locale:  locale || "en",
-  fallbackLocale: "en",
+  locale,
+  fallbackLocale: 'en',
   messages: messages
 });
 export default i18n;

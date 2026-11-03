@@ -35,7 +35,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Two Factor Authentication" />
+    <Head :title="$t('t-two-factor-authentication')" />
 
     <div class="auth-page-wrapper pt-5">
         <div class="auth-page-content">
@@ -48,7 +48,7 @@ const submit = () => {
                                 <img src="@assets/images/logo_safesky blue.webp" alt="" height="20">
                                 </Link>
                             </div>
-                            <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
+                            <p class="mt-3 fs-15 fw-medium">{{ $t('t-safesky-learning-management-system') }}</p>
                         </div>
                     </BCol>
                 </BRow>
@@ -68,21 +68,21 @@ const submit = () => {
 
                                 <div class="p-2 mt-4">
                                     <div class="text-muted text-center mb-4 mx-lg-3">
-                                        <h4 class="">Two Factor Authentication</h4>
+                                        <h4 class="">{{ $t('t-two-factor-authentication') }}</h4>
                                         <div class="text-sm text-muted">
                                             <template v-if="! recovery">
-                                                Please confirm access to your account by entering the authentication code provided by your authenticator application.
+                                                {{ $t('t-two-factor-code-instructions') }}
                                             </template>
                                 
                                             <template v-else>
-                                                Please confirm access to your account by entering one of your emergency recovery codes.
+                                                {{ $t('t-two-factor-recovery-instructions') }}
                                             </template>
                                         </div>
                                     </div>
 
                                     <form @submit.prevent="submit">
                                         <div v-if="! recovery">
-                                            <InputLabel for="code" value="Code" />
+                                            <InputLabel for="code" :value="$t('t-code')" />
                                             <TextInput
                                                 id="code"
                                                 ref="codeInput"
@@ -90,7 +90,7 @@ const submit = () => {
                                                 type="text"
                                                 inputmode="numeric"
                                                 autofocus
-                                                placeholder="Enter the code that you recieve your authenticator app"
+                                                :placeholder="$t('t-enter-authenticator-code')"
                                                 autocomplete="one-time-code"
                                                 :class="{ 'is-invalid' : form.errors.code }"
                                             />
@@ -98,7 +98,7 @@ const submit = () => {
                                         </div>
                             
                                         <div v-else>
-                                            <InputLabel for="recovery_code" value="Recovery Code" />
+                                            <InputLabel for="recovery_code" :value="$t('t-recovery-code')" />
                                             <TextInput
                                                 id="recovery_code"
                                                 ref="recoveryCodeInput"
@@ -113,15 +113,15 @@ const submit = () => {
                                         <div class="d-flex align-items-center justify-content-end mt-4">
                                             <button type="button" class="btn btn-primary me-1" @click.prevent="toggleRecovery">
                                                 <template v-if="! recovery">
-                                                    Use a recovery code
+                                                    {{ $t('t-use-recovery-code') }}
                                                 </template>
                             
                                                 <template v-else>
-                                                    Use an authentication code
+                                                    {{ $t('t-use-authentication-code') }}
                                                 </template>
                                             </button>
                             
-                                            <BButton variant="success" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">Log in</BButton>
+                                            <BButton variant="success" type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">{{ $t('t-login') }}</BButton>
                                         </div>
                                     </form>
                                 </div>
@@ -137,7 +137,7 @@ const submit = () => {
                 <BRow>
                     <BCol lg="12">
                         <div class="text-center">
-                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                            <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} SafeSky Solution. {{ $t('t-all-rights-reserved') }}</p>
                         </div>
                     </BCol>
                 </BRow>

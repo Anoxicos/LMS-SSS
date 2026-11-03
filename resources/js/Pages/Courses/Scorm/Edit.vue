@@ -4,6 +4,10 @@ import { Head, Link, useForm } from '@inertiajs/vue3'
 import Swal from 'sweetalert2'
 
 import Layout from '@/Layouts/main.vue'
+import i18n from '@/i18n'
+import { normalizeCourseChoice } from '@/composables/course-labels'
+
+const t = (...args) => i18n.global.t(...args)
 import PageHeader from '@/Components/page-header.vue'
 
 import '../course-builder.css'
@@ -34,11 +38,11 @@ const toBoolean = (value) => {
   return value === true || value === 1 || value === '1' || value === 'true'
 }
 
-const steps = [
-  { id: 1, title: 'Course Information', icon: 'ri-book-open-line' },
-  { id: 2, title: 'Plan', icon: 'ri-stack-line' },
-  { id: 3, title: 'Review', icon: 'ri-checkbox-circle-line' },
-]
+const steps = computed(() => [
+  { id: 1, title: t('ui-course-information'), icon: 'ri-book-open-line' },
+  { id: 2, title: t('ui-plan'), icon: 'ri-stack-line' },
+  { id: 3, title: t('ui-review'), icon: 'ri-checkbox-circle-line' },
+])
 
 const currentStep = ref(Number(props.step || 1))
 
@@ -99,14 +103,14 @@ watch(
     form.title = course.title || ''
     form.description = course.description || ''
     form.category_id = course.category_id || ''
-    form.type = course.type || ''
-    form.training_type = course.training_type || ''
+    form.type = normalizeCourseChoice('type', course.type || '')
+    form.training_type = normalizeCourseChoice('training_type', course.training_type || '')
     form.method = course.method || ''
     form.duration_hours = course.duration_hours ?? ''
     form.passing_score = course.passing_score ?? 80
-    form.skill_level = course.skill_level || ''
+    form.skill_level = normalizeCourseChoice('skill_level', course.skill_level || '')
     form.course_focus = course.course_focus || ''
-    form.language = course.language || 'English'
+    form.language = normalizeCourseChoice('language', course.language || 'English')
     form.price = course.price || 0
     form.currency = course.currency || 'MAD'
     form.is_published = toBoolean(course.is_published)
@@ -143,7 +147,7 @@ watch(
 )
 
 const isFirstStep = computed(() => currentStep.value === 1)
-const isLastStep = computed(() => currentStep.value === steps.length)
+const isLastStep = computed(() => currentStep.value === steps.value.length)
 
 const selectedCategory = computed(() => {
   return props.categories.find((category) => {
@@ -154,7 +158,7 @@ const selectedCategory = computed(() => {
 const showSuccess = (message) => {
   Swal.fire({
     icon: 'success',
-    title: 'Saved!',
+    title: t('ui-saved'),
     text: message,
     timer: 1800,
     showConfirmButton: false,
@@ -164,7 +168,7 @@ const showSuccess = (message) => {
 const showError = (message = 'Please check the form and try again.') => {
   Swal.fire({
     icon: 'error',
-    title: 'Error!',
+    title: t('ui-error-label'),
     text: message,
     timer: 2600,
     showConfirmButton: false,
@@ -194,8 +198,8 @@ const validateBasicInfo = () => {
   ) {
     Swal.fire({
       icon: 'warning',
-      title: 'Required fields',
-      text: 'Please fill in the required SCORM course information.',
+      title: t('ui-required-fields'),
+      text: t('ui-please-fill-in-the-required-scorm-course-information'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -209,8 +213,8 @@ const validateBasicInfo = () => {
   if (Number.isNaN(durationHours) || durationHours <= 0) {
     Swal.fire({
       icon: 'warning',
-      title: 'Invalid duration',
-      text: 'Duration must be greater than 0 hour.',
+      title: t('ui-invalid-duration'),
+      text: t('ui-duration-must-be-greater-than-0-hour'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -221,8 +225,8 @@ const validateBasicInfo = () => {
   if (Number.isNaN(passingScore) || passingScore < 0 || passingScore > 100) {
     Swal.fire({
       icon: 'warning',
-      title: 'Invalid passing score',
-      text: 'Passing score must be between 0 and 100.',
+      title: t('ui-invalid-passing-score'),
+      text: t('ui-passing-score-must-be-between-0-and-100'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -233,8 +237,8 @@ const validateBasicInfo = () => {
   if (!form.scorm_file && !form.scorm_zip_path) {
     Swal.fire({
       icon: 'warning',
-      title: 'SCORM package required',
-      text: 'Please upload a valid SCORM ZIP package.',
+      title: t('ui-scorm-package-required'),
+      text: t('ui-please-upload-a-valid-scorm-zip-package'),
       timer: 2500,
       showConfirmButton: false,
     })
@@ -256,7 +260,7 @@ const previousStep = () => {
 }
 
 const nextStep = () => {
-  if (currentStep.value < steps.length) {
+  if (currentStep.value < steps.value.length) {
     currentStep.value++
   }
 }
@@ -321,8 +325,8 @@ const saveCurrentStep = (goNext = false) => {
 
 <template>
   <Layout>
-    <Head title="Edit SCORM Course" />
-    <PageHeader title="Edit SCORM Course" pageTitle="Courses" />
+    <Head :title="$t('ui-edit-scorm-course')" />
+    <PageHeader :title="$t('ui-edit-scorm-course')" :page-title="$t('ui-courses')" />
 
     <div class="course-builder-page">
       <BCard class="course-builder-card border-0 shadow-sm">
@@ -334,9 +338,9 @@ const saveCurrentStep = (goNext = false) => {
               </div>
 
               <div>
-                <h4 class="mb-1 fw-bold">Edit SCORM Course</h4>
+                <h4 class="mb-1 fw-bold">{{ $t('ui-edit-scorm-course') }}</h4>
                 <p class="text-muted mb-0">
-                  Configure the course information, assessment plan and final review.
+                  {{ $t('ui-configure-the-course-information-assessment-plan-and-f') }}
                 </p>
               </div>
             </div>
@@ -347,12 +351,12 @@ const saveCurrentStep = (goNext = false) => {
                 class="btn btn-soft-info back-btn"
               >
                 <i class="ri-eye-line me-1"></i>
-                View
+                {{ $t('ui-view') }}
               </Link>
 
               <Link :href="route('courses.scorm.index')" class="btn btn-light back-btn">
                 <i class="ri-arrow-left-line me-1"></i>
-                Back to SCORM Courses
+                {{ $t('ui-back-to-scorm-courses') }}
               </Link>
             </div>
           </div>
@@ -418,7 +422,7 @@ const saveCurrentStep = (goNext = false) => {
               @click="previousStep"
             >
               <i class="ri-arrow-left-line me-1"></i>
-              Previous
+              {{ $t('ui-previous') }}
             </BButton>
 
             <div class="d-flex flex-wrap gap-2 justify-content-end">
@@ -435,7 +439,7 @@ const saveCurrentStep = (goNext = false) => {
                   class="spinner-border spinner-border-sm me-1"
                 ></span>
                 <i v-else class="ri-save-line me-1"></i>
-                Save & Next
+                {{ $t('ui-save-next') }}
               </BButton>
 
               <BButton
@@ -445,7 +449,7 @@ const saveCurrentStep = (goNext = false) => {
                 class="footer-btn"
                 @click="nextStep"
               >
-                Next
+                {{ $t('ui-next') }}
                 <i class="ri-arrow-right-line ms-1"></i>
               </BButton>
 
@@ -455,7 +459,7 @@ const saveCurrentStep = (goNext = false) => {
                 class="btn btn-soft-info footer-btn"
               >
                 <i class="ri-eye-line me-1"></i>
-                View Course
+                {{ $t('ui-view-course') }}
               </Link>
 
               <Link
@@ -463,7 +467,7 @@ const saveCurrentStep = (goNext = false) => {
                 :href="route('courses.scorm.index')"
                 class="btn btn-success footer-btn"
               >
-                Finish
+                {{ $t('ui-finish') }}
                 <i class="ri-check-line ms-1"></i>
               </Link>
             </div>

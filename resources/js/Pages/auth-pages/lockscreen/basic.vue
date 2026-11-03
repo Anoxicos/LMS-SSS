@@ -8,7 +8,7 @@ export default {
 </script>
 
 <template>
-  <Head title="Lock Screen" />
+  <Head :title="$t('t-lock-screen')" />
   <div class="auth-page-wrapper pt-5">
   
     <div class="auth-page-content">
@@ -21,7 +21,7 @@ export default {
                   <img src="@assets/images/logo_safesky blue.webp" alt="" height="20">
                 </Link>
               </div>
-              <p class="mt-3 fs-15 fw-medium">Premium Admin & Dashboard Template</p>
+              <p class="mt-3 fs-15 fw-medium">{{ $t('ui-premium-admin-dashboard-template') }}</p>
             </div>
           </BCol>
         </BRow>
@@ -32,7 +32,7 @@ export default {
 
               <BCardBody class="p-4">
                 <div class="text-center mt-2">
-                  <h5 class="text-primary">Lock Screen</h5>
+                  <h5 class="text-primary">{{ $t('t-lock-screen') }}</h5>
                   <p class="text-muted">Enter your password to unlock the screen!</p>
                 </div>
                 <div class="user-thumb text-center">
@@ -43,11 +43,11 @@ export default {
                 <div class="p-2 mt-4">
                   <form>
                     <div class="mb-3">
-                      <label class="form-label" for="userpassword">Password</label>
-                      <input type="password" class="form-control" id="userpassword" placeholder="Enter password" required>
+                      <label class="form-label" for="userpassword">{{ $t('ui-password') }}</label>
+                      <input type="password" class="form-control" id="userpassword" :placeholder="$t('ui-enter-password')" required>
                     </div>
                     <div class="mb-2 mt-4">
-                      <BButton variant="primary" class="w-100" type="submit">Unlock</BButton>
+                      <BButton variant="primary" class="w-100" type="submit">{{ $t('t-unlock') }}</BButton>
                     </div>
                   </form>
 
@@ -57,7 +57,7 @@ export default {
 
             <div class="mt-4 text-center">
               <p class="mb-0">Not you ? return <Link href="/auth/signin-basic"
-                  class="fw-semibold text-primary text-decoration-underline"> Signin </Link>
+                  class="fw-semibold text-primary text-decoration-underline"> {{ $t('ui-signin') }} </Link>
               </p>
             </div>
 
@@ -71,8 +71,8 @@ export default {
         <BRow>
           <BCol lg="12">
             <div class="text-center">
-              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} Velzon. Crafted with <i
-                  class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+              <p class="mb-0 text-muted">&copy; {{ new Date().getFullYear() }} {{ $t('ui-velzon-crafted-with') }} <i
+                  class="mdi mdi-heart text-danger"></i> {{ $t('ui-by-themesbrand') }}</p>
             </div>
           </BCol>
         </BRow>
