@@ -600,7 +600,7 @@ export default {
         <div class="me-2">
           <h5 class="m-0 me-2 text-white">{{ $t('ui-theme-customizer') }}</h5>
         </div>
-        <button type="button" class="btn-close btn-close-white ms-auto" id="customizerclose-btn" @click="click"></button>
+        <button type="button" class="btn-close btn-close-white ms-auto" id="customizerclose-btn" :aria-label="$t('t-close')" @click="click"></button>
       </template>
       <simplebar class="h-100">
         <div class="p-4">
@@ -1230,7 +1230,7 @@ export default {
               </BCol>
               <BCol cols="4">
                 <button class="btn btn-link avatar-md w-100 p-0 overflow-hidden border collapsed " type="button"
-                  v-b-toggle.collapseBgGradient @click="onSideBarColorClick('gradient')">
+                  :aria-label="$t('ui-gradient')" v-b-toggle.collapseBgGradient @click="onSideBarColorClick('gradient')">
                   <span class="d-flex gap-1 h-100">
                     <span class="flex-shrink-0">
                       <span class="bg-vertical-gradient d-flex h-100 flex-column gap-1 p-1">

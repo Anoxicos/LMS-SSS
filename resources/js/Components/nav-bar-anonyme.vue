@@ -418,6 +418,17 @@ const handleDocumentClick = event => {
   }
 }
 
+const handleEscape = event => {
+  if (event.key !== 'Escape') return
+
+  const mobileWasOpen = mobileMenuOpen.value
+  if (!mobileWasOpen && !userMenuOpen.value && !languageMenuOpen.value && !openedDropdown.value) return
+
+  event.preventDefault()
+  closeAllMenus()
+  if (mobileWasOpen) document.querySelector('.mobile-menu-btn')?.focus()
+}
+
 const handleWindowScroll = () => {
   const currentY = window.scrollY
 
@@ -465,6 +476,7 @@ onMounted(() => {
     'click',
     handleDocumentClick
   )
+  document.addEventListener('keydown', handleEscape)
   window.addEventListener('scroll', handleWindowScroll, { passive: true })
   window.addEventListener('resize', handleWindowResize)
 
@@ -484,6 +496,7 @@ onBeforeUnmount(() => {
     'click',
     handleDocumentClick
   )
+  document.removeEventListener('keydown', handleEscape)
   window.removeEventListener('scroll', handleWindowScroll)
   window.removeEventListener('resize', handleWindowResize)
 
@@ -558,6 +571,8 @@ onBeforeUnmount(() => {
             <button
               type="button"
               class="public-nav-link dropdown-trigger"
+              :aria-expanded="openedDropdown === item.key"
+              aria-haspopup="true"
               @click.stop="toggleDropdown(item.key)"
             >
               <span class="nav-link-content">
@@ -834,7 +849,7 @@ onBeforeUnmount(() => {
         </Link>
 
         <template v-if="!user">
-          <Link :href="route('login')" class="icon-btn" :title="$t('t-login')">
+          <Link :href="route('login')" class="icon-btn" :aria-label="$t('t-login')" :title="$t('t-login')">
             <i class="ri-login-box-line"></i>
           </Link>
 
@@ -962,7 +977,9 @@ onBeforeUnmount(() => {
         type="button"
         class="mobile-menu-btn"
         :class="{ 'is-open': mobileMenuOpen }"
-        :aria-label="$t('ui-open-menu')"
+        :aria-label="mobileMenuOpen ? $t('ui-close-menu') : $t('ui-open-menu')"
+        :aria-expanded="mobileMenuOpen"
+        aria-controls="public-navbar-nav"
         @click="toggleMobileMenu"
       >
         <span></span>

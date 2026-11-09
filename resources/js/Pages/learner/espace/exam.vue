@@ -475,6 +475,7 @@ const getOptionClass = option => {
           <button
             type="button"
             class="back-btn"
+            :aria-label="$t('t-back')"
             @click="backToFinish"
           >
             <i class="ri-arrow-left-line"></i>

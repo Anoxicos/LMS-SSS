@@ -843,6 +843,7 @@ watch(totalPages, value => {
             <button
               type="button"
               :disabled="currentPage === 1"
+              :aria-label="$t('ui-previous')"
               @click="goToPage(currentPage - 1)"
             >
               <i class="ri-arrow-left-s-line"></i>
@@ -861,6 +862,7 @@ watch(totalPages, value => {
             <button
               type="button"
               :disabled="currentPage === totalPages"
+              :aria-label="$t('ui-next')"
               @click="goToPage(currentPage + 1)"
             >
               <i class="ri-arrow-right-s-line"></i>

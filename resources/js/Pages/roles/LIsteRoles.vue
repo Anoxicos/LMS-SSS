@@ -418,7 +418,7 @@ const defaultOptions = {
                 class="page-link"
                 @click.prevent="changePage(currentPageRoles - 1)"
               >
-                <i class="ri-arrow-left-s-line"></i>
+                <i class="ri-arrow-left-s-line" aria-hidden="true"></i><span class="visually-hidden">{{ $t('ui-previous') }}</span>
               </BLink>
             </li>
 
@@ -446,7 +446,7 @@ const defaultOptions = {
                 class="page-link"
                 @click.prevent="changePage(currentPageRoles + 1)"
               >
-                <i class="ri-arrow-right-s-line"></i>
+                <i class="ri-arrow-right-s-line" aria-hidden="true"></i><span class="visually-hidden">{{ $t('ui-next') }}</span>
               </BLink>
             </li>
           </ul>

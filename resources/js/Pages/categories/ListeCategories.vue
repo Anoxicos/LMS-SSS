@@ -427,7 +427,7 @@ const onSort = (column) => {
                 class="page-link"
                 @click.prevent="currentPageData > 1 && currentPageData--"
               >
-                <i class="ri-arrow-left-s-line"></i>
+                <i class="ri-arrow-left-s-line" aria-hidden="true"></i><span class="visually-hidden">{{ $t('ui-previous') }}</span>
               </BLink>
             </li>
 
@@ -455,7 +455,7 @@ const onSort = (column) => {
                 class="page-link"
                 @click.prevent="currentPageData < totalPagesData && currentPageData++"
               >
-                <i class="ri-arrow-right-s-line"></i>
+                <i class="ri-arrow-right-s-line" aria-hidden="true"></i><span class="visually-hidden">{{ $t('ui-next') }}</span>
               </BLink>
             </li>
           </ul>

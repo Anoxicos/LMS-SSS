@@ -269,7 +269,7 @@ export default {
         <!-- LOGO -->
         <div class="navbar-brand-box">
           <!-- Dark Logo-->
-          <Link href="/" class="logo logo-dark">
+          <Link href="/" class="logo logo-dark" :aria-label="$t('ui-safesky-solution-home')">
           <span class="logo-sm">
             <img src="@assets/images/logo-sm.png" alt="" height="22" />
           </span>
@@ -278,7 +278,7 @@ export default {
           </span>
           </Link>
           <!-- Light Logo-->
-          <Link href="/" class="logo logo-light">
+          <Link href="/" class="logo logo-light" :aria-label="$t('ui-safesky-solution-home')">
           <span class="logo-sm">
             <img src="@assets/images/logo-sm.png" alt="" height="22" />
           </span>
@@ -286,16 +286,13 @@ export default {
             <img src="@assets/images/logo-blanche-.png" alt="" height="65" />
           </span>
           </Link>
-          <button type="button" class=" btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
-            <i class="ri-record-circle-line"></i>
-          </button>
         </div>
 
         <div id="scrollbar" v-if="rmenu == 'twocolumn'">
           <BContainer fluid>
             <div id="two-column-menu">
               <simplebar class="twocolumn-iconview list-unstyled">
-                <a class="logo"><img src="@assets/images/logo-sm.png" alt="Logo" height="22" /></a>
+                <div class="logo"><img src="@assets/images/logo-sm.png" alt="" height="22" /></div>
                 <li>
                   <a href="#sidebarDashboards" class="nav-icon" role="button" @click.prevent="updateMenu('sidebarDashboards', $event)">
                     <i class="ri-dashboard-2-line"></i>
@@ -574,10 +571,10 @@ export default {
                     <ul class="nav nav-sm flex-column">
                       <li class="nav-item">
 
-                        <a class="nav-link" data-key="t-level-1.1">
+                        <span class="nav-link" data-key="t-level-1.1">
 
                           {{ $t("t-level-1.1") }}
-                        </a>
+                        </span>
                       </li>
                       <li class="nav-item">
 
@@ -588,9 +585,9 @@ export default {
 
                           <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                              <a class="nav-link" data-key="t-level-2.1">
+                              <span class="nav-link" data-key="t-level-2.1">
                                 {{ $t("t-level-2.1") }}
-                              </a>
+                              </span>
                             </li>
                             <li class="nav-item">
 
@@ -601,14 +598,14 @@ export default {
 
                                 <ul class="nav nav-sm flex-column">
                                   <li class="nav-item">
-                                    <a class="nav-link" data-key="t-level-3.1">
+                                    <span class="nav-link" data-key="t-level-3.1">
                                       {{ $t("t-level-3.1") }}
-                                    </a>
+                                    </span>
                                   </li>
                                   <li class="nav-item">
-                                    <a class="nav-link" data-key="t-level-3.2">
+                                    <span class="nav-link" data-key="t-level-3.2">
                                       {{ $t("t-level-3.2") }}
-                                    </a>
+                                    </span>
                                   </li>
                                 </ul>
                               </div>

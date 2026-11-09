@@ -449,6 +449,7 @@ onBeforeUnmount(() => {
       type="button"
       class="filters-overlay"
       :class="{ show: showMobileFilters }"
+      :aria-label="$t('ui-close-filters')"
       @click="closeMobileFilters"
     ></button>
 
@@ -792,17 +793,21 @@ onBeforeUnmount(() => {
               <button
                 type="button"
                 :class="{ active: viewMode === 'grid' }"
+                :aria-label="$t('ui-grid-view')"
+                :aria-pressed="viewMode === 'grid'"
                 @click="viewMode = 'grid'"
               >
-                <i class="ri-grid-line"></i>
+                <i class="ri-grid-line" aria-hidden="true"></i>
               </button>
 
               <button
                 type="button"
                 :class="{ active: viewMode === 'list' }"
+                :aria-label="$t('ui-list-view')"
+                :aria-pressed="viewMode === 'list'"
                 @click="viewMode = 'list'"
               >
-                <i class="ri-list-check"></i>
+                <i class="ri-list-check" aria-hidden="true"></i>
               </button>
             </div>
 
@@ -931,9 +936,10 @@ onBeforeUnmount(() => {
           <button
             type="button"
             :disabled="currentPage === 1"
+            :aria-label="$t('ui-previous')"
             @click="prevPage"
           >
-            <i class="ri-arrow-left-s-line"></i>
+            <i class="ri-arrow-left-s-line" aria-hidden="true"></i>
           </button>
 
           <button
@@ -942,6 +948,7 @@ onBeforeUnmount(() => {
             type="button"
             class="page-number"
             :class="{ active: page === currentPage, dots: page === '...' }"
+            :aria-current="page === currentPage ? 'page' : null"
             :disabled="page === '...'"
             @click="goToPage(page)"
           >
@@ -951,9 +958,10 @@ onBeforeUnmount(() => {
           <button
             type="button"
             :disabled="currentPage === totalPages"
+            :aria-label="$t('ui-next')"
             @click="nextPage"
           >
-            <i class="ri-arrow-right-s-line"></i>
+            <i class="ri-arrow-right-s-line" aria-hidden="true"></i>
           </button>
         </div>
       </main>

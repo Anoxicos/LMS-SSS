@@ -1,6 +1,5 @@
 <script>
 import { Link } from '@inertiajs/vue3';
-// import router from "@/router";
 import simplebar from "simplebar-vue";
 import { layoutComputed } from "@/state/helpers";
 
@@ -8,7 +7,6 @@ import NavBar from "@/Components/nav-bar.vue";
 import Menu from "@/Components/menu.vue";
 import RightBar from "@/Components/right-bar.vue";
 import Footer from "@/Components/footer.vue";
-localStorage.setItem('hoverd', false);
 
 /**
  * Vertical layout
@@ -51,21 +49,12 @@ export default {
       }
     },
     toggleMenu() {
-      document.body.classList.toggle("sidebar-enable");
-
-      if (window.screen.width >= 992) {
-        // eslint-disable-next-line no-unused-vars
-        router.afterEach((routeTo, routeFrom) => {
-          document.body.classList.remove("sidebar-enable");
-          document.body.classList.remove("vertical-collpsed");
-        });
+      if (window.innerWidth >= 992) {
+        document.body.classList.remove("vertical-sidebar-enable");
         document.body.classList.toggle("vertical-collpsed");
       } else {
-        // eslint-disable-next-line no-unused-vars
-        router.afterEach((routeTo, routeFrom) => {
-          document.body.classList.remove("sidebar-enable");
-        });
         document.body.classList.remove("vertical-collpsed");
+        document.body.classList.toggle("vertical-sidebar-enable");
       }
       this.isMenuCondensed = !this.isMenuCondensed;
     },
@@ -82,8 +71,11 @@ export default {
       document.documentElement.setAttribute('data-sidebar-size', 'sm-hover-active');
     }
 
-    document.getElementById('overlay').addEventListener('click', () => {
+    document.getElementById('overlay')?.addEventListener('click', () => {
       document.body.classList.remove('vertical-sidebar-enable');
+      document.querySelector('.hamburger-icon')?.classList.remove('open');
+      document.getElementById('topnav-hamburger-icon')?.setAttribute('aria-expanded', 'false');
+      document.getElementById('topnav-hamburger-icon')?.focus();
     });
   }
 };
@@ -95,11 +87,11 @@ export default {
     <div>
       <!-- ========== Left Sidebar Start ========== -->
       <!-- ========== App Menu ========== -->
-      <div class="app-menu navbar-menu">
+      <div id="app-menu" class="app-menu navbar-menu">
         <!-- LOGO -->
         <div class="navbar-brand-box">
           <!-- Dark Logo-->
-          <Link href="/" class="logo logo-dark">
+          <Link href="/" class="logo logo-dark" :aria-label="$t('ui-safesky-solution-home')">
             <span class="logo-sm">
               <img src="@assets/images/logo-sm.png" alt="" height="22" />
             </span>
@@ -108,7 +100,7 @@ export default {
             </span>
           </Link>
           <!-- Light Logo-->
-          <Link href="/" class="logo logo-light">
+          <Link href="/" class="logo logo-light" :aria-label="$t('ui-safesky-solution-home')">
             <span class="logo-sm">
               <img src="@assets/images/logo-sm.png" alt="" height="22" />
             </span>
@@ -117,7 +109,7 @@ export default {
             </span>
           </Link>
           <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
-            id="vertical-hover" @click="initActiveMenu">
+            id="vertical-hover" :aria-label="$t('ui-toggle-sidebar-hover')" @click="initActiveMenu">
             <i class="ri-record-circle-line"></i>
           </button>
         </div>

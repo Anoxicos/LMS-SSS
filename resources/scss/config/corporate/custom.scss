@@ -114,6 +114,76 @@ File: Custom Css File
   }
 }
 
+// Shared LMS interaction and form polish.
+#layout-wrapper:not(.public-layout) {
+  .navbar-menu :focus-visible {
+    outline-color: var(--jet);
+  }
+
+  .form-label {
+    margin-bottom: 0.45rem;
+    color: var(--slate);
+    font-weight: 600;
+  }
+
+  :is(.form-control, .form-select) {
+    min-height: 44px;
+    border-color: var(--sand);
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+
+    &:focus {
+      border-color: var(--signal);
+      box-shadow: 0 0 0 3px rgba($signal, 0.14);
+    }
+  }
+
+  .table-responsive {
+    border-radius: 6px;
+    scrollbar-color: var(--stone) transparent;
+    scrollbar-width: thin;
+  }
+
+  .table > :not(caption) > * > * {
+    padding: 0.75rem 0.875rem;
+    vertical-align: middle;
+  }
+
+  .table thead th {
+    color: var(--slate);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767.98px) {
+  #layout-wrapper:not(.public-layout) {
+    .page-content {
+      padding-right: 12px;
+      padding-left: 12px;
+    }
+
+    :is(.btn, .nav-link, .form-control, .form-select) {
+      min-height: 44px;
+    }
+
+    .btn-icon {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #layout-wrapper:not(.public-layout) *,
+  #layout-wrapper:not(.public-layout) *::before,
+  #layout-wrapper:not(.public-layout) *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .multiselect {
   border-color: var(--#{$prefix}border-color) !important;
   background: $input-bg !important;

@@ -51,7 +51,7 @@ export default {
         <!-- LOGO -->
         <div class="navbar-brand-box">
           <!-- Dark Logo-->
-          <Link href="/" class="logo logo-dark">
+          <Link href="/" class="logo logo-dark" :aria-label="$t('ui-safesky-solution-home')">
           <span class="logo-sm">
             <img src="@assets/images/logo-sm.png" alt="" height="22" />
           </span>
@@ -60,7 +60,7 @@ export default {
           </span>
           </Link>
           <!-- Light Logo-->
-          <Link href="/" class="logo logo-light">
+          <Link href="/" class="logo logo-light" :aria-label="$t('ui-safesky-solution-home')">
           <span class="logo-sm">
             <img src="@assets/images/logo-sm.png" alt="" height="22" />
           </span>
@@ -68,10 +68,6 @@ export default {
             <img src="@assets/images/logo-blanche-.png" alt="" height="65" />
           </span>
           </Link>
-          <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
-            id="vertical-hover">
-            <i class="ri-record-circle-line"></i>
-          </button>
         </div>
         <div id="scrollbar">
           <BContainer fluid>
@@ -357,9 +353,9 @@ export default {
                       <div class="collapse menu-dropdown" id="sidebarMultilevel">
                         <ul class="nav nav-sm flex-column">
                           <li class="nav-item">
-                            <a class="nav-link" data-key="t-level-1.1">
+                            <span class="nav-link" data-key="t-level-1.1">
                               {{ $t("t-level-1.1") }}
-                            </a>
+                            </span>
                           </li>
                           <li class="nav-item">
                             <a class="nav-link" href="#sidebarAccount" data-bs-toggle="collapse" role="button"
@@ -369,9 +365,9 @@ export default {
                             <div class="collapse menu-dropdown" id="sidebarAccount">
                               <ul class="nav nav-sm flex-column">
                                 <li class="nav-item">
-                                  <a class="nav-link" data-key="t-level-2.1">
+                                  <span class="nav-link" data-key="t-level-2.1">
                                     {{ $t("t-level-2.1") }}
-                                  </a>
+                                  </span>
                                 </li>
                                 <li class="nav-item">
                                   <a class="nav-link" href="#sidebarCrm" data-bs-toggle="collapse" role="button"
@@ -381,14 +377,14 @@ export default {
                                   <div class="collapse menu-dropdown" id="sidebarCrm">
                                     <ul class="nav nav-sm flex-column">
                                       <li class="nav-item">
-                                        <a class="nav-link" data-key="t-level-3.1">
+                                        <span class="nav-link" data-key="t-level-3.1">
                                           {{ $t("t-level-3.1") }}
-                                        </a>
+                                        </span>
                                       </li>
                                       <li class="nav-item">
-                                        <a class="nav-link" data-key="t-level-3.2">
+                                        <span class="nav-link" data-key="t-level-3.2">
                                           {{ $t("t-level-3.2") }}
-                                        </a>
+                                        </span>
                                       </li>
                                     </ul>
                                   </div>

@@ -112,7 +112,7 @@ const handleAuthImageError = (event) => {
 </script>
 
 <script>
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import simplebar from 'simplebar-vue'
 
 import { layoutMethods } from '@/state/helpers'
@@ -196,6 +196,7 @@ export default {
       flag: null,
       value: null,
       myVar: 1,
+      removeNavigateListener: null,
     }
   },
 
@@ -221,6 +222,11 @@ export default {
     })
 
     document.addEventListener('scroll', this.handleTopbarShadow)
+    this.removeNavigateListener = router.on('navigate', () => {
+      document.body.classList.remove('vertical-sidebar-enable')
+      document.querySelector('.hamburger-icon')?.classList.remove('open')
+      document.getElementById('topnav-hamburger-icon')?.setAttribute('aria-expanded', 'false')
+    })
 
     const hamburgerIcon = document.getElementById('topnav-hamburger-icon')
 
@@ -233,6 +239,7 @@ export default {
 
   beforeUnmount() {
     document.removeEventListener('scroll', this.handleTopbarShadow)
+    this.removeNavigateListener?.()
 
     const hamburgerIcon = document.getElementById('topnav-hamburger-icon')
 
@@ -269,14 +276,13 @@ export default {
     toggleHamburgerMenu() {
       const windowSize = document.documentElement.clientWidth
       const layoutType = document.documentElement.getAttribute('data-layout')
+      let isExpanded = false
 
       document.documentElement.setAttribute('data-sidebar-visibility', 'show')
 
       const visibilityType = document.documentElement.getAttribute('data-sidebar-visibility')
 
-      if (windowSize > 767) {
-        document.querySelector('.hamburger-icon')?.classList.toggle('open')
-      }
+      document.querySelector('.hamburger-icon')?.classList.toggle('open')
 
       if (document.documentElement.getAttribute('data-layout') === 'horizontal') {
         document.body.classList.contains('menu')
@@ -301,16 +307,25 @@ export default {
             ? document.documentElement.setAttribute('data-sidebar-size', 'sm')
             : document.documentElement.setAttribute('data-sidebar-size', 'lg')
         } else if (windowSize <= 767) {
-          document.body.classList.add('vertical-sidebar-enable')
+          document.body.classList.toggle('vertical-sidebar-enable')
           document.documentElement.setAttribute('data-sidebar-size', 'lg')
         }
+
+        isExpanded = windowSize <= 767
+          ? document.body.classList.contains('vertical-sidebar-enable')
+          : document.documentElement.getAttribute('data-sidebar-size') !== 'sm'
       }
 
       if (document.documentElement.getAttribute('data-layout') === 'twocolumn') {
         document.body.classList.contains('twocolumn-panel')
           ? document.body.classList.remove('twocolumn-panel')
           : document.body.classList.add('twocolumn-panel')
+        isExpanded = document.body.classList.contains('twocolumn-panel')
       }
+
+      if (layoutType === 'horizontal') isExpanded = document.body.classList.contains('menu')
+      document.querySelector('.hamburger-icon')?.classList.toggle('open', isExpanded)
+      document.getElementById('topnav-hamburger-icon')?.setAttribute('aria-expanded', String(isExpanded))
     },
 
     toggleMenu() {
@@ -400,7 +415,7 @@ export default {
         <div class="d-flex">
           <!-- LOGO -->
           <div class="navbar-brand-box horizontal-logo">
-            <Link href="/" class="logo logo-dark">
+            <Link href="/" class="logo logo-dark" :aria-label="$t('ui-safesky-solution-home')">
               <span class="logo-sm">
                 <img src="@assets/images/logo-sm.png" alt="" height="22" />
               </span>
@@ -410,7 +425,7 @@ export default {
               </span>
             </Link>
 
-            <Link href="/" class="logo logo-light">
+            <Link href="/" class="logo logo-light" :aria-label="$t('ui-safesky-solution-home')">
               <span class="logo-sm">
                 <img src="@assets/images/logo-sm.png" alt="" height="22" />
               </span>
@@ -425,6 +440,9 @@ export default {
             type="button"
             class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger"
             id="topnav-hamburger-icon"
+            :aria-label="$t('t-menu')"
+            aria-controls="navbar-nav"
+            aria-expanded="false"
           >
             <span class="hamburger-icon">
               <span></span>

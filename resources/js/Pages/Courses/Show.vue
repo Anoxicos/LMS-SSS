@@ -1185,6 +1185,8 @@ onBeforeUnmount(() => {
                   :key="slide.id"
                   type="button"
                   :class="{ active: currentSlideIndex === index }"
+                  :aria-label="$t('ui-go-to-slide-number', { number: index + 1 })"
+                  :aria-pressed="currentSlideIndex === index"
                   @click="selectSlide(index)"
                 ></button>
               </div>

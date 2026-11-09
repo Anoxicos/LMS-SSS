@@ -980,6 +980,7 @@ const getSyllabusUrl = course => {
             type="button"
             class="pagination-navigation"
             :disabled="currentPage === 1"
+            :aria-label="$t('ui-previous')"
             @click="previousPage"
           >
             <i class="ri-arrow-left-s-line"></i>
@@ -1004,6 +1005,7 @@ const getSyllabusUrl = course => {
             type="button"
             class="pagination-navigation"
             :disabled="currentPage === totalPages"
+            :aria-label="$t('ui-next')"
             @click="nextPage"
           >
             <i class="ri-arrow-right-s-line"></i>
