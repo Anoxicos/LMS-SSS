@@ -42,7 +42,6 @@ class LearnerRegistrationController extends Controller
             'Public/Auth/LearnerRegister',
             [
                 'loginUrl' => route('login'),
-                'coursesUrl' => route('courses'),
             ]
         );
     }

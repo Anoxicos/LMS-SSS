@@ -11,7 +11,6 @@
     </svg>
   </button>
 </template>
-
 <script>
 export default {
   data() {
@@ -37,7 +36,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .back-to-top {
   position: fixed;
@@ -61,19 +59,16 @@ export default {
   width: 16px;
   height: 22px;
 }
-
 .back-to-top:hover {
   border-color: var(--jet, #38e1ff);
   color: var(--ink, #070b14);
   background: var(--jet, #38e1ff);
 }
-
 .back-to-top:focus-visible {
   outline: 2px solid var(--ink, #070b14);
   outline-offset: 3px;
   box-shadow: 0 0 0 5px var(--jet, #38e1ff);
 }
-
 @media (prefers-reduced-motion: reduce) {
   .back-to-top {
     transition: none;

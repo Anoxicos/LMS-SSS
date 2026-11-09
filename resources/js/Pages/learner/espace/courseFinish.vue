@@ -4470,11 +4470,159 @@ const startExam = () => {
 
 
 
+/* Learner completion flow */
+.course-finish-page {
+  background: var(--paper, #f2efe8);
+  color: var(--ink, #070b14);
+}
+
+.finish-hero {
+  min-height: 320px;
+  padding: clamp(42px, 6vw, 76px) clamp(20px, 8vw, 112px);
+  background: var(--ink, #070b14);
+  border-bottom: 1px solid rgba(56, 225, 255, 0.24);
+}
+
+.finish-hero::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 78% 20%, rgba(56, 225, 255, 0.16), transparent 42%);
+}
+
+.finish-hero h1 {
+  max-width: 16ch;
+  font-size: clamp(2.25rem, 4.2vw, 3.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.finish-hero p {
+  max-width: 58ch;
+  color: var(--mist, #b7bdcb);
+  font-size: 1rem;
+}
+
+.hero-badge {
+  color: var(--ink, #070b14);
+  border: 1px solid rgba(56, 225, 255, 0.5);
+  background: var(--jet, #38e1ff);
+  box-shadow: none;
+}
+
+.hero-primary-btn,
+.main-btn,
+.course-required-alert button {
+  color: var(--chalk, #fff);
+  background: var(--signal, #1f5cff);
+  box-shadow: none;
+}
+
+.hero-primary-btn:hover:not(:disabled),
+.main-btn:not(.disabled):hover,
+.course-required-alert button:hover {
+  color: var(--chalk, #fff);
+  background: var(--signal-deep, #1546cc);
+}
+
+.hero-primary-btn:focus-visible,
+.hero-secondary-btn:focus-visible,
+.course-required-alert button:focus-visible,
+.course-finish-page a:focus-visible,
+.course-finish-page button:focus-visible {
+  outline: 2px solid var(--signal, #1f5cff);
+  outline-offset: 3px;
+}
+
+.hero-secondary-btn {
+  color: var(--ink, #070b14);
+  border: 1px solid var(--sand, #e2ded3);
+  background: var(--chalk, #fff);
+  box-shadow: none;
+}
+
+.hero-secondary-btn:hover {
+  color: var(--ink, #070b14);
+  border-color: var(--jet, #38e1ff);
+  background: var(--paper, #f2efe8);
+}
+
+.attempts-card {
+  border: 1px solid var(--sand, #e2ded3);
+  border-radius: 16px;
+  box-shadow: 0 18px 44px rgba(7, 11, 20, 0.16);
+}
+
+.attempts-icon:not(.passed),
+.section-icon,
+.certificate-item-icon {
+  color: var(--ink, #070b14);
+  background: var(--jet, #38e1ff);
+}
+
+.finish-container {
+  margin-top: -28px;
+}
+
+.course-summary-card,
+.stat-card,
+.info-card,
+.exam-card {
+  border-color: var(--sand, #e2ded3);
+  box-shadow: 0 8px 24px rgba(7, 11, 20, 0.06);
+}
+
+.course-summary-card::before {
+  background: var(--jet, #38e1ff);
+}
+
+.course-summary-resource,
+.course-meta span,
+.training-overview,
+.info-row,
+.exam-item,
+.exam-details span {
+  border-color: var(--sand, #e2ded3);
+}
+
+.course-category-name,
+.course-meta span i,
+.training-overview-icon,
+.training-approval-label i,
+.resource-open-icon,
+.certificate-section-header > i,
+.certificate-item-content span,
+.certificate-item-download,
+.exam-details i {
+  color: var(--signal, #1f5cff);
+}
+
+.resource-icon,
+.training-overview-icon,
+.stat-icon.primary,
+.training-state-badge {
+  color: var(--signal, #1f5cff);
+  background: color-mix(in srgb, var(--signal, #1f5cff) 9%, white);
+}
+
+.course-summary-resource:hover {
+  border-color: var(--signal, #1f5cff);
+  box-shadow: 0 8px 20px rgba(31, 92, 255, 0.1);
+}
+
+.training-overview-copy strong,
+.resource-copy strong,
+.certificate-section-header strong {
+  color: var(--ink, #070b14);
+}
+
 .certificate-validity {
 
   margin-top: 4px;
 
-  color: #0d8fe9 !important;
+  color: var(--success-deep, #077264) !important;
 
   display: inline-flex !important;
 

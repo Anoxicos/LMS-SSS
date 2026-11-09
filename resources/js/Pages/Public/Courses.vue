@@ -60,6 +60,8 @@ const {
   toggleCourse,
 } = useIndividualCourseCart()
 
+const cartFeedback = ref(false)
+
 const openCart = () => {
   if (!cartCount.value) return
 
@@ -72,11 +74,14 @@ const openCart = () => {
 }
 
 const handleCourseCart = course => {
+  if (isCourseInCart(course.id)) {
+    openCart()
+    return
+  }
+
   const action = toggleCourse(course)
 
-  if (action === 'added' && !authUser.value) {
-    router.visit(route('login', { mode: 'register' }))
-  }
+  cartFeedback.value = action === 'added'
 }
 
 const searchQuery = ref('')
@@ -367,6 +372,19 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="courses-page">
+    <div v-if="cartFeedback" class="cart-feedback" role="status" aria-live="polite">
+      <i class="ri-check-line" aria-hidden="true"></i>
+      <span>{{ $t('t-added-to-cart') }}</span>
+      <button type="button" @click="openCart">{{ $t('t-view-cart') }}</button>
+      <button
+        type="button"
+        class="cart-feedback-dismiss"
+        :aria-label="$t('t-close')"
+        @click="cartFeedback = false"
+      >
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+    </div>
     <section class="courses-hero">
       <div class="courses-hero-inner">
         <div class="courses-hero-copy">
@@ -944,6 +962,28 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.cart-feedback {
+  position: fixed;
+  z-index: 20;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--sand);
+  background: var(--chalk);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(7, 11, 20, 0.14);
+}
+.cart-feedback > i { color: var(--success); }
+.cart-feedback button { min-height: 44px; border: 0; background: transparent; color: var(--signal); font: inherit; font-weight: 700; cursor: pointer; }
+.cart-feedback .cart-feedback-dismiss { min-width: 44px; color: var(--slate); }
+@media (max-width: 560px) {
+  .cart-feedback { right: 0.75rem; left: 0.75rem; top: 0.75rem; max-width: none; justify-content: space-between; gap: 0.25rem; }
+}
+
 .courses-page {
   --mobile-menu-height: 82px;
 

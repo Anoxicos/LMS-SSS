@@ -2,12 +2,16 @@
 import NavBar from "@/Components/nav-bar-anonyme.vue";
 import Footer from "@/Components/footer.vue";
 import BackToTop from "@/Components/BackToTop.vue";
+import ImmersiveHint from "@/Components/ImmersiveHint.vue";
+import CustomCursor from "@/Components/CustomCursor.vue";
 
 export default {
     components: {
         NavBar,
         Footer,
         BackToTop,
+        ImmersiveHint,
+        CustomCursor,
     },
 };
 </script>
@@ -22,6 +26,8 @@ export default {
 
         <Footer />
         <BackToTop />
+        <ImmersiveHint />
+        <CustomCursor />
     </div>
 </template>
 

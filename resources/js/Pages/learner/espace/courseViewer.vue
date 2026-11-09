@@ -37,7 +37,11 @@ const audioCurrentTime = ref(0)
 const audioDuration = ref(0)
 
 const isSidebarOpen = ref(false)
+const isMobileViewport = ref(false)
+const sidebarCloseButton = ref(null)
+const mobileMenuButton = ref(null)
 const initialPositionRestored = ref(false)
+let mobileSidebarQuery = null
 
 const quizAnswers = ref({})
 const quizValidation = ref({})
@@ -924,10 +928,24 @@ const goBackToCourses = () => {
 
 const closeSidebar = () => {
   isSidebarOpen.value = false
+
+  if (isMobileViewport.value) {
+    nextTick(() => mobileMenuButton.value?.focus({ preventScroll: true }))
+  }
 }
 
-const toggleSidebar = () => {
+const toggleSidebar = async () => {
   isSidebarOpen.value = !isSidebarOpen.value
+
+  if (isSidebarOpen.value && isMobileViewport.value) {
+    await nextTick()
+    sidebarCloseButton.value?.focus({ preventScroll: true })
+  }
+}
+
+const handleMobileSidebarViewport = event => {
+  isMobileViewport.value = event.matches
+  if (!event.matches) isSidebarOpen.value = false
 }
 
 const markSlideViewed = () => {
@@ -1231,6 +1249,10 @@ const blockKeyboardShortcuts = event => {
 }
 
 onMounted(() => {
+  mobileSidebarQuery = window.matchMedia('(max-width: 991.98px)')
+  isMobileViewport.value = mobileSidebarQuery.matches
+  mobileSidebarQuery.addEventListener('change', handleMobileSidebarViewport)
+
   document.addEventListener('contextmenu', blockActions)
   document.addEventListener('copy', blockActions)
   document.addEventListener('cut', blockActions)
@@ -1247,6 +1269,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  mobileSidebarQuery?.removeEventListener('change', handleMobileSidebarViewport)
   resetVoiceOverAudio()
   document.body.style.overflow = ''
 
@@ -1267,18 +1290,27 @@ onBeforeUnmount(() => {
       type="button"
       class="sidebar-overlay"
       :class="{ show: isSidebarOpen }"
+      :aria-label="$t('ui-close-menu')"
+      :aria-hidden="!isSidebarOpen"
+      :disabled="!isSidebarOpen"
       @click="closeSidebar"
     ></button>
 
     <div class="compact-player-shell">
       <aside
+        id="course-contents"
         class="compact-sidebar"
         :class="{ open: isSidebarOpen }"
+        :aria-label="$t('ui-chapters')"
+        :aria-hidden="isMobileViewport && !isSidebarOpen"
+        :inert="isMobileViewport && !isSidebarOpen"
+        @keydown.esc.stop.prevent="closeSidebar"
       >
         <div class="compact-sidebar-header">
           <button
             type="button"
             class="back-btn"
+            :aria-label="$t('ui-back-to-courses')"
             @click="goBackToCourses"
           >
             <i class="ri-arrow-left-line"></i>
@@ -1292,17 +1324,31 @@ onBeforeUnmount(() => {
           <button
             type="button"
             class="sidebar-close-btn"
+            ref="sidebarCloseButton"
+            :aria-label="$t('ui-close-menu')"
             @click="closeSidebar"
           >
             <i class="ri-close-line"></i>
           </button>
         </div>
 
-        <div class="compact-progress">
+        <div
+          class="compact-progress"
+          role="progressbar"
+          :aria-label="$t('t-course-progress')"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          :aria-valuenow="Number(progressPercent)"
+        >
           <div :style="{ width: `${progressPercent}%` }"></div>
         </div>
 
-        <div class="compact-chapters">
+        <div v-if="!chapters.length" class="compact-empty-chapters">
+          <i class="ri-book-open-line" aria-hidden="true"></i>
+          <p>{{ $t('t-course-content-unavailable') }}</p>
+        </div>
+
+        <div v-else class="compact-chapters">
           <div
             v-for="(chapter, chapterIndex) in chapters"
             :key="chapter.id"
@@ -1389,24 +1435,31 @@ onBeforeUnmount(() => {
             <button
               type="button"
               class="mobile-menu-btn"
+              ref="mobileMenuButton"
+              :aria-label="$t('ui-open-menu')"
+              :aria-expanded="isSidebarOpen"
+              aria-controls="course-contents"
               @click="toggleSidebar"
             >
               <i class="ri-menu-2-line"></i>
             </button>
 
             <div class="min-width-0">
-              <span class="slide-counter">
+              <span v-if="selectedSlide" class="slide-counter" aria-live="polite">
                 {{ $t('ui-slide') }} {{ currentGlobalSlideNumber }} / {{ totalSlides }}
               </span>
 
-              <h1>{{ selectedSlide?.title || '-' }}</h1>
+              <h1>{{ selectedSlide?.title || enrollment.course?.title || $t('ui-course-viewer') }}</h1>
             </div>
           </div>
 
           <div class="topbar-actions">
             <span
+              v-if="selectedSlide"
               class="status-pill"
               :class="isCurrentSlideCompleted ? 'done' : 'pending'"
+              role="status"
+              aria-live="polite"
             >
               <i
                 :class="isCurrentSlideCompleted
@@ -1414,7 +1467,12 @@ onBeforeUnmount(() => {
                   : 'ri-time-line'"
               ></i>
 
-              {{ isCurrentSlideCompleted ? 'Completed' : 'In progress' }}
+              {{ isCurrentSlideCompleted ? $t('t-slide-completed') : $t('t-in-progress') }}
+            </span>
+
+            <span v-else class="status-pill unavailable" role="status">
+              <i class="ri-information-line" aria-hidden="true"></i>
+              {{ $t('t-course-content-unavailable') }}
             </span>
 
             <BButton
@@ -1461,6 +1519,8 @@ onBeforeUnmount(() => {
             <div
               v-if="selectedSlide.lesson_type === 'text'"
               class="compact-rich-content protected-text"
+              tabindex="0"
+              :aria-label="$t('t-lesson-content')"
               v-html="selectedSlide.content || 'No content available.'"
             ></div>
 
@@ -1471,6 +1531,7 @@ onBeforeUnmount(() => {
               <iframe
                 v-if="selectedSlide.video_url"
                 :src="getVideoEmbedUrl(selectedSlide.video_url)"
+                :title="selectedSlide.title || $t('t-course-video')"
                 frameborder="0"
                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowfullscreen
@@ -1515,6 +1576,7 @@ onBeforeUnmount(() => {
                 v-if="selectedSlide.external_url"
                 :href="selectedSlide.external_url"
                 target="_blank"
+                rel="noopener noreferrer"
                 class="open-link-btn"
               >
                 {{ $t('t-open-resource') }}
@@ -1543,9 +1605,9 @@ onBeforeUnmount(() => {
 
                       <p>
                         {{
-                          isCurrentSlideCompleted
-                            ? 'Cette slide est déjà complétée. Vous pouvez refaire le quiz pour vous entraîner.'
-                            : 'Répondez correctement à toutes les questions pour compléter cette slide.'
+                        isCurrentSlideCompleted
+                            ? $t('t-quiz-already-completed-description')
+                            : $t('t-quiz-completion-description')
                         }}
                       </p>
                     </div>
@@ -1564,8 +1626,8 @@ onBeforeUnmount(() => {
 
                       {{
                         isCurrentSlideCompleted
-                          ? 'Slide completed'
-                          : 'Completion required'
+                          ? $t('t-quiz-slide-completed')
+                          : $t('t-quiz-completion-required')
                       }}
                     </span>
 
@@ -1669,16 +1731,16 @@ onBeforeUnmount(() => {
                     <h3>
                       {{
                         isQuizValid
-                          ? 'Félicitations, quiz réussi !'
-                          : 'Quiz à recommencer'
+                          ? $t('t-quiz-passed')
+                          : $t('t-quiz-retry')
                       }}
                     </h3>
 
                     <p>
                       {{
                         isQuizValid
-                          ? 'Vous avez répondu correctement à toutes les questions.'
-                          : 'Certaines réponses sont incorrectes. Consultez vos réponses ou recommencez le quiz.'
+                          ? $t('t-quiz-all-answers-correct')
+                          : $t('t-quiz-incorrect-feedback')
                       }}
                     </p>
                   </div>
@@ -1883,19 +1945,32 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div v-else class="compact-rich-content protected-text">
+            <div
+              v-else
+              class="compact-rich-content protected-text"
+              tabindex="0"
+              :aria-label="$t('t-lesson-content')"
+            >
               {{ selectedSlide.content || 'No content available.' }}
             </div>
           </div>
 
-          <div v-else class="compact-empty-content">
-            <i class="ri-slideshow-line"></i>
-            <p>{{ $t('t-no-slide-available') }}</p>
+          <div v-else class="compact-empty-content compact-empty-state">
+            <div class="compact-empty-state-icon">
+              <i class="ri-slideshow-line" aria-hidden="true"></i>
+            </div>
+            <span class="compact-empty-state-kicker">{{ $t('t-course-content-unavailable') }}</span>
+            <h2>{{ $t('t-no-slide-available') }}</h2>
+            <p>{{ $t('t-course-content-unavailable-description') }}</p>
+            <button type="button" class="compact-empty-return" @click="goBackToCourses">
+              <i class="ri-arrow-left-line" aria-hidden="true"></i>
+              {{ $t('ui-back-to-courses') }}
+            </button>
           </div>
         </div>
 
         <div class="compact-bottom-bar">
-          <div class="compact-audio-box">
+          <div v-if="selectedSlide" class="compact-audio-box">
             <template v-if="hasCurrentSlideVoiceOver">
               <button
                 type="button"
@@ -1947,7 +2022,7 @@ onBeforeUnmount(() => {
             </template>
           </div>
 
-          <div class="compact-nav-actions">
+          <div v-if="selectedSlide" class="compact-nav-actions">
             <BButton
               variant="light"
               class="compact-nav-btn"
@@ -1977,12 +2052,12 @@ onBeforeUnmount(() => {
               <span>
                 {{
                   isCurrentSlideCompleted
-                    ? 'Completed'
+                    ? $t('t-slide-completed')
                     : hasCurrentSlideVoiceOver && !audioFinished
-                      ? 'Audio required'
+                      ? $t('t-audio-required')
                       : hasQuizQuestions && !isQuizValid
-                        ? 'Quiz required'
-                        : 'Complete'
+                        ? $t('t-quiz-required')
+                        : $t('t-complete-slide')
                 }}
               </span>
             </BButton>
@@ -2008,6 +2083,14 @@ onBeforeUnmount(() => {
               <i class="ri-arrow-right-line"></i>
             </BButton>
           </div>
+
+          <div v-else class="compact-empty-bottom">
+            <span>{{ $t('t-course-content-unavailable-description') }}</span>
+            <button type="button" @click="goBackToCourses">
+              {{ $t('ui-back-to-courses') }}
+              <i class="ri-arrow-right-line" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
       </main>
     </div>
@@ -2018,10 +2101,15 @@ onBeforeUnmount(() => {
 .compact-player-page {
   --navbar-height: 82px;
   --footer-height: 58px;
+  --player-surface: var(--paper, #f2efe8);
+  --player-border: var(--sand, #e2ded3);
+  --player-accent: var(--signal, #1f5cff);
+  --player-accent-hover: var(--signal-deep, #1546cc);
 
+  height: calc(100vh - var(--navbar-height) - var(--footer-height));
   height: calc(100dvh - var(--navbar-height) - var(--footer-height));
   min-height: 0;
-  background: #f6f9fc;
+  background: var(--player-surface);
   overflow: hidden;
   position: relative;
 }
@@ -2043,8 +2131,8 @@ onBeforeUnmount(() => {
 .compact-sidebar {
   height: 100%;
   min-height: 0;
-  background: #ffffff;
-  border-right: 1px solid #e8edf3;
+  background: var(--chalk, #ffffff);
+  border-right: 1px solid var(--player-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2055,7 +2143,7 @@ onBeforeUnmount(() => {
   height: 70px;
   min-height: 70px;
   padding: 12px 16px;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--player-border);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -2106,14 +2194,15 @@ onBeforeUnmount(() => {
 }
 
 .compact-progress {
-  height: 4px;
-  min-height: 4px;
-  background: #e9eef6;
+  height: 5px;
+  min-height: 5px;
+  background: var(--player-border);
 }
 
 .compact-progress div {
   height: 100%;
-  background: linear-gradient(90deg, #0d8fe9 0%, #071126 100%);
+  background: var(--player-accent);
+  transition: width 220ms ease-out;
 }
 
 .compact-chapters {
@@ -2140,8 +2229,8 @@ onBeforeUnmount(() => {
 }
 
 .compact-chapter-btn.active {
-  border-color: #0d8fe9;
-  background: #eef8ff;
+  border-color: var(--player-accent);
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
 }
 
 .compact-chapter-btn.locked {
@@ -2210,9 +2299,9 @@ onBeforeUnmount(() => {
 }
 
 .compact-slide-btn:hover:not(:disabled) {
-  border-color: #0d8fe9;
-  background: #eef8ff;
-  color: #0d8fe9;
+  border-color: var(--player-accent);
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+  color: var(--player-accent-hover);
 }
 
 .compact-slide-btn.completed {
@@ -2223,9 +2312,8 @@ onBeforeUnmount(() => {
 
 .compact-slide-btn.active {
   color: #ffffff;
-  border-color: #1e3a8a;
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+  border-color: var(--player-accent);
+  background: var(--player-accent);
 }
 
 .compact-slide-btn.active i,
@@ -2235,9 +2323,8 @@ onBeforeUnmount(() => {
 
 .compact-slide-btn.active.completed {
   color: #ffffff;
-  border-color: #1e3a8a;
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+  border-color: var(--player-accent);
+  background: var(--player-accent);
 }
 
 .compact-slide-btn.active.completed i,
@@ -2263,14 +2350,14 @@ onBeforeUnmount(() => {
   min-height: 0;
   min-width: 0;
   display: grid;
-  grid-template-rows: 70px minmax(0, 1fr) 76px;
+  grid-template-rows: 70px auto minmax(0, 1fr) 76px;
   overflow: hidden;
 }
 
 .compact-topbar {
   min-height: 70px;
-  background: #ffffff;
-  border-bottom: 1px solid #e8edf3;
+  background: var(--chalk, #ffffff);
+  border-bottom: 1px solid var(--player-border);
   padding: 10px 22px;
   display: flex;
   align-items: center;
@@ -2286,7 +2373,7 @@ onBeforeUnmount(() => {
 }
 
 .slide-counter {
-  color: #0d8fe9;
+  color: var(--player-accent);
   font-size: 12px;
   font-weight: 900;
 }
@@ -2315,8 +2402,8 @@ onBeforeUnmount(() => {
   border: none;
   border-radius: 12px;
   color: #ffffff;
-  background: linear-gradient(135deg, #687cfe 0%, #405189 100%);
-  box-shadow: 0 8px 18px rgba(104, 124, 254, 0.24);
+  background: var(--player-accent);
+  box-shadow: none;
   font-size: 12px;
   font-weight: 800;
   display: inline-flex;
@@ -2332,7 +2419,8 @@ onBeforeUnmount(() => {
 .topbar-finish-course-btn:hover {
   color: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 11px 22px rgba(104, 124, 254, 0.3);
+  background: var(--player-accent-hover);
+  box-shadow: none;
 }
 
 .topbar-finish-course-btn i {
@@ -2357,7 +2445,12 @@ onBeforeUnmount(() => {
 
 .status-pill.pending {
   background: #fff7e6;
-  color: #f7b84b;
+  color: var(--warning-deep, #7a4b00);
+}
+
+.status-pill.unavailable {
+  background: color-mix(in srgb, var(--danger, #ff4d4d) 10%, white);
+  color: var(--danger-deep, #b42318);
 }
 
 .compact-content-card {
@@ -2369,11 +2462,12 @@ onBeforeUnmount(() => {
 
 .compact-slide-content {
   height: 100%;
-  background: #ffffff;
-  border: 1px solid #edf2f7;
-  border-radius: 20px;
+  min-height: 0;
+  background: var(--chalk, #ffffff);
+  border: 1px solid var(--player-border);
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 22px rgba(7, 11, 20, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2383,10 +2477,33 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   padding: 28px;
-  color: #334155;
+  color: var(--slate, #3a4256);
   line-height: 1.75;
   font-size: 16px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: var(--stone, #8a8f9c) transparent;
+}
+
+.compact-rich-content :deep(h1),
+.compact-rich-content :deep(h2),
+.compact-rich-content :deep(h3),
+.compact-rich-content :deep(h4) {
+  color: var(--ink, #070b14);
+  line-height: 1.3;
+}
+
+.compact-rich-content :deep(img),
+.compact-rich-content :deep(video) {
+  max-width: 100%;
+  height: auto;
+}
+
+.compact-rich-content :deep(table) {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .compact-video-box {
@@ -2435,6 +2552,89 @@ onBeforeUnmount(() => {
 .compact-empty-content i {
   font-size: 42px;
   color: #0d8fe9;
+}
+
+.compact-empty-state {
+  padding: 28px;
+  border: 1px solid var(--player-border);
+  border-radius: 14px;
+  background: var(--chalk, #ffffff);
+  text-align: center;
+}
+
+.compact-empty-state-icon {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--player-accent) 9%, white);
+}
+
+.compact-empty-state-icon i {
+  color: var(--player-accent);
+  font-size: 30px;
+}
+
+.compact-empty-state-kicker {
+  color: var(--player-accent-hover);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compact-empty-state h2 {
+  max-width: 26ch;
+  margin: 0;
+  color: var(--ink, #070b14);
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 800;
+}
+
+.compact-empty-state p {
+  max-width: 54ch;
+  margin: 0;
+  color: var(--slate, #3a4256);
+  line-height: 1.6;
+}
+
+.compact-empty-return,
+.compact-empty-bottom button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--player-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.compact-empty-return:hover,
+.compact-empty-bottom button:hover {
+  background: var(--player-accent-hover);
+}
+
+.compact-empty-chapters {
+  padding: 22px 18px;
+  color: var(--stone, #8a8f9c);
+  text-align: center;
+}
+
+.compact-empty-chapters i {
+  color: var(--player-accent);
+  font-size: 24px;
+}
+
+.compact-empty-chapters p {
+  margin: 8px 0 0;
+  color: var(--slate, #3a4256);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .open-link-btn {
@@ -2599,8 +2799,8 @@ onBeforeUnmount(() => {
 
 .quiz-header-nav-btn.verify {
   border-color: transparent;
-  background: linear-gradient(135deg, #0ab39c 0%, #087f6f 100%);
-  box-shadow: 0 6px 14px rgba(10, 179, 156, 0.2);
+  background: var(--success, #19c39a);
+  box-shadow: none;
 }
 
 .quiz-header-nav-btn.summary {
@@ -3010,13 +3210,13 @@ onBeforeUnmount(() => {
 }
 
 .quiz-result-summary.success .quiz-result-icon {
-  background: linear-gradient(135deg, #0ab39c 0%, #087f6f 100%);
-  box-shadow: 0 12px 25px rgba(10, 179, 156, 0.24);
+  background: var(--success, #19c39a);
+  box-shadow: none;
 }
 
 .quiz-result-summary.failed .quiz-result-icon {
-  background: linear-gradient(135deg, #f06548 0%, #c2412d 100%);
-  box-shadow: 0 12px 25px rgba(240, 101, 72, 0.22);
+  background: var(--danger, #ff4d4d);
+  box-shadow: none;
 }
 
 .quiz-result-icon i {
@@ -3256,6 +3456,16 @@ onBeforeUnmount(() => {
   z-index: 5;
 }
 
+.compact-empty-bottom {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--slate, #3a4256);
+  font-size: 13px;
+}
+
 .compact-audio-box {
   flex: 1;
   min-width: 0;
@@ -3379,8 +3589,8 @@ onBeforeUnmount(() => {
 }
 
 .finish-course-btn {
-  background: linear-gradient(135deg, #0ab39c 0%, #087f6f 100%) !important;
-  border-color: #0ab39c !important;
+  background: var(--success, #19c39a) !important;
+  border-color: var(--success, #19c39a) !important;
   color: #ffffff !important;
 }
 
@@ -3445,7 +3655,7 @@ onBeforeUnmount(() => {
   }
 
   .compact-main {
-    grid-template-rows: 64px minmax(0, 1fr) 112px;
+    grid-template-rows: 64px auto minmax(0, 1fr) 112px;
   }
 
   .compact-topbar {
@@ -3489,7 +3699,7 @@ onBeforeUnmount(() => {
   }
 
   .compact-main {
-    grid-template-rows: 62px minmax(0, 1fr) 118px;
+    grid-template-rows: 62px auto minmax(0, 1fr) 118px;
   }
 
   .compact-topbar {
@@ -3705,7 +3915,7 @@ onBeforeUnmount(() => {
   }
 
   .compact-main {
-    grid-template-rows: 56px minmax(0, 1fr) 94px;
+    grid-template-rows: 56px auto minmax(0, 1fr) 94px;
   }
 
   .compact-topbar {
@@ -4158,6 +4368,203 @@ onBeforeUnmount(() => {
 
   .viewer-training-accreditations {
     justify-content: flex-start;
+  }
+}
+
+.compact-quiz-area {
+  background: var(--player-surface);
+}
+
+.quiz-simple-header {
+  background: var(--chalk, #ffffff);
+}
+
+.quiz-header-icon,
+.quiz-header-nav-btn.next,
+.quiz-header-nav-btn.summary,
+.quiz-result-btn.restart {
+  background: var(--player-accent);
+  box-shadow: none;
+}
+
+.quiz-question-number,
+.quiz-result-icon {
+  background: var(--player-accent);
+  box-shadow: none;
+}
+
+.quiz-question-type.qcm {
+  color: var(--player-accent-hover);
+  border-color: color-mix(in srgb, var(--player-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+}
+
+.quiz-option:hover:not(:disabled) {
+  border-color: var(--player-accent);
+  background: color-mix(in srgb, var(--player-accent) 4%, white);
+  box-shadow: none;
+}
+
+.quiz-option.selected {
+  border-color: var(--player-accent);
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+}
+
+.quiz-option.selected .quiz-option-indicator {
+  color: var(--player-accent);
+}
+
+.quiz-result-stat.total .quiz-result-stat-icon {
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+}
+
+.quiz-empty-icon {
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+}
+
+.quiz-kicker,
+.quiz-compact-dot.answered:not(.active) {
+  color: var(--player-accent-hover);
+  border-color: color-mix(in srgb, var(--player-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+}
+
+.quiz-compact-progress-head strong,
+.quiz-result-kicker,
+.quiz-result-stat.total .quiz-result-stat-icon,
+.quiz-empty-icon {
+  color: var(--player-accent);
+}
+
+.quiz-compact-progress-track div,
+.quiz-compact-dot.active,
+.quiz-option.selected .quiz-option-letter {
+  border-color: var(--player-accent);
+  background: var(--player-accent);
+}
+
+.quiz-header-reset-btn:hover {
+  color: var(--player-accent-hover);
+  border-color: var(--player-accent);
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+}
+
+.quiz-result-score {
+  border-color: color-mix(in srgb, var(--player-accent) 24%, transparent);
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+  color: var(--player-accent-hover);
+}
+
+.quiz-result-summary,
+.quiz-result-summary.success,
+.quiz-result-summary.failed {
+  background: var(--chalk, #ffffff);
+}
+
+.compact-bottom-bar {
+  background: var(--chalk, #ffffff);
+  border-top-color: var(--player-border);
+}
+
+.viewer-training-strip {
+  border-color: var(--player-border);
+  background: var(--chalk, #ffffff);
+}
+
+.viewer-training-period > i {
+  background: color-mix(in srgb, var(--player-accent) 8%, white);
+  color: var(--player-accent-hover);
+}
+
+@media (max-width: 575.98px) {
+  .compact-main {
+    grid-template-rows: 56px auto minmax(0, 1fr) auto;
+  }
+
+  .compact-bottom-bar {
+    min-height: 0;
+  }
+
+  .back-btn,
+  .sidebar-close-btn,
+  .mobile-menu-btn,
+  .audio-icon-btn,
+  .compact-nav-btn,
+  .compact-complete-btn,
+  .quiz-header-nav-btn,
+  .quiz-header-reset-btn {
+    min-height: 44px;
+  }
+
+  .back-btn,
+  .sidebar-close-btn,
+  .mobile-menu-btn {
+    width: 44px;
+    min-width: 44px;
+  }
+
+  .audio-icon-btn {
+    width: 44px;
+    min-width: 44px;
+  }
+
+  .compact-slide-btn {
+    height: auto;
+    min-height: 44px;
+  }
+
+  .compact-nav-btn,
+  .compact-complete-btn,
+  .quiz-header-nav-btn {
+    height: auto;
+  }
+
+  .quiz-header-navigation {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) 44px;
+  }
+
+  .quiz-header-reset-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compact-progress div,
+  .compact-sidebar,
+  .sidebar-overlay,
+  .compact-slide-btn,
+  .topbar-finish-course-btn,
+  .audio-icon-btn,
+  .quiz-header-reset-btn {
+    transition: none;
+  }
+}
+
+.compact-player-page {
+  --navbar-height: 100px;
+  margin-top: var(--navbar-height);
+  height: calc(100dvh - var(--navbar-height) - var(--footer-height));
+}
+
+@media (max-width: 991.98px) {
+  .compact-player-page {
+    --navbar-height: 88px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .compact-empty-state {
+    padding: 20px 16px;
+  }
+
+  .compact-empty-bottom {
+    justify-content: center;
+  }
+
+  .compact-empty-bottom > span {
+    display: none;
   }
 }
 

@@ -1,5 +1,6 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
 
 defineOptions({
@@ -28,8 +29,32 @@ const form = useForm({
   passport_file: null,
 })
 
+const passportDragging = ref(false)
+const passportName = ref('')
+const passportUploadError = ref('')
+
 const handlePassport = event => {
-  form.passport_file = event.target.files?.[0] || null
+  const file = event.target.files?.[0] || null
+  if (event.target) event.target.value = ''
+  if (!file) return
+
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext) || file.size > 5 * 1024 * 1024) {
+    form.passport_file = null
+    passportName.value = ''
+    passportUploadError.value = 'Choose a PDF, JPG, or PNG file up to 5 MB.'
+    return
+  }
+
+  passportUploadError.value = ''
+  passportName.value = file.name
+  form.passport_file = file
+}
+
+const handlePassportDrop = event => {
+  passportDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handlePassport({ target: { files: [file], value: '' } })
 }
 
 const submit = () => {
@@ -125,13 +150,26 @@ const submit = () => {
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
               :required="!learner.has_passport_file"
+              class="media-drop-target"
+              :class="{ 'is-dragging': passportDragging }"
+              @dragenter.prevent="passportDragging = true"
+              @dragover.prevent="passportDragging = true"
+              @dragleave.prevent="passportDragging = false"
+              @drop.prevent="handlePassportDrop"
               @change="handlePassport"
             >
+            <small v-if="passportName" class="selected-upload" role="status"><i class="ri-check-line" aria-hidden="true"></i> {{ passportName }}</small>
+            <small v-if="passportUploadError" class="upload-error" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ passportUploadError }}</small>
             <small v-if="form.errors.passport_file">{{ form.errors.passport_file }}</small>
             <em v-else-if="learner.has_passport_file">
               {{ $t('t-passport-replacement-hint') }}
             </em>
           </label>
+        </div>
+
+        <div v-if="form.processing && form.progress" class="upload-progress" role="status" aria-live="polite">
+          <div class="d-flex justify-content-between small"><span>{{ passportName }}</span><strong>{{ form.progress.percentage }}%</strong></div>
+          <div class="progress" role="progressbar" :aria-valuenow="form.progress.percentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" :style="{ width: `${form.progress.percentage}%` }"></div></div>
         </div>
 
         <button type="submit" :disabled="form.processing">
@@ -144,6 +182,12 @@ const submit = () => {
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { outline: 2px dashed var(--signal); outline-offset: 2px; background: rgba(31, 92, 255, 0.08); }
+.selected-upload { display: block; color: var(--success-deep); }
+.upload-error { display: block; color: var(--danger-deep); }
+.upload-progress .progress { height: 7px; }
+
 .profile-page {
   min-height: 100vh;
   padding: 112px 0 70px;

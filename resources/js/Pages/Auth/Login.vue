@@ -308,7 +308,7 @@ const submit = () => {
                       {{ $t('t-sign-in') }}
                     </BButton>
                   </form>
-                  <Link href="/courses?arrival=1" class="continue-guest-link">
+                  <Link href="/?arrival=1" class="continue-guest-link">
                     {{ $t('t-continue-as-guest') }} <i class="ri-arrow-right-line" aria-hidden="true"></i>
                   </Link>
                   </div>

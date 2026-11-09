@@ -15,6 +15,8 @@ const submitted = ref(false)
 const selectedData = ref(null)
 const logoInput = ref(null)
 const logoPreview = ref(defaultImage)
+const logoDragging = ref(false)
+const logoUploadError = ref('')
 
 /* ===================== FORM ===================== */
 const form = useForm({
@@ -79,13 +81,28 @@ const openLogoInput = () => {
 }
 
 const handleLogoChange = (event) => {
-  const file = event.target.files[0]
+  const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext) || file.size > 2 * 1024 * 1024) {
+    logoUploadError.value = 'Choose a JPG, PNG, or WebP image up to 2 MB.'
+    return
+  }
+
+  logoUploadError.value = ''
+  if (logoPreview.value.startsWith('blob:')) URL.revokeObjectURL(logoPreview.value)
   form.logo = file
   form.remove_logo = false
   logoPreview.value = URL.createObjectURL(file)
+}
+
+const handleLogoDrop = event => {
+  logoDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handleLogoChange({ target: { files: [file], value: '' } })
 }
 
 const removeLogo = () => {
@@ -188,7 +205,7 @@ defineExpose({
       <input type="hidden" id="id_" />
 
       <!-- Company logo -->
-      <div class="company-logo-wrapper mb-4">
+      <div class="company-logo-wrapper mb-4 media-drop-target" :class="{ 'is-dragging': logoDragging }" @dragenter.prevent="logoDragging = true" @dragover.prevent="logoDragging = true" @dragleave.prevent="logoDragging = false" @drop.prevent="handleLogoDrop">
         <div class="company-logo-card">
           <div class="position-relative d-inline-block">
             <img
@@ -221,20 +238,27 @@ defineExpose({
           <div class="mt-3">
             <h6 class="mb-1">{{ $t('ui-company-logo') }}</h6>
             <p class="text-muted mb-0 small">
-              {{ $t('ui-click-the-image-to-upload-or-change-the-logo') }}
+              Drop a JPG, PNG, or WebP logo here, or click to choose · up to 2 MB
             </p>
+            <p v-if="form.logo" class="text-success small mb-0" role="status"><i class="ri-check-line" aria-hidden="true"></i> {{ form.logo.name }}</p>
           </div>
 
           <input
             ref="logoInput"
             type="file"
             class="d-none"
-            accept="image/*"
+            accept=".jpg,.jpeg,.png,.webp"
             @change="handleLogoChange"
           />
 
-          <div v-if="form.errors.logo" class="text-danger small mt-2">
+          <div v-if="form.errors.logo" class="text-danger small mt-2" role="alert">
+            <i class="ri-error-warning-line" aria-hidden="true"></i>
             {{ form.errors.logo }}
+          </div>
+          <div v-if="logoUploadError" class="text-danger small mt-2" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ logoUploadError }}</div>
+          <div v-if="form.processing && form.progress" class="upload-progress mt-2" role="status" aria-live="polite">
+            <div class="d-flex justify-content-between small"><span>{{ form.logo?.name }}</span><strong>{{ form.progress.percentage }}%</strong></div>
+            <div class="progress" role="progressbar" :aria-valuenow="form.progress.percentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" :style="{ width: `${form.progress.percentage}%` }"></div></div>
           </div>
         </div>
       </div>
@@ -362,6 +386,10 @@ defineExpose({
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { border: 2px dashed var(--bs-primary, #1f5cff); background: rgba(31, 92, 255, 0.08); }
+.upload-progress .progress { height: 7px; }
+
 .company-modal :deep(.modal-content) {
   border: none;
   border-radius: 18px;

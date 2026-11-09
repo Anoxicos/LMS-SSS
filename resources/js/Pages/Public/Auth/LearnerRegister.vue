@@ -11,11 +11,6 @@ const props = defineProps({
     required: true,
   },
 
-  coursesUrl: {
-    type: String,
-    required: true,
-  },
-
   embedded: {
     type: Boolean,
     default: false,
@@ -57,6 +52,9 @@ const steps = computed(() => [
 const currentStep = ref(0)
 const stepPanels = ref([])
 const passwordConfirmationRef = ref(null)
+const passportDragging = ref(false)
+const passportName = ref('')
+const passportUploadError = ref('')
 const setStepPanel = (element, index) => {
   if (element) stepPanels.value[index] = element
 }
@@ -83,7 +81,27 @@ const passwordStrengthLabel = computed(() =>
 const passwordMeetsLength = computed(() => form.password.length >= 8)
 
 const handlePassport = event => {
-  form.passport_file = event.target.files?.[0] || null
+  const file = event.target.files?.[0] || null
+  if (event.target) event.target.value = ''
+  if (!file) return
+
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['pdf', 'jpg', 'jpeg', 'png', 'webp'].includes(ext) || file.size > 5 * 1024 * 1024) {
+    form.passport_file = null
+    passportName.value = ''
+    passportUploadError.value = 'Choose a PDF or image file up to 5 MB.'
+    return
+  }
+
+  passportUploadError.value = ''
+  passportName.value = file.name
+  form.passport_file = file
+}
+
+const handlePassportDrop = event => {
+  passportDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handlePassport({ target: { files: [file], value: '' } })
 }
 
 const updatePasswordConfirmationValidity = () => {
@@ -222,6 +240,11 @@ const submit = () => {
             <p>{{ steps[currentStep].description }}</p>
           </div>
         </header>
+
+        <div v-if="form.processing && form.progress" class="upload-progress" role="status" aria-live="polite">
+          <div class="d-flex justify-content-between small"><span>{{ passportName }}</span><strong>{{ form.progress.percentage }}%</strong></div>
+          <div class="progress" role="progressbar" :aria-valuenow="form.progress.percentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" :style="{ width: `${form.progress.percentage}%` }"></div></div>
+        </div>
 
         <div class="step-progress" role="progressbar" :aria-valuenow="currentStep + 1" :aria-valuemin="1" :aria-valuemax="steps.length" :aria-label="$t('t-step-of-total', { step: currentStep + 1, total: steps.length, title: steps[currentStep].title })">
           <span><strong>{{ steps[currentStep].title }}</strong> · {{ $t('t-step-count', { step: currentStep + 1, total: steps.length }) }}</span>
@@ -378,12 +401,23 @@ const submit = () => {
 
               <input
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
                 required
+                class="media-drop-target"
+                :class="{ 'is-dragging': passportDragging }"
+                @dragenter.prevent="passportDragging = true"
+                @dragover.prevent="passportDragging = true"
+                @dragleave.prevent="passportDragging = false"
+                @drop.prevent="handlePassportDrop"
                 @change="handlePassport"
               >
 
+              <small v-if="passportName" class="selected-upload" role="status"><i class="ri-check-line" aria-hidden="true"></i> {{ passportName }}</small>
+              <small class="file-hint">PDF or JPG, PNG, WebP · up to 5 MB</small>
+              <small v-if="passportUploadError" class="upload-error" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ passportUploadError }}</small>
+
               <small v-if="form.errors.passport_file">
+                <i class="ri-error-warning-line" aria-hidden="true"></i>
                 {{ form.errors.passport_file }}
               </small>
             </label>
@@ -506,7 +540,7 @@ const submit = () => {
           </button>
         </footer>
 
-        <Link :href="`${props.coursesUrl}?arrival=1`" class="register-guest-link">
+        <Link href="/?arrival=1" class="register-guest-link">
           {{ $t('t-continue-as-guest') }} <i class="ri-arrow-right-line" aria-hidden="true"></i>
         </Link>
 
@@ -525,6 +559,12 @@ const submit = () => {
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { outline: 2px dashed var(--signal); outline-offset: 2px; background: rgba(31, 92, 255, 0.08); }
+.selected-upload { display: block; color: var(--success-deep); }
+.file-hint { display: block; color: var(--slate); }
+.upload-error { display: block; color: var(--danger-deep); }
+.upload-progress .progress { height: 7px; }
 /* =========================================================
    PAGE
 ========================================================= */

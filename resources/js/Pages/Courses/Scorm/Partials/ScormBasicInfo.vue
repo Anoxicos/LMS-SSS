@@ -27,6 +27,12 @@ const props = defineProps({
 
 const imagePreview = ref(null)
 const syllabusInput = ref(null)
+const scormDragging = ref(false)
+const scormUploadError = ref('')
+const imageDragging = ref(false)
+const syllabusDragging = ref(false)
+const imageUploadError = ref('')
+const syllabusUploadError = ref('')
 
 const methodOptions = computed(() => [
   { value: 'Online e-learning (LMS)', label: t('ui-online-e-learning-lms') },
@@ -62,6 +68,12 @@ const hasSyllabus = computed(() => {
   return Boolean(props.form.syllabus || props.form.syllabus_url)
 })
 
+const uploadFileNames = computed(() => {
+  return [props.form.image?.name, props.form.syllabus?.name, props.form.scorm_file?.name]
+    .filter(Boolean)
+    .join(', ')
+})
+
 const selectedScormFileName = computed(() => {
   if (props.form.scorm_file) {
     return props.form.scorm_file.name
@@ -88,12 +100,27 @@ const toggleTag = (tagId) => {
 
 const handleImageChange = (event) => {
   const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
+  const extension = file.name.split('.').pop()?.toLowerCase()
+  if (!['jpg', 'jpeg', 'png', 'webp'].includes(extension) || file.size > 2 * 1024 * 1024) {
+    imageUploadError.value = 'Choose a JPG, PNG, or WebP image up to 2 MB.'
+    return
+  }
+
+  imageUploadError.value = ''
+  if (imagePreview.value?.startsWith('blob:')) URL.revokeObjectURL(imagePreview.value)
   props.form.image = file
   props.form.remove_image = false
   imagePreview.value = URL.createObjectURL(file)
+}
+
+const handleImageDrop = event => {
+  imageDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handleImageChange({ target: { files: [file], value: '' } })
 }
 
 const removeImage = () => {
@@ -109,16 +136,29 @@ const openSyllabusInput = () => {
 
 const handleSyllabusChange = (event) => {
   const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
   if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-    event.target.value = ''
+    syllabusUploadError.value = 'Choose a PDF file.'
     return
   }
 
+  if (file.size > 10 * 1024 * 1024) {
+    syllabusUploadError.value = 'The PDF must be 10 MB or smaller.'
+    return
+  }
+
+  syllabusUploadError.value = ''
   props.form.syllabus = file
   props.form.remove_syllabus = false
+}
+
+const handleSyllabusDrop = event => {
+  syllabusDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handleSyllabusChange({ target: { files: [file], value: '' } })
 }
 
 const removeSyllabus = () => {
@@ -134,10 +174,28 @@ const removeSyllabus = () => {
 
 const handleScormFileChange = (event) => {
   const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
+  if (!file.name.toLowerCase().endsWith('.zip')) {
+    scormUploadError.value = 'Choose a ZIP package.'
+    return
+  }
+
+  if (file.size > 500 * 1024 * 1024) {
+    scormUploadError.value = 'The ZIP package must be 500 MB or smaller.'
+    return
+  }
+
+  scormUploadError.value = ''
   props.form.scorm_file = file
+}
+
+const handleScormDrop = event => {
+  scormDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handleScormFileChange({ target: { files: [file], value: '' } })
 }
 </script>
 
@@ -520,7 +578,14 @@ const handleScormFileChange = (event) => {
                 </span>
               </div>
 
-              <div class="file-upload-card">
+              <div
+                class="file-upload-card media-drop-target"
+                :class="{ 'is-dragging': scormDragging }"
+                @dragenter.prevent="scormDragging = true"
+                @dragover.prevent="scormDragging = true"
+                @dragleave.prevent="scormDragging = false"
+                @drop.prevent="handleScormDrop"
+              >
                 <div class="file-upload-icon">
                   <i class="ri-upload-cloud-2-line"></i>
                 </div>
@@ -531,7 +596,10 @@ const handleScormFileChange = (event) => {
                   </label>
 
                   <p class="text-muted mb-0">
-                    {{ $t('ui-accepted-format-zip') }}
+                    ZIP · up to 500 MB · include imsmanifest.xml
+                  </p>
+                  <p v-if="form.scorm_file" class="small text-muted mb-0">
+                    {{ (form.scorm_file.size / (1024 * 1024)).toFixed(1) }} MB selected
                   </p>
                 </div>
 
@@ -550,6 +618,8 @@ const handleScormFileChange = (event) => {
                   @change="handleScormFileChange"
                 />
               </div>
+
+              <div v-if="scormUploadError" class="text-danger small mt-2" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ scormUploadError }}</div>
 
               <div v-if="form.scorm_title || form.scorm_version" class="mt-3">
                 <div class="publish-card">
@@ -570,7 +640,17 @@ const handleScormFileChange = (event) => {
               </div>
 
               <div v-if="form.errors.scorm_file" class="invalid-feedback d-block">
+                <i class="ri-error-warning-line" aria-hidden="true"></i>
                 {{ form.errors.scorm_file }}
+              </div>
+
+              <div v-if="form.processing && form.progress" class="upload-progress mt-3" role="status" aria-live="polite">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span>{{ uploadFileNames || selectedScormFileName }}</span><strong>{{ form.progress.percentage }}%</strong>
+                </div>
+                <div class="progress" role="progressbar" :aria-valuenow="form.progress.percentage" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" :style="{ width: `${form.progress.percentage}%` }"></div>
+                </div>
               </div>
 
               <div v-if="form.errors.error" class="invalid-feedback d-block">
@@ -600,7 +680,7 @@ const handleScormFileChange = (event) => {
               @change="handleSyllabusChange"
             />
 
-            <div v-if="hasSyllabus" class="syllabus-file-box mb-3">
+            <div v-if="hasSyllabus" class="syllabus-file-box mb-3 media-drop-target" :class="{ 'is-dragging': syllabusDragging }" @dragenter.prevent="syllabusDragging = true" @dragover.prevent="syllabusDragging = true" @dragleave.prevent="syllabusDragging = false" @drop.prevent="handleSyllabusDrop">
               <div class="syllabus-file-icon">
                 <i class="ri-file-pdf-2-line"></i>
               </div>
@@ -611,14 +691,16 @@ const handleScormFileChange = (event) => {
                 </strong>
 
                 <small>
+                  <i v-if="form.syllabus" class="ri-check-line text-success" aria-hidden="true"></i>
                   {{ form.syllabus ? 'New PDF selected' : 'Current syllabus' }}
                 </small>
               </div>
             </div>
 
-            <div v-else class="course-image-empty syllabus-empty mb-3">
+            <div v-else class="course-image-empty syllabus-empty mb-3 media-drop-target" :class="{ 'is-dragging': syllabusDragging }" @dragenter.prevent="syllabusDragging = true" @dragover.prevent="syllabusDragging = true" @dragleave.prevent="syllabusDragging = false" @drop.prevent="handleSyllabusDrop">
               <i class="ri-file-pdf-2-line"></i>
-              <span>{{ $t('ui-no-syllabus-selected') }}</span>
+              <span>Drop a PDF here or choose a file</span>
+              <small>PDF · up to 10 MB</small>
             </div>
 
             <div class="d-flex flex-wrap gap-2">
@@ -658,27 +740,31 @@ const handleScormFileChange = (event) => {
             </p>
 
             <div v-if="form.errors.syllabus" class="invalid-feedback d-block">
+              <i class="ri-error-warning-line" aria-hidden="true"></i>
               {{ form.errors.syllabus }}
             </div>
+            <div v-if="syllabusUploadError" class="text-danger small" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ syllabusUploadError }}</div>
           </div>
 
           <div class="course-image-card mb-3">
             <label class="form-label">{{ $t('ui-course-image') }}</label>
 
-            <div v-if="imagePreview" class="course-image-preview mb-3">
+            <div v-if="imagePreview" class="course-image-preview mb-3 media-drop-target" :class="{ 'is-dragging': imageDragging }" @dragenter.prevent="imageDragging = true" @dragover.prevent="imageDragging = true" @dragleave.prevent="imageDragging = false" @drop.prevent="handleImageDrop">
               <img :src="imagePreview" :alt="$t('t-course-image')" />
             </div>
+            <p v-if="form.image" class="text-success small mb-2" role="status"><i class="ri-check-line" aria-hidden="true"></i> {{ form.image.name }}</p>
 
-            <div v-else class="course-image-empty mb-3">
+            <div v-else class="course-image-empty mb-3 media-drop-target" :class="{ 'is-dragging': imageDragging }" @dragenter.prevent="imageDragging = true" @dragover.prevent="imageDragging = true" @dragleave.prevent="imageDragging = false" @drop.prevent="handleImageDrop">
               <i class="ri-image-add-line"></i>
-              <span>{{ $t('ui-no-image-selected') }}</span>
+              <span>Drop an image here or choose a file</span>
+              <small>JPG, PNG, or WebP · up to 2 MB</small>
             </div>
 
             <input
               id="courseImageInput"
               type="file"
               class="d-none"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png,.webp"
               @change="handleImageChange"
             />
 
@@ -700,8 +786,10 @@ const handleScormFileChange = (event) => {
             </div>
 
             <div v-if="form.errors.image" class="invalid-feedback d-block">
+              <i class="ri-error-warning-line" aria-hidden="true"></i>
               {{ form.errors.image }}
             </div>
+            <div v-if="imageUploadError" class="text-danger small" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ imageUploadError }}</div>
           </div>
 
           <h6 class="mb-3">
@@ -827,6 +915,10 @@ const handleScormFileChange = (event) => {
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { border: 2px dashed var(--bs-primary, #1f5cff); background: rgba(31, 92, 255, 0.08); }
+.upload-progress .progress { height: 7px; }
+
 .syllabus-type-badge {
   border-radius: 999px;
   padding: 6px 10px;

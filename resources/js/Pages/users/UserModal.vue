@@ -31,6 +31,8 @@ const submitted = ref(false)
 const selectedData = ref(null)
 const photoInput = ref(null)
 const photoPreview = ref(defaultImage)
+const photoDragging = ref(false)
+const photoUploadError = ref('')
 
 const isSuperAdmin = computed(() => {
   return props.authUser?.role === 'Super-admin'
@@ -102,12 +104,27 @@ const openPhotoInput = () => {
 
 const handlePhotoChange = event => {
   const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext) || file.size > 2 * 1024 * 1024) {
+    photoUploadError.value = 'Choose a JPG, PNG, or WebP image up to 2 MB.'
+    return
+  }
+
+  photoUploadError.value = ''
+  if (photoPreview.value.startsWith('blob:')) URL.revokeObjectURL(photoPreview.value)
   form.photo = file
   form.remove_photo = false
   photoPreview.value = URL.createObjectURL(file)
+}
+
+const handlePhotoDrop = event => {
+  photoDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handlePhotoChange({ target: { files: [file], value: '' } })
 }
 
 const removePhoto = () => {
@@ -334,7 +351,7 @@ defineExpose({
               {{ $t('ui-profile-photo') }}
             </div>
 
-            <div class="user-photo-wrapper">
+            <div class="user-photo-wrapper media-drop-target" :class="{ 'is-dragging': photoDragging }" @dragenter.prevent="photoDragging = true" @dragover.prevent="photoDragging = true" @dragleave.prevent="photoDragging = false" @drop.prevent="handlePhotoDrop">
               <div class="position-relative d-inline-block">
                 <img
                   :src="photoPreview"
@@ -365,8 +382,9 @@ defineExpose({
               </div>
 
               <p class="text-muted mb-0 mt-3 small">
-                {{ $t('ui-jpg-jpeg-png-or-webp-maximum-2-mb') }}
+                Drop or choose a JPG, PNG, or WebP image · up to 2 MB
               </p>
+              <p v-if="form.photo" class="text-success small mb-0" role="status"><i class="ri-check-line" aria-hidden="true"></i> {{ form.photo.name }}</p>
 
               <input
                 ref="photoInput"
@@ -379,8 +397,15 @@ defineExpose({
               <div
                 v-if="form.errors.photo"
                 class="text-danger small mt-2"
+                role="alert"
               >
+                <i class="ri-error-warning-line" aria-hidden="true"></i>
                 {{ form.errors.photo }}
+              </div>
+              <div v-if="photoUploadError" class="text-danger small mt-2" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ photoUploadError }}</div>
+              <div v-if="form.processing && form.progress" class="upload-progress mt-2" role="status" aria-live="polite">
+                <div class="d-flex justify-content-between small"><span>{{ form.photo?.name }}</span><strong>{{ form.progress.percentage }}%</strong></div>
+                <div class="progress" role="progressbar" :aria-valuenow="form.progress.percentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" :style="{ width: `${form.progress.percentage}%` }"></div></div>
               </div>
             </div>
           </div>
@@ -738,6 +763,9 @@ defineExpose({
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { border: 2px dashed var(--bs-primary, #1f5cff); background: rgba(31, 92, 255, 0.08); }
+.upload-progress .progress { height: 7px; }
 .user-modal :deep(.modal-content) {
   border: none;
   border-radius: 18px;

@@ -20,6 +20,8 @@ export default defineConfig({
             },
         }),
     ],
+
+
     resolve: {
         alias: {
             '@assets': '/resources/', // Update this with the correct path to your images

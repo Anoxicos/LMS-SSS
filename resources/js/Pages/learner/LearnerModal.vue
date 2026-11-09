@@ -32,6 +32,10 @@ const selectedData = ref(null)
 
 const photoInput = ref(null)
 const photoPreview = ref(defaultImage)
+const photoDragging = ref(false)
+const passportDragging = ref(false)
+const photoUploadError = ref('')
+const passportUploadError = ref('')
 
 const passportInput = ref(null)
 const currentPassportUrl = ref(null)
@@ -123,12 +127,27 @@ const openPhotoInput = () => {
 
 const handlePhotoChange = event => {
   const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext) || file.size > 2 * 1024 * 1024) {
+    photoUploadError.value = 'Choose a JPG, PNG, or WebP image up to 2 MB.'
+    return
+  }
+
+  photoUploadError.value = ''
+  if (photoPreview.value?.startsWith('blob:')) URL.revokeObjectURL(photoPreview.value)
   form.photo = file
   form.remove_photo = false
   photoPreview.value = URL.createObjectURL(file)
+}
+
+const handlePhotoDrop = event => {
+  photoDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handlePhotoChange({ target: { files: [file], value: '' } })
 }
 
 const removePhoto = () => {
@@ -157,11 +176,25 @@ const openPassportInput = () => {
 
 const handlePassportChange = event => {
   const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['pdf', 'jpg', 'jpeg', 'png', 'webp'].includes(ext) || file.size > 5 * 1024 * 1024) {
+    passportUploadError.value = 'Choose a PDF or image file up to 5 MB.'
+    return
+  }
+
+  passportUploadError.value = ''
   form.passport_file = file
   form.remove_passport_file = false
+}
+
+const handlePassportDrop = event => {
+  passportDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handlePassportChange({ target: { files: [file], value: '' } })
 }
 
 const removePassport = () => {
@@ -401,7 +434,7 @@ defineExpose({
               {{ $t('ui-profile-photo') }}
             </div>
 
-            <div class="user-photo-wrapper">
+            <div class="user-photo-wrapper media-drop-target" :class="{ 'is-dragging': photoDragging }" @dragenter.prevent="photoDragging = true" @dragover.prevent="photoDragging = true" @dragleave.prevent="photoDragging = false" @drop.prevent="handlePhotoDrop">
               <div class="position-relative d-inline-block">
                 <img
                   :src="photoPreview"
@@ -432,8 +465,9 @@ defineExpose({
               </div>
 
               <p class="text-muted mb-0 mt-3 small">
-                {{ $t('ui-jpg-jpeg-png-or-webp-maximum-2-mb') }}
+                Drop or choose a JPG, PNG, or WebP image · up to 2 MB
               </p>
+              <p v-if="form.photo" class="text-success small mb-0" role="status"><i class="ri-check-line" aria-hidden="true"></i> {{ form.photo.name }}</p>
 
               <input
                 ref="photoInput"
@@ -444,8 +478,10 @@ defineExpose({
               />
 
               <div v-if="form.errors.photo" class="text-danger small mt-2">
+                <i class="ri-error-warning-line" aria-hidden="true"></i>
                 {{ form.errors.photo }}
               </div>
+              <div v-if="photoUploadError" class="text-danger small mt-2" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ photoUploadError }}</div>
             </div>
           </div>
 
@@ -465,11 +501,16 @@ defineExpose({
 
             <button
               type="button"
-              class="passport-upload-box"
+              class="passport-upload-box media-drop-target"
+              :class="{ 'is-dragging': passportDragging }"
+              @dragenter.prevent="passportDragging = true"
+              @dragover.prevent="passportDragging = true"
+              @dragleave.prevent="passportDragging = false"
+              @drop.prevent="handlePassportDrop"
               @click="openPassportInput"
             >
               <i class="ri-upload-cloud-2-line"></i>
-              <span>{{ $t('ui-passport-attachment') }}</span>
+              <span>{{ form.passport_file?.name || $t('ui-passport-attachment') }}</span>
               <small>{{ $t('ui-pdf-or-image-maximum-5-mb') }}</small>
             </button>
 
@@ -501,8 +542,15 @@ defineExpose({
             <div
               v-if="form.errors.passport_file"
               class="text-danger small mt-2"
+              role="alert"
             >
+              <i class="ri-error-warning-line" aria-hidden="true"></i>
               {{ form.errors.passport_file }}
+            </div>
+            <div v-if="passportUploadError" class="text-danger small mt-2" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ passportUploadError }}</div>
+            <div v-if="form.processing && form.progress" class="upload-progress mt-2" role="status" aria-live="polite">
+              <div class="d-flex justify-content-between small"><span>{{ [form.photo?.name, form.passport_file?.name].filter(Boolean).join(', ') }}</span><strong>{{ form.progress.percentage }}%</strong></div>
+              <div class="progress" role="progressbar" :aria-valuenow="form.progress.percentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" :style="{ width: `${form.progress.percentage}%` }"></div></div>
             </div>
           </div>
         </BCol>
@@ -759,6 +807,10 @@ defineExpose({
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { border: 2px dashed var(--bs-primary, #1f5cff); background: rgba(31, 92, 255, 0.08); }
+.upload-progress .progress { height: 7px; }
+
 .user-modal :deep(.modal-content) {
   border: none;
   border-radius: 18px;

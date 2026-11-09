@@ -40,6 +40,10 @@ const direction = ref('asc')
 const sortColumn = ref('question')
 
 const importInput = ref(null)
+const importDragging = ref(false)
+const importFileName = ref('')
+const importUploadError = ref('')
+const importFailed = ref(false)
 
 const importForm = useForm({
   file: null,
@@ -338,12 +342,30 @@ const openImportInput = () => {
 }
 
 const handleImportFile = (event) => {
-  const file = event.target.files?.[0]
+  const file = event.target.files?.[0] || event.dataTransfer?.files?.[0]
+  if (event.target?.value !== undefined) event.target.value = ''
 
   if (!file) return
 
-  importForm.file = file
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  if (!['xlsx', 'xls', 'csv'].includes(ext)) {
+    importUploadError.value = 'Choose an XLSX, XLS, or CSV file.'
+    importFailed.value = false
+    return
+  }
 
+  importForm.file = file
+  importFileName.value = file.name
+  importUploadError.value = ''
+  importFailed.value = false
+
+  startImport()
+}
+
+const startImport = () => {
+  if (!importForm.file) return
+  importFailed.value = false
+  importUploadError.value = ''
   importForm.post(route('banks.questions.import', props.bank.id), {
     preserveScroll: true,
     forceFormData: true,
@@ -358,12 +380,16 @@ const handleImportFile = (event) => {
 
       importForm.reset()
       importForm.clearErrors()
+      importFileName.value = ''
+      importFailed.value = false
 
       if (importInput.value) {
         importInput.value.value = ''
       }
     },
     onError: () => {
+      importFailed.value = true
+      importUploadError.value = 'Import failed. Check the file format and content, then retry.'
       Swal.fire({
         icon: 'error',
         title: t('ui-import-error'),
@@ -375,6 +401,11 @@ const handleImportFile = (event) => {
       }
     },
   })
+}
+
+const handleImportDrop = event => {
+  importDragging.value = false
+  handleImportFile(event)
 }
 
 const exportQuestions = () => {
@@ -425,7 +456,14 @@ const exportQuestions = () => {
               md="12"
               cols="12"
             >
-              <div class="company-header-actions">
+              <div
+                class="company-header-actions media-drop-target"
+                :class="{ 'is-dragging': importDragging }"
+                @dragenter.prevent="importDragging = true"
+                @dragover.prevent="importDragging = true"
+                @dragleave.prevent="importDragging = false"
+                @drop.prevent="handleImportDrop"
+              >
                 <div class="search-box company-search-box">
                   <input
                     v-model="searchQuery"
@@ -484,6 +522,17 @@ const exportQuestions = () => {
                   accept=".xlsx,.xls,.csv"
                   @change="handleImportFile"
                 />
+              </div>
+              <div v-if="importFileName" class="small mt-2" role="status">
+                <i class="ri-check-line text-success" aria-hidden="true"></i> {{ importFileName }}
+                <span v-if="importForm.processing"> · {{ importForm.progress?.percentage || 0 }}%</span>
+                <button v-if="importFailed" type="button" class="btn btn-link btn-sm p-0 ms-2" @click="startImport">Retry</button>
+              </div>
+              <div v-if="importUploadError" class="small text-danger mt-1" role="alert">
+                <i class="ri-error-warning-line" aria-hidden="true"></i> {{ importUploadError }}
+              </div>
+              <div v-if="importForm.processing && importForm.progress" class="progress mt-2" role="progressbar" :aria-valuenow="importForm.progress.percentage" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" :style="{ width: `${importForm.progress.percentage}%` }"></div>
               </div>
             </BCol>
           </BRow>
@@ -1074,6 +1123,9 @@ const exportQuestions = () => {
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { outline: 2px dashed var(--signal); outline-offset: 2px; background: rgba(31, 92, 255, 0.08); }
+
 .company-card {
   border-radius: 18px;
   overflow: hidden;

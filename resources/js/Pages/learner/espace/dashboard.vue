@@ -214,6 +214,14 @@ const clampProgressPercent = (value) => {
   return Math.min(100, Math.max(0, percent))
 }
 
+const completionPercent = (stats) => {
+  const total = Number(stats.total_courses || 0)
+
+  if (!total) return 0
+
+  return Math.min(100, Math.round((Number(stats.completed || 0) / total) * 100))
+}
+
 const progressMeasureToPercent = (value) => {
   const measure = Number(value)
 
@@ -354,6 +362,27 @@ const getSyllabusUrl = (course) => {
 
             <div class="overview-main-icon">
               <i class="ri-line-chart-line"></i>
+            </div>
+          </div>
+
+          <div class="overview-completion">
+            <div class="overview-completion-copy">
+              <span>{{ $t('t-course-completion') }}</span>
+              <strong>{{ $t('t-completed-course-summary', { completed: stats.completed || 0, total: stats.total_courses || 0 }) }}</strong>
+            </div>
+
+            <div
+              class="overview-completion-track"
+              role="progressbar"
+              :aria-label="$t('t-course-completion')"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              :aria-valuenow="completionPercent(stats)"
+            >
+              <div
+                class="overview-completion-bar"
+                :style="{ width: `${completionPercent(stats)}%` }"
+              ></div>
             </div>
           </div>
 
@@ -806,6 +835,41 @@ const getSyllabusUrl = (course) => {
   font-size: 38px;
   line-height: 1;
   font-weight: 950;
+}
+
+.overview-completion {
+  padding-top: 17px;
+}
+
+.overview-completion-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-bottom: 9px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.overview-completion-copy strong {
+  color: #071126;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.overview-completion-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8eef5;
+}
+
+.overview-completion-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #1f5cff;
+  transition: width 240ms ease-out;
 }
 
 .overview-main-icon {
@@ -1946,6 +2010,7 @@ const getSyllabusUrl = (course) => {
   .hero-primary-btn,
   .stat-card,
   .recent-course-card,
+  .overview-completion-bar,
   .continue-btn,
   .recent-all-btn {
     transition: none !important;

@@ -4,6 +4,7 @@ import { Link } from '@inertiajs/vue3'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import i18n from '@/i18n'
+import NumberedAccordion from '@/Components/NumberedAccordion.vue'
 import LayoutAnonyme from '@/Layouts/main-anonyme.vue'
 import airplaneHero from '@assets/images/airplane-hero.png'
 import maintenanceTraining from '@assets/images/home/maintenance-training.png'
@@ -18,6 +19,9 @@ defineOptions({
 const pageRoot = ref(null)
 const headlinePhraseElement = ref(null)
 const activeHeadlineIndex = ref(0)
+const isDesktopHero = ref(typeof window !== 'undefined' && window.matchMedia('(min-width: 1200px)').matches)
+const prefersReducedMotion = typeof window !== 'undefined'
+  && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 let gsapContext = null
 let headlineTimer = null
 
@@ -33,6 +37,9 @@ const headlineWords = computed(() => headlinePhrase.value.split(' ').map((word, 
   if (index === 0 && letters.length) letters[0] = letters[0].toLocaleUpperCase()
   return letters
 }))
+const updateHeroBreakpoint = () => {
+  isDesktopHero.value = window.matchMedia('(min-width: 1200px)').matches
+}
 
 const marqueeItems = [
   't-home-feature-ewis',
@@ -199,14 +206,20 @@ const journeySteps = [
   },
 ]
 
-const faqs = [
+const faqs = computed(() => [
   ['t-landing-faq-who-q', 't-landing-faq-who-a'],
   ['t-landing-faq-schedule-q', 't-landing-faq-schedule-a'],
   ['t-landing-faq-price-q', 't-landing-faq-price-a'],
   ['t-landing-faq-certificate-q', 't-landing-faq-certificate-a'],
-]
+].map(([question, answer], index) => ({
+  id: String(index + 1),
+  title: i18n.global.t(question),
+  content: i18n.global.t(answer),
+})))
 
 onMounted(() => {
+  updateHeroBreakpoint()
+  window.addEventListener('resize', updateHeroBreakpoint)
   const root = pageRoot.value
 
   if (!root || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
@@ -286,6 +299,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.clearInterval(headlineTimer)
+  window.removeEventListener('resize', updateHeroBreakpoint)
   if (headlinePhraseElement.value) {
     gsap.killTweensOf(headlinePhraseElement.value.querySelectorAll('.hero-rotate-char'))
   }
@@ -300,6 +314,18 @@ onBeforeUnmount(() => {
          HERO
          ===================================================== -->
     <section class="hero-section">
+      <video
+        v-if="isDesktopHero"
+        class="hero-background-video"
+        src="/videos/aircraft-maintenance-training.mp4"
+        :poster="airplaneHero"
+        :autoplay="!prefersReducedMotion"
+        muted
+        loop
+        playsinline
+        aria-hidden="true"
+        tabindex="-1"
+      ></video>
       <div class="page-container hero-container">
         <div class="hero-content">
           <h1 class="hero-title hero-load hero-load-1">
@@ -329,7 +355,7 @@ onBeforeUnmount(() => {
 
           <div class="hero-actions hero-load hero-load-3">
             <Link href="/courses" class="home-btn home-btn-primary">
-              <span>{{ $t('t-landing-cta') }}</span>
+              <span class="home-btn-label" :data-hover-text="$t('t-landing-cta')">{{ $t('t-landing-cta') }}</span>
               <i class="ri-arrow-right-line"></i>
             </Link>
           </div>
@@ -338,6 +364,7 @@ onBeforeUnmount(() => {
         </div>
 
         <Link
+          v-if="!isDesktopHero"
           href="/courses"
           class="hero-visual hero-visual-load"
           :aria-label="$t('t-landing-visual-link')"
@@ -346,6 +373,7 @@ onBeforeUnmount(() => {
           <img :src="airplaneHero" alt="" class="hero-aircraft" draggable="false" />
           <span class="hero-visual-caption">{{ $t('t-landing-visual-caption') }}</span>
         </Link>
+
       </div>
     </section>
 
@@ -490,7 +518,7 @@ onBeforeUnmount(() => {
           <p>{{ $t('t-home-categories-description') }}</p>
 
           <Link href="/courses" class="home-btn home-btn-dark">
-            <span>{{ $t('t-see-all-courses') }}</span>
+            <span class="home-btn-label" :data-hover-text="$t('t-see-all-courses')">{{ $t('t-see-all-courses') }}</span>
             <i class="ri-arrow-right-line"></i>
           </Link>
         </div>
@@ -624,16 +652,7 @@ onBeforeUnmount(() => {
           <span class="section-eyebrow">{{ $t('t-landing-faq-label') }}</span>
           <h2>{{ $t('t-landing-faq-title') }}</h2>
         </div>
-        <div class="landing-faq-list">
-          <details
-            v-for="([question, answer], index) in faqs"
-            :key="question"
-            :open="index === 0"
-          >
-            <summary>{{ $t(question) }}<span aria-hidden="true">+</span></summary>
-            <p>{{ $t(answer) }}</p>
-          </details>
-        </div>
+        <NumberedAccordion :items="faqs" default-value="1" />
       </div>
     </section>
 
@@ -662,7 +681,7 @@ onBeforeUnmount(() => {
           </div>
 
           <Link href="/courses" class="home-btn home-btn-white">
-            <span>{{ $t('t-home-browse-training') }}</span>
+            <span class="home-btn-label" :data-hover-text="$t('t-home-browse-training')">{{ $t('t-home-browse-training') }}</span>
             <i class="ri-arrow-right-line"></i>
           </Link>
         </div>
@@ -717,51 +736,6 @@ onBeforeUnmount(() => {
   font-size: clamp(36px, 4.4vw, 54px);
   line-height: 1.03;
   letter-spacing: -0.055em;
-}
-
-.landing-faq-list details {
-  border-top: 1px solid var(--sand);
-}
-
-.landing-faq-list details:last-child {
-  border-bottom: 1px solid var(--sand);
-}
-
-.landing-faq-list summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-  padding: 19px 0;
-  cursor: pointer;
-  list-style: none;
-  color: var(--ink);
-  font-size: 15px;
-  font-weight: 750;
-}
-
-.landing-faq-list summary::-webkit-details-marker {
-  display: none;
-}
-
-.landing-faq-list summary span {
-  color: var(--signal);
-  font-size: 22px;
-  font-weight: 400;
-  transition: transform 0.2s ease;
-}
-
-.landing-faq-list details[open] summary span {
-  transform: rotate(45deg);
-}
-
-.landing-faq-list details p {
-  max-width: 600px;
-  margin: 0;
-  padding: 0 36px 20px 0;
-  color: var(--slate);
-  font-size: 14px;
-  line-height: 1.7;
 }
 
 /* =========================================================
@@ -862,22 +836,12 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.section-text-link i {
-  transition: transform 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .section-text-link:hover {
   color: var(--signal-deep);
   border-color: var(--signal);
-}
-
-.section-text-link:hover i {
-  transform: translateX(4px);
 }
 
 .home-btn {
@@ -903,6 +867,27 @@ onBeforeUnmount(() => {
 .home-btn i {
   font-size: 18px;
   transition: transform 0.2s ease;
+}
+
+.home-btn-label {
+  position: relative;
+  display: inline-block;
+}
+
+.home-btn-label::after {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  overflow: hidden;
+  color: var(--signal);
+  content: attr(data-hover-text);
+  white-space: nowrap;
+  transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.home-btn:hover .home-btn-label::after,
+.home-btn:focus-visible .home-btn-label::after {
+  width: 100%;
 }
 
 .home-btn:hover {
@@ -982,10 +967,27 @@ onBeforeUnmount(() => {
   padding: clamp(76px, 10vh, 104px) 0 clamp(24px, 4vh, 42px);
   overflow: hidden;
   color: var(--chalk);
-  background: radial-gradient(ellipse at 73% 42%, rgba(56, 225, 255, 0.13), transparent 34%), var(--ink);
+  background: var(--ink);
   box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
+}
+
+.hero-background-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, rgba(7, 11, 20, 0.94) 0%, rgba(7, 11, 20, 0.78) 42%, rgba(7, 11, 20, 0.38) 100%);
 }
 
 .hero-container {
@@ -993,13 +995,12 @@ onBeforeUnmount(() => {
   z-index: 2;
   height: 100%;
   display: grid;
-  grid-template-columns: minmax(430px, 0.92fr) minmax(500px, 1.08fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  gap: clamp(58px, 7vw, 104px);
 }
 
 .hero-content {
-  max-width: 630px;
+  max-width: 760px;
 }
 
 .hero-title {
@@ -1085,7 +1086,6 @@ onBeforeUnmount(() => {
 
 @media (min-width: 992px) and (max-height: 700px) {
   .hero-section { padding-block: 72px 22px; }
-  .hero-container { gap: clamp(24px, 4vw, 58px); }
   .hero-title { font-size: clamp(42px, 4vw, 58px); }
   .hero-description { margin-top: 16px; font-size: 15px; }
   .hero-actions { margin-top: 18px; }
@@ -1522,17 +1522,11 @@ onBeforeUnmount(() => {
   gap: 12px;
 }
 
-.path-link i {
-  font-size: 19px;
-  transition: transform 0.2s ease;
-}
-
 .path-link:hover {
   color: var(--signal-deep);
 }
-
-.path-link:hover i {
-  transform: translate(3px, -3px);
+.path-link i {
+  font-size: 19px;
 }
 
 /* =========================================================
@@ -2067,11 +2061,18 @@ onBeforeUnmount(() => {
    RESPONSIVE
    ========================================================= */
 @media (max-width: 1199.98px) {
+  .hero-section {
+    background: radial-gradient(ellipse at 73% 42%, rgba(56, 225, 255, 0.13), transparent 34%), var(--ink);
+  }
+
+  .hero-section::before { display: none; }
+
   .hero-container {
     grid-template-columns: minmax(390px, 0.92fr) minmax(430px, 1.08fr);
     gap: 46px;
   }
 
+  .hero-content { max-width: 630px; }
   .hero-visual { height: min(56svh, 430px); }
 
   .trust-layout {
@@ -2182,10 +2183,6 @@ onBeforeUnmount(() => {
 
   .hero-section {
     padding: 96px 0 32px;
-  }
-
-  .hero-container {
-    gap: 22px;
   }
 
   .hero-title {
@@ -2388,6 +2385,10 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-btn-label::after {
+    transition: none;
+  }
+
   .marquee-track {
     width: 100%;
     flex-wrap: wrap;

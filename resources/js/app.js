@@ -22,8 +22,9 @@ import i18n from './i18n';
 import { applyLayoutConfig } from './state/modules/layout';
 
 AOS.init({
-    easing: 'ease-out-back',
-    duration: 1000
+    easing: 'ease-out',
+    duration: 650,
+    disable: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 });
 
 createInertiaApp({

@@ -34,6 +34,8 @@ const selectedChapterId = ref(
 
 const editingSlide = ref(null)
 const selectedFileName = ref('')
+const fileDragging = ref(false)
+const fileUploadError = ref('')
 
 const emptyQuestion = () => {
   return {
@@ -329,15 +331,28 @@ const removeQuestion = (index) => {
 
 const handleFileChange = (event) => {
   const file = event.target.files?.[0]
+  event.target.value = ''
 
   if (!file) return
 
+  if (file.size > 10 * 1024 * 1024) {
+    fileUploadError.value = 'The file must be 10 MB or smaller.'
+    return
+  }
+
+  fileUploadError.value = ''
   slideForm.file = file
   slideForm.file_path = null
   slideForm.file_name = file.name
   slideForm.file_type = file.name.split('.').pop()
   slideForm.file_size = file.size
   selectedFileName.value = file.name
+}
+
+const handleFileDrop = event => {
+  fileDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) handleFileChange({ target: { files: [file], value: '' } })
 }
 
 const editSlide = (slide, chapter) => {
@@ -959,18 +974,25 @@ const formatFileSize = (size) => {
             <div v-if="slideForm.lesson_type === 'file'" class="mb-3">
               <label class="form-label">{{ $t('ui-file') }}</label>
 
-              <div class="file-upload-card">
+              <div
+                class="file-upload-card media-drop-target"
+                :class="{ 'is-dragging': fileDragging }"
+                @dragenter.prevent="fileDragging = true"
+                @dragover.prevent="fileDragging = true"
+                @dragleave.prevent="fileDragging = false"
+                @drop.prevent="handleFileDrop"
+              >
                 <div class="file-upload-icon">
                   <i class="ri-upload-cloud-2-line"></i>
                 </div>
 
                 <div class="flex-grow-1 min-width-0">
                   <label for="slideFileInput" class="file-upload-title">
-                    {{ selectedFileName || 'Choose file' }}
+                    {{ selectedFileName || slideForm.file_name || 'Drop a file here or choose a file' }}
                   </label>
 
                   <p class="text-muted mb-0">
-                    {{ $t('ui-max-size-10-mb') }}
+                    Any file type · up to 10 MB
                   </p>
                 </div>
 
@@ -989,6 +1011,8 @@ const formatFileSize = (size) => {
                 />
               </div>
 
+              <div v-if="fileUploadError" class="text-danger small mt-2" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ fileUploadError }}</div>
+
               <div v-if="slideForm.file_name" class="mt-2 small text-muted">
                 {{ $t('ui-current-file') }}
                 <strong>{{ slideForm.file_name }}</strong>
@@ -998,7 +1022,16 @@ const formatFileSize = (size) => {
               </div>
 
               <div v-if="slideForm.errors.file" class="invalid-feedback d-block">
+                <i class="ri-error-warning-line" aria-hidden="true"></i>
                 {{ slideForm.errors.file }}
+              </div>
+              <div v-if="slideForm.processing && slideForm.progress" class="upload-progress mt-3" role="status" aria-live="polite">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span>{{ selectedFileName || slideForm.file_name }}</span><strong>{{ slideForm.progress.percentage }}%</strong>
+                </div>
+                <div class="progress" role="progressbar" :aria-valuenow="slideForm.progress.percentage" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" :style="{ width: `${slideForm.progress.percentage}%` }"></div>
+                </div>
               </div>
             </div>
 
@@ -1567,3 +1600,9 @@ const formatFileSize = (size) => {
     </BRow>
   </div>
 </template>
+
+<style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { border: 2px dashed var(--bs-primary, #1f5cff); background: rgba(31, 92, 255, 0.08); }
+.upload-progress .progress { height: 7px; }
+</style>

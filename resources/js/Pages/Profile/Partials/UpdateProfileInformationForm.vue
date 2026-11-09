@@ -26,6 +26,9 @@ const form = useForm({
 const verificationLinkSent = ref(false)
 const photoPreview = ref(null)
 const photoInput = ref(null)
+const photoDragging = ref(false)
+const photoName = ref('')
+const photoUploadError = ref('')
 
 /* ================= USER PHOTO ================= */
 const normalizePhotoUrl = photo => {
@@ -129,6 +132,21 @@ const updatePhotoPreview = () => {
 
   if (!photo) return
 
+  setPhoto(photo)
+}
+
+const setPhoto = photo => {
+  const extension = photo.name.split('.').pop()?.toLowerCase()
+  if (!['jpg', 'jpeg', 'png'].includes(extension) || photo.size > 1024 * 1024) {
+    photoUploadError.value = 'Choose a JPG or PNG image up to 1 MB.'
+    form.photo = null
+    photoName.value = ''
+    if (photoInput.value) photoInput.value.value = ''
+    return
+  }
+
+  photoUploadError.value = ''
+  photoName.value = photo.name
   form.photo = photo
 
   const reader = new FileReader()
@@ -138,6 +156,15 @@ const updatePhotoPreview = () => {
   }
 
   reader.readAsDataURL(photo)
+}
+
+const handlePhotoDrop = event => {
+  photoDragging.value = false
+  const photo = event.dataTransfer?.files?.[0]
+  if (photo) {
+    if (photoInput.value) photoInput.value.value = ''
+    setPhoto(photo)
+  }
 }
 
 const deletePhoto = () => {
@@ -159,6 +186,7 @@ const clearPhotoFileInput = () => {
   if (photoInput.value) {
     photoInput.value.value = null
   }
+  photoName.value = ''
 }
 </script>
 
@@ -175,13 +203,13 @@ const clearPhotoFileInput = () => {
           ref="photoInput"
           type="file"
           class="d-none form-control"
-          accept="image/*"
+          accept=".jpg,.jpeg,.png"
           @change="updatePhotoPreview"
         />
 
         <InputLabel for="photo" :value="$t('ui-photo')" />
 
-        <div class="profile-photo-wrapper mt-3">
+        <div class="profile-photo-wrapper mt-3 media-drop-target" :class="{ 'is-dragging': photoDragging }" @dragenter.prevent="photoDragging = true" @dragover.prevent="photoDragging = true" @dragleave.prevent="photoDragging = false" @drop.prevent="handlePhotoDrop">
           <div class="profile-photo-box">
             <img
               :src="currentPhoto"
@@ -190,6 +218,14 @@ const clearPhotoFileInput = () => {
               @error="handleImageError"
             />
           </div>
+        </div>
+
+        <p class="small text-muted mt-2 mb-0">JPG or PNG · up to 1 MB</p>
+        <p v-if="photoName" class="small text-success mb-0" role="status"><i class="ri-check-line" aria-hidden="true"></i> {{ photoName }}</p>
+        <p v-if="photoUploadError" class="small text-danger mb-0" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ photoUploadError }}</p>
+        <div v-if="form.processing && form.progress" class="upload-progress mt-2" role="status" aria-live="polite">
+          <div class="d-flex justify-content-between small"><span>{{ photoName }}</span><strong>{{ form.progress.percentage }}%</strong></div>
+          <div class="progress" role="progressbar" :aria-valuenow="form.progress.percentage" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" :style="{ width: `${form.progress.percentage}%` }"></div></div>
         </div>
 
         <div class="mt-3 d-flex flex-wrap gap-2">
@@ -293,6 +329,9 @@ const clearPhotoFileInput = () => {
 </template>
 
 <style scoped>
+.media-drop-target { transition: border-color 140ms ease, background-color 140ms ease; }
+.media-drop-target.is-dragging { outline: 2px dashed var(--signal); outline-offset: 2px; background: rgba(31, 92, 255, 0.08); }
+.upload-progress .progress { height: 7px; }
 .profile-photo-wrapper {
   display: flex;
   align-items: center;

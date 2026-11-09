@@ -566,6 +566,7 @@ const getOptionClass = option => {
           <button
             type="button"
             class="back-btn"
+            :aria-label="$t('t-back-to-course')"
             @click="backToFinish"
           >
             <i class="ri-arrow-left-line"></i>
@@ -605,6 +606,11 @@ const getOptionClass = option => {
         <div
           v-else
           class="sidebar-progress"
+            role="progressbar"
+            :aria-label="$t('t-progress')"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            :aria-valuenow="progressPercent"
         >
           <div class="progress-main">
             <div>
@@ -644,7 +650,7 @@ const getOptionClass = option => {
           </small>
         </div>
 
-        <div v-if="!isSubmitted" class="question-map-card">
+          <div v-if="!isSubmitted" class="question-map-card">
           <div class="question-map-header">
             <div>
               <h6>{{ $t('t-question-map') }}</h6>
@@ -664,13 +670,15 @@ const getOptionClass = option => {
             </span>
           </div>
 
-          <div class="question-map-grid">
+          <div class="question-map-grid" role="group" :aria-label="$t('t-question-map')">
             <button
               v-for="(question, index) in questions"
               :key="question.id"
               type="button"
               class="question-map-dot"
               :class="getQuestionMapClass(question, index)"
+              :aria-label="$t('t-question-count', { current: index + 1, total: totalQuestions })"
+              :aria-current="index === currentQuestionIndex ? 'step' : undefined"
               @click="selectQuestion(index)"
             >
               {{ index + 1 }}
@@ -731,7 +739,7 @@ const getOptionClass = option => {
                     ? exam.passed
                       ? $t('t-passed')
                       : $t('t-failed')
-                    : 'In progress'
+                    : $t('t-in-progress')
                 }}
               </span>
             </div>
@@ -879,7 +887,7 @@ const getOptionClass = option => {
                   {{ $t('t-question-count', { current: currentQuestionIndex + 1, total: totalQuestions }) }}
                 </span>
 
-                <h2>{{ currentQuestion.name_chapter || 'Exam section' }}</h2>
+                <h2>{{ currentQuestion.name_chapter || $t('t-exam-section') }}</h2>
               </div>
 
               <div class="question-actions">
@@ -2659,6 +2667,81 @@ const getOptionClass = option => {
     min-width: 0;
     justify-content: center;
     padding-inline: 12px;
+  }
+}
+/* Match the course player and completion screen. */
+.exam-page {
+  --exam-paper: var(--paper, #f2efe8);
+  --exam-ink: var(--ink, #070b14);
+  --exam-sand: var(--sand, #e2ded3);
+  --exam-signal: var(--signal, #1f5cff);
+  background: var(--exam-paper);
+}
+
+.exam-shell {
+  border-color: var(--exam-sand);
+  border-radius: 18px;
+  box-shadow: 0 16px 44px rgba(7, 11, 20, 0.08);
+}
+
+.exam-sidebar {
+  background: var(--exam-ink);
+}
+
+.exam-main {
+  background: var(--exam-paper);
+  color: var(--exam-ink);
+}
+
+.exam-header,
+.question-card,
+.exam-footer {
+  border-color: var(--exam-sand);
+}
+
+.exam-badge,
+.question-index-big {
+  color: var(--exam-ink);
+  background: var(--jet, #38e1ff);
+}
+
+.progress-track div,
+.question-map-dot.active,
+.footer-btn.primary,
+.retry-exam-btn {
+  background: var(--exam-signal);
+}
+
+.answer-option.selected,
+.question-map-dot.answered {
+  border-color: var(--exam-signal);
+}
+
+.back-btn:focus-visible,
+.question-map-dot:focus-visible,
+.answer-option:focus-visible,
+.exam-page button:focus-visible {
+  outline: 2px solid var(--exam-signal);
+  outline-offset: 3px;
+}
+
+.exam-sidebar button:focus-visible {
+  outline-color: var(--jet, #38e1ff);
+}
+
+@media (max-width: 575.98px) {
+  .exam-page {
+    padding-inline: 12px;
+  }
+
+  .exam-shell {
+    border-radius: 14px;
+  }
+
+  .question-map-dot,
+  .footer-btn,
+  .back-btn {
+    min-height: 44px;
   }
 }
 </style>

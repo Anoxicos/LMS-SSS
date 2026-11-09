@@ -7,6 +7,8 @@ import TwoColumns from "./twocolumn.vue";
 
 import SuperAdminPendingReminder from "@/Components/SuperAdminPendingReminder.vue";
 import HomeArrival from "@/Components/HomeArrival.vue";
+import ImmersiveHint from "@/Components/ImmersiveHint.vue";
+import CustomCursor from "@/Components/CustomCursor.vue";
 
 export default {
     components: {
@@ -15,6 +17,8 @@ export default {
         TwoColumns,
         SuperAdminPendingReminder,
         HomeArrival,
+        ImmersiveHint,
+        CustomCursor,
     },
 
     data() {
@@ -109,5 +113,7 @@ export default {
             v-if="isSuperAdmin"
         />
         <HomeArrival />
+        <ImmersiveHint />
+        <CustomCursor />
     </div>
 </template>

@@ -629,6 +629,27 @@ File: Custom Css File
 
 $shiny-cta-selectors: '.shiny-cta, a.btn-primary, button.btn-primary, .home-btn, .section-text-link, .path-link, .signup-btn, .mobile-signup-btn, .cart-action-button, .public-cart-button, .enroll-btn, .purchase-button, .purchase-syllabus-button, .sidebar-enroll-button, .submit-request-button, .primary-action, .secondary-action, .hero-primary-btn, .hero-secondary-btn, .continue-btn, .course-action-btn, .main-btn, .outline-btn, .add-more-link, .step-next, .recent-all-btn, .retry-exam-btn, .review-course-btn, .finish-course-btn';
 
+html { --ui-focus-color: var(--signal, #1f5cff); }
+html[data-bs-theme="dark"] { --ui-focus-color: var(--jet, #38e1ff); }
+
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ui-focus-color);
+  outline-offset: 3px;
+}
+
+:where(a[href], button:not(:disabled), input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"], select, summary, label[for], [role="button"]:not([aria-disabled="true"])) {
+  cursor: pointer;
+}
+
+:where(button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed;
+}
+
 #{$shiny-cta-selectors}:not(:disabled):not(.disabled) {
   position: relative;
   isolation: isolate;
@@ -662,7 +683,7 @@ $shiny-cta-selectors: '.shiny-cta, a.btn-primary, button.btn-primary, .home-btn,
     transition: transform 650ms ease, opacity 180ms ease;
   }
 
-  &:focus-visible { outline: 2px solid var(--jet, #38e1ff); outline-offset: 3px; }
+  &:focus-visible { outline: 2px solid var(--ui-focus-color); outline-offset: 3px; }
 }
 
 @keyframes shiny-cta-turn { to { --shiny-cta-angle: 360deg; } }
