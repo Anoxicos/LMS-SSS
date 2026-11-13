@@ -402,7 +402,7 @@ const submit = () => {
               <input
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png,.webp"
-                required
+                :required="!form.passport_file"
                 class="media-drop-target"
                 :class="{ 'is-dragging': passportDragging }"
                 @dragenter.prevent="passportDragging = true"

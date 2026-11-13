@@ -89,8 +89,6 @@ const trustItems = [
 
 const learningPaths = [
   {
-    number: '01',
-    icon: 'ri-tools-line',
     image: maintenanceTraining,
     label: 't-home-path-maintenance-label',
     title: 't-home-path-maintenance-title',
@@ -102,8 +100,6 @@ const learningPaths = [
     ],
   },
   {
-    number: '02',
-    icon: 'ri-plane-line',
     image: flightOperations,
     label: 't-home-path-operations-label',
     title: 't-home-path-operations-title',
@@ -115,8 +111,6 @@ const learningPaths = [
     ],
   },
   {
-    number: '03',
-    icon: 'ri-team-line',
     image: crewTraining,
     label: 't-home-path-crew-label',
     title: 't-home-path-crew-title',
@@ -438,11 +432,6 @@ onBeforeUnmount(() => {
       <div class="page-container">
         <div class="section-heading heading-with-action" data-reveal>
           <div class="section-heading-copy">
-            <span class="section-eyebrow">
-              <i class="ri-route-line"></i>
-              {{ $t('t-home-learning-paths-eyebrow') }}
-            </span>
-
             <h2>{{ $t('t-home-learning-paths-title') }}</h2>
             <p>{{ $t('t-home-learning-paths-description') }}</p>
           </div>
@@ -465,17 +454,11 @@ onBeforeUnmount(() => {
               <img
                 :src="path.image"
                 :alt="$t(path.label)"
+                width="640"
+                height="440"
                 loading="lazy"
                 @error="handleImageError"
               />
-
-              <div class="path-media-shade" aria-hidden="true"></div>
-
-              <span class="path-number">{{ path.number }}</span>
-
-              <div class="path-icon">
-                <i :class="path.icon"></i>
-              </div>
             </div>
 
             <div class="path-card-body">
@@ -483,17 +466,17 @@ onBeforeUnmount(() => {
               <h3>{{ $t(path.title) }}</h3>
               <p>{{ $t(path.description) }}</p>
 
-              <div class="path-features">
-                <span
+              <ul class="path-features">
+                <li
                   v-for="feature in path.features"
                   :key="feature"
                 >
-                  <i class="ri-check-line"></i>
+                  <i class="ri-check-line" aria-hidden="true"></i>
                   {{ $t(feature) }}
-                </span>
-              </div>
+                </li>
+              </ul>
 
-              <Link href="/courses" class="path-link">
+              <Link href="/courses" class="path-link" :aria-label="`${$t('t-home-view-catalogue')} (${ $t(path.label) })`">
                 <span>{{ $t('t-home-discover-courses') }}</span>
                 <i class="ri-arrow-right-up-line"></i>
               </Link>
@@ -509,11 +492,6 @@ onBeforeUnmount(() => {
     <section class="home-section categories-section">
       <div class="page-container categories-layout">
         <div class="categories-intro" data-reveal>
-          <span class="section-eyebrow">
-            <i class="ri-apps-2-line"></i>
-            {{ $t('t-home-categories-eyebrow') }}
-          </span>
-
           <h2>{{ $t('t-home-categories-title') }}</h2>
           <p>{{ $t('t-home-categories-description') }}</p>
 
@@ -553,11 +531,6 @@ onBeforeUnmount(() => {
     <section class="home-section experience-section">
       <div class="page-container experience-layout">
         <div class="experience-main" data-reveal>
-          <span class="section-eyebrow section-eyebrow-light">
-            <i class="ri-dashboard-line"></i>
-            {{ $t('t-home-experience-eyebrow') }}
-          </span>
-
           <h2>{{ $t('t-home-experience-title') }}</h2>
           <p>{{ $t('t-home-experience-description') }}</p>
 
@@ -570,6 +543,8 @@ onBeforeUnmount(() => {
             <img
               :src="learnerExperience"
               :alt="$t('t-home-experience-title')"
+              width="640"
+              height="440"
               loading="lazy"
               @error="handleImageError"
             />
@@ -600,7 +575,6 @@ onBeforeUnmount(() => {
               <p>{{ $t(benefit.description) }}</p>
             </div>
 
-            <span class="benefit-index">0{{ index + 1 }}</span>
           </article>
         </div>
       </div>
@@ -612,11 +586,6 @@ onBeforeUnmount(() => {
     <section class="home-section journey-section">
       <div class="page-container">
         <div class="section-heading centered-heading" data-reveal>
-          <span class="section-eyebrow">
-            <i class="ri-navigation-line"></i>
-            {{ $t('t-home-journey-eyebrow') }}
-          </span>
-
           <h2>{{ $t('t-home-journey-title') }}</h2>
           <p>{{ $t('t-home-journey-description') }}</p>
         </div>
@@ -649,7 +618,6 @@ onBeforeUnmount(() => {
     <section class="home-section landing-faq-section" id="faq">
       <div class="page-container landing-faq-layout">
         <div class="landing-faq-heading" data-reveal>
-          <span class="section-eyebrow">{{ $t('t-landing-faq-label') }}</span>
           <h2>{{ $t('t-landing-faq-title') }}</h2>
         </div>
         <NumberedAccordion :items="faqs" default-value="1" />
@@ -671,11 +639,6 @@ onBeforeUnmount(() => {
           <div class="final-cta-lines" aria-hidden="true"></div>
 
           <div class="final-cta-copy">
-            <span class="final-cta-label">
-              <i class="ri-flight-takeoff-line"></i>
-              {{ $t('t-home-final-cta-eyebrow') }}
-            </span>
-
             <h2>{{ $t('t-home-final-cta-title') }}</h2>
             <p>{{ $t('t-home-final-cta-description') }}</p>
           </div>
@@ -735,7 +698,7 @@ onBeforeUnmount(() => {
   color: var(--ink);
   font-size: clamp(36px, 4.4vw, 54px);
   line-height: 1.03;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.035em;
 }
 
 /* =========================================================
@@ -781,7 +744,7 @@ onBeforeUnmount(() => {
 .experience-main h2,
 .final-cta-copy h2 {
   margin: 20px 0 16px;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.035em;
   font-weight: 900;
 }
 
@@ -1366,38 +1329,28 @@ onBeforeUnmount(() => {
 
 .path-card {
   position: relative;
-  min-height: 590px;
+  min-height: 570px;
   overflow: hidden;
   border: 1px solid var(--sand);
-  border-radius: 20px;
+  border-radius: 14px;
   background: var(--chalk);
-  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   transition:
     transform 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
+    border-color 0.25s ease;
 }
 
 .path-card:hover {
   border-color: rgba(31, 92, 255, 0.28);
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-7px);
+  transform: translateY(-4px);
 }
 
 .path-media {
   position: relative;
-  height: 218px;
-  margin: 18px 18px 0;
+  height: 220px;
   overflow: hidden;
-  border: 1px solid rgba(7, 17, 38, 0.07);
-  border-radius: 15px;
-  background: linear-gradient(
-    135deg,
-    var(--signal),
-    var(--signal)
-  );
+  background: var(--sand);
 }
 
 .path-media img {
@@ -1411,58 +1364,16 @@ onBeforeUnmount(() => {
   transform: scale(1.055);
 }
 
-.path-media-shade {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(7, 17, 38, 0.02) 34%,
-    rgba(7, 17, 38, 0.54) 100%
-  );
-}
-
-.path-number {
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  z-index: 2;
-  color: var(--chalk);
-  font-size: 12px;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-}
-
-.path-icon {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  z-index: 2;
-  width: 46px;
-  height: 46px;
-  border: 1px solid rgba(255, 255, 255, 0.86);
-  border-radius: 12px;
-  color: var(--ink);
-  background: var(--paper);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.path-icon i {
-  font-size: 21px;
-}
-
 .path-card-body {
   flex: 1;
-  padding: 24px 22px 22px;
+  padding: 28px 26px 24px;
   display: flex;
   flex-direction: column;
 }
 
 .path-label {
   color: var(--signal-deep);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 950;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1481,19 +1392,21 @@ onBeforeUnmount(() => {
   margin: 0;
   color: var(--slate);
   font-size: 14px;
-  line-height: 1.72;
+  line-height: 1.6;
 }
 
 .path-features {
   margin: 24px 0 28px;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.path-features span {
+.path-features li {
   color: var(--slate);
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.45;
   font-weight: 750;
   display: flex;
@@ -1510,7 +1423,8 @@ onBeforeUnmount(() => {
 
 .path-link {
   margin-top: auto;
-  padding-top: 18px;
+  min-height: 54px;
+  padding-top: 14px;
   border-top: 1px solid var(--sand);
   color: var(--ink);
   font-size: 13px;
@@ -1524,6 +1438,10 @@ onBeforeUnmount(() => {
 
 .path-link:hover {
   color: var(--signal-deep);
+}
+.path-link:focus-visible {
+  outline: 2px solid var(--signal-deep);
+  outline-offset: 4px;
 }
 .path-link i {
   font-size: 19px;
@@ -1561,10 +1479,9 @@ onBeforeUnmount(() => {
   padding: 22px;
   overflow: hidden;
   border: 1px solid var(--sand);
-  border-radius: 17px;
+  border-radius: 14px;
   color: inherit;
   background: var(--chalk);
-  box-shadow: var(--shadow-card);
   text-decoration: none;
   display: grid;
   grid-template-columns: 50px minmax(0, 1fr) auto;
@@ -1617,7 +1534,7 @@ onBeforeUnmount(() => {
 .category-copy p {
   margin: 0;
   color: var(--slate);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.62;
 }
 
@@ -1757,17 +1674,6 @@ onBeforeUnmount(() => {
   border-radius: 16px;
   color: var(--ink);
   background: var(--paper);
-  box-shadow: 0 10px 26px rgba(7, 11, 20, 0.12);
-  transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.benefit-card:hover {
-  border-color: rgba(56, 225, 255, 0.42);
-  box-shadow: 0 16px 32px rgba(7, 11, 20, 0.2);
-  transform: translateY(-5px);
 }
 
 .benefit-icon {
@@ -1802,16 +1708,6 @@ onBeforeUnmount(() => {
   line-height: 1.7;
 }
 
-.benefit-index {
-  position: absolute;
-  top: 22px;
-  right: 22px;
-  color: var(--mist);
-  font-size: 11px;
-  font-weight: 950;
-  letter-spacing: 0.1em;
-}
-
 /* =========================================================
    JOURNEY
    ========================================================= */
@@ -1833,19 +1729,8 @@ onBeforeUnmount(() => {
   min-height: 260px;
   padding: 28px;
   border: 1px solid var(--sand);
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--chalk);
-  box-shadow: var(--shadow-card);
-  transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.journey-card:hover {
-  border-color: rgba(31, 92, 255, 0.28);
-  box-shadow: 0 22px 44px rgba(15, 23, 42, 0.11);
-  transform: translateY(-4px);
 }
 
 .journey-card-top {
@@ -2242,6 +2127,7 @@ onBeforeUnmount(() => {
   .heading-with-action {
     align-items: flex-start;
     flex-direction: column;
+    gap: 18px;
   }
 
   .category-card {
@@ -2250,6 +2136,10 @@ onBeforeUnmount(() => {
 
   .journey-card {
     min-height: auto;
+  }
+
+  .journey-card h3 {
+    margin-top: 20px;
   }
 
   .final-cta-section {

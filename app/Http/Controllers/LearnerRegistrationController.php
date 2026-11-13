@@ -284,29 +284,15 @@ class LearnerRegistrationController extends Controller
                 ->withInput();
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Redirection vers la connexion
-        |--------------------------------------------------------------------------
-        |
-        | Le Learner n'est pas connecté automatiquement.
-        | Il doit se connecter avec l'e-mail et le mot de passe créés.
-        |
-        */
+        Auth::login($user);
+        $request->session()->regenerate();
 
         return redirect()
             ->route('courses')
             ->with([
                 'arrival_intro' => true,
                 'success' =>
-                    'Your learner account has been created successfully. You can now log in.',
-
-                /*
-                | Permet éventuellement de préremplir l'e-mail
-                | sur la page de connexion.
-                */
-                'registered_email' =>
-                    $user->email,
+                    'Your learner account has been created successfully.',
             ]);
     }
 }

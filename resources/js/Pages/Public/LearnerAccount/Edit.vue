@@ -149,7 +149,7 @@ const submit = () => {
             <input
               type="file"
               accept=".pdf,.jpg,.jpeg,.png"
-              :required="!learner.has_passport_file"
+              :required="!learner.has_passport_file && !form.passport_file"
               class="media-drop-target"
               :class="{ 'is-dragging': passportDragging }"
               @dragenter.prevent="passportDragging = true"

@@ -697,7 +697,8 @@ File: Custom Css File
   inherits: false;
 }
 
-$shiny-cta-selectors: '.shiny-cta, a.btn-primary, button.btn-primary, .home-btn, .section-text-link, .path-link, .signup-btn, .mobile-signup-btn, .cart-action-button, .public-cart-button, .enroll-btn, .purchase-button, .purchase-syllabus-button, .sidebar-enroll-button, .submit-request-button, .primary-action, .secondary-action, .hero-primary-btn, .hero-secondary-btn, .continue-btn, .course-action-btn, .main-btn, .outline-btn, .add-more-link, .step-next, .recent-all-btn, .retry-exam-btn, .review-course-btn, .finish-course-btn';
+$shiny-cta-selectors: '.shiny-cta, a.btn-primary, button.btn-primary, .home-btn, .signup-btn, .mobile-signup-btn, .cart-action-button, .public-cart-button, .enroll-btn, .purchase-button, .purchase-syllabus-button, .sidebar-enroll-button, .submit-request-button, .primary-action, .secondary-action, .hero-primary-btn, .hero-secondary-btn, .continue-btn, .course-action-btn, .main-btn, .outline-btn, .step-next, .recent-all-btn, .retry-exam-btn, .review-course-btn, .finish-course-btn';
+$shiny-line-selectors: '.section-text-link, .path-link';
 
 html { --ui-focus-color: var(--signal, #1f5cff); }
 html[data-bs-theme="dark"] { --ui-focus-color: var(--jet, #38e1ff); }
@@ -758,6 +759,30 @@ html.has-custom-cursor * {
 
 @keyframes shiny-cta-turn { to { --shiny-cta-angle: 360deg; } }
 
+#{$shiny-line-selectors} {
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 35%;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--signal, #1f5cff), var(--jet, #38e1ff), transparent);
+    animation: shiny-line-travel 5s linear infinite;
+  }
+}
+
+.section-text-link::before { bottom: 0; }
+.path-link::before { top: 0; height: 1px; }
+
+@keyframes shiny-line-travel {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(286%); }
+}
+
 @media (hover: hover) {
   #{$shiny-cta-selectors}:not(:disabled):not(.disabled):hover {
     &::before { animation-duration: 2.4s; }
@@ -767,5 +792,7 @@ html.has-custom-cursor * {
 
 @media (prefers-reduced-motion: reduce) {
   #{$shiny-cta-selectors}::before,
-  #{$shiny-cta-selectors}::after { animation: none; transition: none; }
+  #{$shiny-cta-selectors}::after,
+  #{$shiny-line-selectors}::before { animation: none; transition: none; }
+  #{$shiny-line-selectors}::before { display: none; }
 }
